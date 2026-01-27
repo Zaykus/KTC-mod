@@ -1,0 +1,29 @@
+# Unity / C# Project
+
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]in/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# MemoryCaptures can be huge
+MemoryCaptures/
+
+# Visual Studio cache files
+.vs/
+
+# Rider
+.idea/
+
+# User-specific files
+*.user
+*.userprefs
+*.suo
+
+# Build results
+/[Bb]uild/
+/[Bb]uilds/
+
+# Markdown notes (optional, you can remove this if you want to keep them)
+*.md
