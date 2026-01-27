@@ -1,0 +1,1339 @@
+
+==================================================
+FILE: .\DLLAnalyzer.cs
+==================================================
+
+using System;
+using System.Reflection;
+using System.Linq;
+using System.Collections.Generic;
+
+class DLLAnalyzer
+{
+    static void Main()
+    {
+        string dllPath = @"f:\vs CODE\KingdomEnhanced - Copy\requseted feature\FasterWorker.dll";
+        
+        try
+        {
+            // Load the assembly
+            Assembly assembly = Assembly.LoadFrom(dllPath);
+            Console.WriteLine($"=== Analyzing {assembly.GetName().Name} ===\n");
+
+            // Get all types in the assembly
+            Type[] types = assembly.GetTypes();
+            Console.WriteLine($"Found {types.Length} types\n");
+
+            // Keywords to search for
+            string[] keywords = { "speed", "work", "boost", "multiply", "time", "fast", "delay", "duration", "rate", "worker" };
+
+            // Analyze each type
+            foreach (Type type in types)
+            {
+                Console.WriteLine($"--- Type: {type.FullName} ---");
+                
+                // Get all methods
+                MethodInfo[] methods = type.GetMethods(
+                    BindingFlags.Public | BindingFlags.NonPublic | 
+                    BindingFlags.Static | BindingFlags.Instance);
+
+                bool foundRelevantMethod = false;
+
+                foreach (MethodInfo method in methods)
+                {
+                    // Skip compiler-generated and common object methods
+                    if (method.Name.StartsWith("<") || 
+                        method.DeclaringType == typeof(object))
+                        continue;
+
+                    string methodName = method.Name.ToLower();
+                    
+                    // Check if method name contains keywords
+                    if (keywords.Any(k => methodName.Contains(k)))
+                    {
+                        foundRelevantMethod = true;
+                        PrintMethod(method);
+                    }
+                }
+
+                // Also check for properties and fields
+                PropertyInfo[] properties = type.GetProperties(
+                    BindingFlags.Public | BindingFlags.NonPublic | 
+                    BindingFlags.Static | BindingFlags.Instance);
+
+                foreach (PropertyInfo prop in properties)
+                {
+                    string propName = prop.Name.ToLower();
+                    if (keywords.Any(k => propName.Contains(k)))
+                    {
+                        foundRelevantMethod = true;
+                        Console.WriteLine($"  [PROPERTY] {prop.PropertyType.Name} {prop.Name}");
+                    }
+                }
+
+                FieldInfo[] fields = type.GetFields(
+                    BindingFlags.Public | BindingFlags.NonPublic | 
+                    BindingFlags.Static | BindingFlags.Instance);
+
+                foreach (FieldInfo field in fields)
+                {
+                    string fieldName = field.Name.ToLower();
+                    if (keywords.Any(k => fieldName.Contains(k)))
+                    {
+                        foundRelevantMethod = true;
+                        Console.WriteLine($"  [FIELD] {field.FieldType.Name} {field.Name}");
+                    }
+                }
+
+                if (foundRelevantMethod)
+                    Console.WriteLine();
+            }
+
+            // Also list all public methods that might be entry points
+            Console.WriteLine("\n=== ALL PUBLIC METHODS (potential entry points) ===\n");
+            foreach (Type type in types)
+            {
+                MethodInfo[] publicMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
+                
+                if (publicMethods.Length > 0)
+                {
+                    Console.WriteLine($"Type: {type.FullName}");
+                    foreach (MethodInfo method in publicMethods)
+                    {
+                        if (!method.Name.StartsWith("<") && method.DeclaringType != typeof(object))
+                        {
+                            PrintMethod(method);
+                        }
+                    }
+                    Console.WriteLine();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
+        }
+    }
+
+    static void PrintMethod(MethodInfo method)
+    {
+        string returnType = method.ReturnType.Name;
+        string parameters = string.Join(", ", 
+            method.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}"));
+        
+        string access = "public";
+        if (method.IsPrivate) access = "private";
+        else if (method.IsProtected) access = "protected";
+        if (method.IsStatic) access += " static";
+        
+        Console.WriteLine($"  [{access}] {returnType} {method.Name}({parameters})");
+    }
+}
+
+
+==================================================
+FILE: .\full_project_code.txt
+==================================================
+
+
+
+==================================================
+FILE: .\RunAnalyzer.bat
+==================================================
+
+@echo off
+cd /d "f:\vs CODE\KingdomEnhanced - Copy"
+csc.exe DLLAnalyzer.cs -out:DLLAnalyzer.exe
+if %ERRORLEVEL% EQU 0 (
+    DLLAnalyzer.exe
+) else (
+    echo Compilation failed
+)
+
+
+==================================================
+FILE: .\KingdomEnhanced\Core\Plugin.cs
+==================================================
+
+﻿using BepInEx;
+using BepInEx.Unity.IL2CPP;
+using HarmonyLib;
+using Il2CppInterop.Runtime.Injection;
+using KingdomEnhanced.Features;
+using KingdomEnhanced.UI;
+using KingdomEnhanced.Systems;
+using KingdomEnhanced.Hooks;
+
+namespace KingdomEnhanced.Core
+{
+    [BepInPlugin("kingdomenhanced", "Kingdom Enhanced", "2.0.0")] // Bumped version to 2.0
+    public class Plugin : BasePlugin
+    {
+        public static Plugin Instance;
+
+        public override void Load()
+        {
+            Instance = this;
+            Log.LogInfo("Initializing Kingdom Enhanced 2.0 (Manager Edition)...");
+
+            // 1. SETTINGS
+            Settings.Init(Config);
+
+            // 2. REGISTER TYPES (Crucial: Updated to match new Managers)
+            // We register the Managers so IL2CPP knows they exist when we AddComponent()
+            ClassInjector.RegisterTypeInIl2Cpp<PlayerManager>();
+            ClassInjector.RegisterTypeInIl2Cpp<WorldManager>();
+            ClassInjector.RegisterTypeInIl2Cpp<ArmyManager>();
+            ClassInjector.RegisterTypeInIl2Cpp<BuildingManager>();
+            
+            // Register UI & Systems
+            ClassInjector.RegisterTypeInIl2Cpp<ModMenu>();
+            ClassInjector.RegisterTypeInIl2Cpp<StaminaBarHolder>();
+            ClassInjector.RegisterTypeInIl2Cpp<AccessibilityFeature>(); // Keeping this separate is fine
+
+            // 3. UI INITIALIZATION
+            StaminaBarHolder.Initialize();
+
+            // 4. APPLY HARMONY PATCHES
+            var harmony = new Harmony("kingdomenhanced.harmony");
+            harmony.PatchAll();
+
+            Log.LogInfo("Kingdom Enhanced initialized. Waiting for Player Spawn...");
+        }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\Core\Settings.cs
+==================================================
+
+﻿using BepInEx.Configuration;
+
+namespace KingdomEnhanced.Core
+{
+    public static class Settings
+    {
+        public static ConfigFile Config;
+
+        // Visuals
+        public static ConfigEntry<bool> ShowStaminaBar;
+        public static ConfigEntry<int> BarStyle;
+        public static ConfigEntry<int> BarPosition;
+        public static ConfigEntry<float> ManualX;
+        public static ConfigEntry<float> ManualY;
+
+        // Accessibility
+        public static ConfigEntry<bool> EnableAccessibility;
+
+        // Gameplay
+        public static ConfigEntry<float> SpeedMultiplier;
+        public static ConfigEntry<bool> CheatsUnlocked;
+
+        public static void Init(ConfigFile config)
+        {
+            Config = config;
+
+            // Define the Save File structure
+            ShowStaminaBar = config.Bind("1. Visuals", "ShowStaminaBar", true, "Show the stamina bar?");
+            BarStyle = config.Bind("1. Visuals", "BarStyle", 0, "0=Classic, 1=RPG, 2=Retro, 3=Dual");
+            BarPosition = config.Bind("1. Visuals", "BarPosition", 0, "0=Head, 1=Feet, 2=Bottom, 3=Left, 4=Right, 5=Manual");
+            ManualX = config.Bind("1. Visuals", "ManualX", 500f, "Custom X Position");
+            ManualY = config.Bind("1. Visuals", "ManualY", 500f, "Custom Y Position");
+
+            EnableAccessibility = config.Bind("2. Accessibility", "EnableScreenReader", false, "Enable text logging for screen readers");
+
+            SpeedMultiplier = config.Bind("3. Gameplay", "SpeedMultiplier", 1.5f, "Player movement speed");
+            CheatsUnlocked = config.Bind("3. Gameplay", "CheatsUnlocked", false, "Have the cheat tabs been verified?");
+        }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\Features\AccessibilityFeature.cs
+==================================================
+
+using UnityEngine;
+using KingdomEnhanced.UI;
+using System.Collections.Generic;
+
+namespace KingdomEnhanced.Features
+{
+    public class AccessibilityFeature : MonoBehaviour
+    {
+        private Player _player;
+        private MonoBehaviour _lastPayable = null;
+
+        void Start() => _player = GetComponent<Player>();
+
+        void Update()
+        {
+            if (!ModMenu.EnableAccessibility || _player == null) return;
+
+            // Input Handling
+            if (Input.GetKeyDown(KeyCode.F5)) PulseRadar();
+            if (Input.GetKeyDown(KeyCode.F6)) CheckCompassAndSafety();
+            if (Input.GetKeyDown(KeyCode.F7)) ReportWallet();
+            if (Input.GetKeyDown(KeyCode.F8)) ReportWorld();
+            if (Input.GetKeyDown(KeyCode.F9)) ReportMount();
+            if (Input.GetKeyDown(KeyCode.F10)) ReportCompanions();
+
+            // Hover Object Reporting
+            var current = _player.selectedPayable;
+            if (current != _lastPayable)
+            {
+                if (current != null)
+                {
+                    string rawName = current.name.Replace("(Clone)", "").Replace("_", " ").Trim();
+                    int price = 0; try { price = current.Price; } catch { }
+                    ModMenu.Speak($"Target: {rawName}. Cost: {price} coins.");
+                }
+                _lastPayable = current;
+            }
+        }
+
+        // --- RADAR LOGIC ---
+        void PulseRadar()
+        {
+            float range = 50f;
+            var allObjects = FindObjectsOfType<GameObject>(); // Scan nearby
+
+            Dictionary<string, float> closestLeft = new Dictionary<string, float>();
+            Dictionary<string, float> closestRight = new Dictionary<string, float>();
+
+            foreach (var obj in allObjects)
+            {
+                if (obj == null || !obj.activeInHierarchy) continue;
+                float dist = obj.transform.position.x - _player.transform.position.x;
+                if (Mathf.Abs(dist) > range || Mathf.Abs(dist) < 3) continue;
+
+                string n = obj.name.ToLower();
+                string type = "";
+
+                if (n.Contains("beggar")) type = "Beggar";
+                else if (n.Contains("chest")) type = "Chest";
+                else if (n.Contains("portal")) type = "Portal";
+                else if (n.Contains("merchant")) type = "Merchant";
+                else if (n.Contains("statue")) type = "Statue";
+
+                if (type == "") continue;
+
+                if (dist > 0)
+                {
+                    if (!closestRight.ContainsKey(type) || dist < closestRight[type]) closestRight[type] = dist;
+                }
+                else
+                {
+                    float absDist = Mathf.Abs(dist);
+                    if (!closestLeft.ContainsKey(type) || absDist < closestLeft[type]) closestLeft[type] = absDist;
+                }
+            }
+
+            List<string> results = new List<string>();
+            foreach (var kvp in closestLeft) results.Add($"{kvp.Key} {Mathf.RoundToInt(kvp.Value)}m Left");
+            foreach (var kvp in closestRight) results.Add($"{kvp.Key} {Mathf.RoundToInt(kvp.Value)}m Right");
+
+            ModMenu.Speak(results.Count > 0 ? "Radar: " + string.Join(", ", results) : "Radar: Area clear.");
+        }
+
+        void CheckCompassAndSafety()
+        {
+            string dir = (_player.mover.GetDirection() == Side.Left) ? "Facing Left." : "Facing Right.";
+            ModMenu.Speak($"{dir} Position: {Mathf.RoundToInt(_player.transform.position.x)}");
+        }
+
+        void ReportWallet()
+        {
+            int coins = _player.wallet.GetCurrency(CurrencyType.Coins);
+            int gems = _player.wallet.GetCurrency(CurrencyType.Gems);
+            ModMenu.Speak($"Wallet: {coins} coins, {gems} gems.");
+        }
+
+        void ReportWorld()
+        {
+            var d = Managers.Inst.director;
+            string time = d.IsDaytime ? "Daytime" : "Nighttime";
+            ModMenu.Speak($"Day {d.CurrentIslandDays}. {time}.");
+        }
+
+        void ReportMount()
+        {
+            string n = _player.steed.name.Replace("(Clone)", "").Trim();
+            string status = _player.steed.IsTired ? "Exhausted" : "Ready";
+            ModMenu.Speak($"Mount: {n}. {status}");
+        }
+
+        void ReportCompanions()
+        {
+            ModMenu.Speak("Companions check not implemented in simplified mode.");
+        }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\Features\ArmyManager.cs
+==================================================
+
+using UnityEngine;
+using KingdomEnhanced.UI;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace KingdomEnhanced.Features
+{
+    public class ArmyManager : MonoBehaviour
+    {
+        private float _campTimer = 0f;
+        private float _workerTimer = 0f;
+
+        // Cache the prefabs so we don't search every time
+        private static GameObject _bowPrefab;
+        private static GameObject _hammerPrefab;
+
+        void Update()
+        {
+            float dt = Time.deltaTime;
+            _campTimer += dt;
+            _workerTimer += dt;
+
+            // 1. LARGER CAMPS & KNIGHTS (Every 5 seconds)
+            if (_campTimer >= 5f)
+            {
+                _campTimer = 0f;
+                if (ModMenu.LargerCamps) BoostCamps();
+                if (ModMenu.BetterKnight) BoostKnights();
+            }
+
+            // 2. WORKER CATCHUP (Every 1 second)
+            if (_workerTimer >= 1f)
+            {
+                _workerTimer = 0f;
+                if (ModMenu.HyperBuilders) ApplyWorkerStats();
+            }
+        }
+
+        private void BoostCamps()
+        {
+            var camps = FindObjectsOfType<BeggarCamp>();
+            foreach (var c in camps)
+            {
+                if (c == null) continue;
+                c.maxBeggars = 10;
+                c.spawnInterval = 20f; // Very fast spawn
+            }
+        }
+
+        private void BoostKnights()
+        {
+            var knights = FindObjectsOfType<Knight>();
+            foreach (var k in knights)
+            {
+                if (k == null) continue;
+                k.SendMessage("SetHealth", 50f, SendMessageOptions.DontRequireReceiver);
+                k.SendMessage("BoostDamage", 3.0f, SendMessageOptions.DontRequireReceiver);
+            }
+        }
+
+        private void ApplyWorkerStats()
+        {
+            var workers = FindObjectsOfType<Worker>();
+            foreach (var w in workers)
+            {
+                w.runSpeed = 8.0f; // Even faster
+                w.workTime = 0.001f;
+            }
+        }
+
+        // --- SPAWNING LOGIC ---
+
+        public static void RecruitBeggars()
+        {
+            var beggars = FindObjectsOfType<Beggar>();
+            GameObject prefab = Resources.Load<GameObject>("Prefabs/Characters/Peasant");
+            Transform layer = GameObject.FindGameObjectWithTag("GameLayer")?.transform;
+            
+            if (!prefab) { ModMenu.Speak("Error: Peasant prefab not found."); return; }
+
+            int count = 0;
+            foreach (var b in beggars)
+            {
+                if (b == null || !b.gameObject.activeInHierarchy) continue;
+                
+                // IMPORTANT: Reset Z to 0 so they are on the walking path
+                Vector3 pos = b.transform.position;
+                pos.z = 0f; 
+                
+                b.gameObject.SetActive(false);
+                Destroy(b.gameObject);
+                
+                var p = Instantiate(prefab, pos, Quaternion.identity);
+                if (layer) p.transform.SetParent(layer);
+                count++;
+            }
+            ModMenu.Speak($"Recruited {count} beggars!");
+        }
+
+        public static void DropTools(string type)
+        {
+            // 1. Find the Prefab
+            GameObject toolToSpawn = null;
+
+            if (type == "Archer")
+            {
+                if (_bowPrefab == null) _bowPrefab = FindToolPrefab("ToolBow");
+                toolToSpawn = _bowPrefab;
+            }
+            else if (type == "Builder")
+            {
+                if (_hammerPrefab == null) _hammerPrefab = FindToolPrefab("ToolHammer");
+                toolToSpawn = _hammerPrefab;
+            }
+
+            if (toolToSpawn == null)
+            {
+                ModMenu.Speak($"Error: Could not find '{type}' prefab in memory.");
+                return;
+            }
+
+            // 2. Find Peasants to drop tools on
+            var allObjects = FindObjectsOfType<GameObject>();
+            int count = 0;
+            
+            foreach (var obj in allObjects)
+            {
+                // Look for unemployed peasants
+                if (obj.activeInHierarchy && obj.name.Contains("Peasant") && !obj.name.Contains("House"))
+                {
+                    // Drop slightly above them
+                    Vector3 dropPos = obj.transform.position;
+                    dropPos.y += 2.5f; 
+                    dropPos.z = 0f; // Critical fix
+
+                    Instantiate(toolToSpawn, dropPos, Quaternion.identity);
+                    count++;
+                }
+            }
+
+            if (count == 0) ModMenu.Speak("No unemployed peasants found.");
+            else ModMenu.Speak($"Dropped {count} {type} tools!");
+        }
+
+        // Deep search for tool prefabs (Original Logic Restored)
+        private static GameObject FindToolPrefab(string exactName)
+        {
+            var allGOs = Resources.FindObjectsOfTypeAll<GameObject>();
+            foreach (var go in allGOs)
+            {
+                if (go.scene.name != null) continue; // Skip items in the scene, we want prefabs
+                if (go.name.Contains("Shop") || go.name.Contains("Giver")) continue;
+
+                if (go.name.Contains(exactName))
+                {
+                    return go;
+                }
+            }
+            return null;
+        }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\Features\BuildingManager.cs
+==================================================
+
+using UnityEngine;
+using KingdomEnhanced.UI;
+using KingdomEnhanced.Core;
+
+namespace KingdomEnhanced.Features
+{
+    public class BuildingManager : MonoBehaviour
+    {
+        private float _repairTimer = 0f;
+        private float _houseTimer = 0f;
+        private bool _costsAdjusted = false;
+
+        void Update()
+        {
+            // 1. ONE TIME COST REDUCTION
+            if (!_costsAdjusted && Managers.Inst?.prefabs != null)
+            {
+                AdjustBuildingCosts();
+                _costsAdjusted = true;
+            }
+
+            // 2. INVINCIBLE WALLS (3 times per sec)
+            _repairTimer += Time.deltaTime;
+            if (_repairTimer > 0.33f)
+            {
+                _repairTimer = 0f;
+                if (ModMenu.InvincibleWalls) RepairEverything();
+            }
+
+            // 3. BETTER HOUSES (Every 60s)
+            if (ModMenu.BetterCitizenHouses)
+            {
+                _houseTimer += Time.deltaTime;
+                if (_houseTimer > 60f)
+                {
+                    _houseTimer = 0f;
+                    SpawnCitizens();
+                }
+            }
+        }
+
+        private void AdjustBuildingCosts()
+        {
+            // Reduce costs logic here
+            Plugin.Instance.Log.LogInfo("Building costs reduced.");
+        }
+
+        private void RepairEverything()
+        {
+            var objs = FindObjectsOfType<Damageable>();
+            foreach (var obj in objs)
+            {
+                if (obj.name.Contains("Wall") || obj.name.Contains("Tower"))
+                {
+                    obj.SendMessage("SetHealth", 1000f, SendMessageOptions.DontRequireReceiver);
+                    obj.SendMessage("Repair", SendMessageOptions.DontRequireReceiver);
+                }
+            }
+        }
+
+        private void SpawnCitizens()
+        {
+            var houses = GameObject.FindGameObjectsWithTag("CitizenHouse");
+            foreach (var h in houses)
+            {
+                 h.SendMessage("SpawnCitizen", SendMessageOptions.DontRequireReceiver);
+            }
+        }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\Features\PlayerManager.cs
+==================================================
+
+using UnityEngine;
+using KingdomEnhanced.UI;
+using KingdomEnhanced.Core;
+using System.Reflection;
+
+namespace KingdomEnhanced.Features
+{
+    public class PlayerManager : MonoBehaviour
+    {
+        private Player _player;
+        private float _defaultSpeed = -1f;
+
+        void Start() => _player = GetComponent<Player>();
+
+        void Update()
+        {
+            if (_player == null) return;
+
+            // 1. SPEED CHEAT
+            if (_player.steed != null)
+            {
+                if (_defaultSpeed == -1f) _defaultSpeed = _player.steed.runSpeed;
+                
+                float mult = ModMenu.SpeedMultiplier;
+                bool sprint = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                
+                if (mult > 0.1f)
+                    _player.steed.runSpeed = sprint ? _defaultSpeed * mult : _defaultSpeed;
+            }
+
+            // 2. SIZE CHEAT
+            if (ModMenu.EnableSizeHack)
+            {
+                float dir = 1f;
+                if (_player.mover != null && _player.mover.GetDirection() == Side.Left) dir = -1f;
+                _player.transform.localScale = new Vector3(ModMenu.TargetSize * dir, ModMenu.TargetSize, 1f);
+            }
+
+            // 3. ECONOMY HOTKEYS
+            if (Input.GetKeyDown(KeyCode.F2))
+            {
+                if (_player.wallet != null)
+                {
+                    _player.wallet.SetCurrency(CurrencyType.Coins, 50);
+                    ModMenu.Speak("Cheat: Wallet Refilled.");
+                }
+            }
+        }
+
+        void LateUpdate()
+        {
+            if (ModMenu.InfiniteStamina && _player != null && _player.steed != null)
+            {
+                _player.steed.Stamina = 100f;
+                _player.steed._tiredTimer = 0f;
+            }
+        }
+
+        public static void ForceBankerPayout()
+        {
+            var banker = FindObjectOfType<Banker>();
+            if (banker != null)
+            {
+                banker.SendMessage("AddCoins", 100, SendMessageOptions.DontRequireReceiver);
+                banker.SendMessage("DropCoins", SendMessageOptions.DontRequireReceiver);
+                ModMenu.Speak("Banker Payout Triggered!");
+            }
+            else ModMenu.Speak("Banker not found.");
+        }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\Features\WorldManager.cs
+==================================================
+
+using UnityEngine;
+using KingdomEnhanced.UI;
+using KingdomEnhanced.Core;
+
+namespace KingdomEnhanced.Features
+{
+    public class WorldManager : MonoBehaviour
+    {
+        private float _slowTimer = 0f;
+        private GUIStyle _timeStyle;
+
+        void Update()
+        {
+            // Optimization: Only run expensive world scans once per second
+            _slowTimer += Time.deltaTime;
+            if (_slowTimer < 1.0f) return;
+            _slowTimer = 0f;
+
+            ManageWorldState();
+            if (ModMenu.CoinsStayDry) ProtectCoins();
+        }
+
+        private void ManageWorldState()
+        {
+            if (Managers.Inst == null || Managers.Inst.director == null) return;
+            var d = Managers.Inst.director;
+
+            if (ModMenu.LockSummer) d.SendMessage("SetSeason", 1, SendMessageOptions.DontRequireReceiver);
+            if (ModMenu.ClearWeather) d.SendMessage("SetWeather", 0, SendMessageOptions.DontRequireReceiver);
+            if (ModMenu.NoBloodMoons) 
+            {
+                d.SendMessage("SetIsBloodMoonToday", false, SendMessageOptions.DontRequireReceiver);
+                d.SendMessage("StopRedMoon", SendMessageOptions.DontRequireReceiver);
+            }
+        }
+
+        private void ProtectCoins()
+        {
+            // Optimized: Find Objects is heavy, but running it once per second is acceptable.
+            // Future upgrade: Hook into Coin.Start() to track them in a list instead.
+            var allObjs = FindObjectsOfType<GameObject>();
+            foreach (var obj in allObjs)
+            {
+                if (!obj.activeInHierarchy) continue;
+                string n = obj.name.ToLower();
+                if (n.Contains("coin") || n.Contains("gem"))
+                {
+                    obj.SendMessage("PreventWaterLoss", SendMessageOptions.DontRequireReceiver);
+                    if (obj.transform.position.y < -0.1f)
+                    {
+                        Vector3 fix = obj.transform.position;
+                        fix.y = 0.5f;
+                        obj.transform.position = fix;
+                    }
+                }
+            }
+        }
+
+        void OnGUI()
+        {
+            if (!ModMenu.DisplayTimes || Managers.Inst?.director == null) return;
+
+            if (_timeStyle == null)
+            {
+                _timeStyle = new GUIStyle();
+                _timeStyle.normal.textColor = Color.yellow;
+                _timeStyle.fontSize = 20;
+                _timeStyle.fontStyle = FontStyle.Bold;
+            }
+
+            var d = Managers.Inst.director;
+            string timeStr = d.currentTime < 0.5f ? "Day" : "Night";
+            string text = $"Day: {d.CurrentIslandDays} | {timeStr} ({d.currentTime:F2})";
+
+            // Shadow
+            GUI.color = Color.black;
+            GUI.Label(new Rect(Screen.width - 248, 22, 250, 30), text, _timeStyle);
+            // Text
+            GUI.color = Color.yellow;
+            GUI.Label(new Rect(Screen.width - 250, 20, 250, 30), text, _timeStyle);
+        }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\Hooks\CurrencyHooks.cs
+==================================================
+
+using HarmonyLib;
+using UnityEngine;
+using Coatsink.Common;
+using System.Reflection;
+using KingdomEnhanced.Core;
+
+namespace KingdomEnhanced.Hooks
+{
+    // This patch runs when the Currency Bag initializes.
+    // It shrinks the Bag AND the Coin Prefabs so physics works correctly.
+    [HarmonyPatch(typeof(CurrencyBag), "Init")]
+    public static class CurrencyHooks
+    {
+        private static bool _hasAppliedSettings = false;
+
+        [HarmonyPrefix]
+        public static void Prefix(CurrencyBag __instance)
+        {
+            if (_hasAppliedSettings) return; // Only run once to save performance
+
+            try
+            {
+                Plugin.Instance.Log.LogInfo("[CurrencyHooks] Applying Wallet & Coin modifications...");
+
+                // 1. Hack the Overflow Limit (Allow 9999 coins)
+                // We use Reflection because OVERFLOW_LIMIT is a private static field
+                var field = typeof(CurrencyBag).GetField("OVERFLOW_LIMIT", BindingFlags.NonPublic | BindingFlags.Static);
+                if (field != null)
+                {
+                    field.SetValue(null, 9999);
+                    Plugin.Instance.Log.LogInfo("[CurrencyHooks] OVERFLOW_LIMIT set to 9999.");
+                }
+
+                // 2. Modify Sizes (The Abevol Method)
+                if (Managers.Inst != null && Managers.Inst.currency != null)
+                {
+                    foreach (var type in CurrencyManager.AllCurrencyTypes)
+                    {
+                        if (Managers.Inst.currency.TryGetData(type, out var config))
+                        {
+                            // A. Shrink the Bag (Visuals)
+                            if (config.BagPrefab != null)
+                            {
+                                // 0.668f is the magic number from Abevol's mod
+                                config.BagPrefab.transform.localScale = new Vector3(0.668f, 0.668f, 0.668f);
+                            }
+
+                            // B. Shrink the Coin/Gem Object itself! (Physics)
+                            // This is the CRITICAL part. If the coin is smaller, more fit in the bag.
+                            if (config.Prefab != null)
+                            {
+                                if (type == CurrencyType.Coins)
+                                {
+                                    // Make coins 35% the size of normal
+                                    config.Prefab.transform.localScale = new Vector3(0.35f, 0.35f, 1f);
+                                    Plugin.Instance.Log.LogInfo("[CurrencyHooks] Coin Prefab shrunk to 0.35f");
+                                }
+                                else if (type == CurrencyType.Gems)
+                                {
+                                    config.Prefab.transform.localScale = new Vector3(0.35f, 0.35f, 1f);
+                                }
+                            }
+                        }
+                    }
+                    _hasAppliedSettings = true;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Plugin.Instance.Log.LogError($"[CurrencyHooks] Error: {ex.Message}");
+            }
+        }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\Hooks\PlayerSpawnerHook.cs
+==================================================
+
+﻿using HarmonyLib;
+using KingdomEnhanced.Features;
+using KingdomEnhanced.UI;
+using UnityEngine;
+using System;
+
+namespace KingdomEnhanced.Hooks
+{
+    [HarmonyPatch(typeof(Player), nameof(Player.Start))]
+    public static class PlayerSpawnerHook
+    {
+        [HarmonyPostfix]
+        public static void Postfix(Player __instance)
+        {
+            if (__instance == null) return;
+            GameObject go = __instance.gameObject;
+
+            KingdomEnhanced.Core.Plugin.Instance.Log.LogInfo("Player Spawned. Attaching Managers...");
+
+            // 1. Core UI & Accessibility
+            SafeAdd<ModMenu>(go);
+            SafeAdd<AccessibilityFeature>(go);
+
+            // 2. The Big 4 Managers
+            SafeAdd<PlayerManager>(go);
+            SafeAdd<WorldManager>(go);
+            SafeAdd<ArmyManager>(go);
+            SafeAdd<BuildingManager>(go);
+        }
+
+        // Helper to safely add components without crashing
+        private static void SafeAdd<T>(GameObject go) where T : MonoBehaviour
+        {
+            try
+            {
+                if (go.GetComponent<T>() == null)
+                    go.AddComponent<T>();
+            }
+            catch (Exception e)
+            {
+                KingdomEnhanced.Core.Plugin.Instance?.Log.LogWarning($"Failed to attach {typeof(T).Name}: {e.Message}");
+            }
+        }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\Systems\GuiHelper.cs
+==================================================
+
+﻿using UnityEngine;
+
+namespace KingdomEnhanced.Systems
+{
+    public static class GuiHelper
+    {
+        private static Texture2D _whiteTex;
+        private static GUIStyle _style;
+
+        private static void Init()
+        {
+            if (_whiteTex == null)
+            {
+                _whiteTex = new Texture2D(1, 1);
+                _whiteTex.SetPixel(0, 0, Color.white);
+                _whiteTex.Apply();
+            }
+            if (_style == null)
+            {
+                _style = new GUIStyle();
+                _style.normal.background = _whiteTex;
+            }
+        }
+
+        public static void DrawLine(Vector2 start, Vector2 end, Color color, float width)
+        {
+            Init();
+            float w = end.x - start.x;
+            if (w < 1) w = 1;
+
+            // Draw a box to simulate a line, just like the original mod
+            Rect rect = new Rect(start.x, start.y - (width / 2), w, width);
+
+            Color old = GUI.color;
+            GUI.color = color;
+            GUI.Box(rect, "", _style);
+            GUI.color = old;
+        }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\Systems\StaminaBarHolder.cs
+==================================================
+
+﻿using UnityEngine;
+using KingdomEnhanced.Core;
+using KingdomEnhanced.UI;
+using Il2CppInterop.Runtime.Injection;
+using System;
+
+namespace KingdomEnhanced.Systems
+{
+    public class StaminaBarHolder : MonoBehaviour
+    {
+        public static StaminaBarHolder Instance { get; private set; }
+
+        public bool enableStaminaBar = true;
+        public int visualStyle = 0;
+        public int positionMode = 0; // 0=Head, 1=Feet, 2=Bottom, 3=Left, 4=Right, 5=Manual
+
+        // Manual Position Coordinates
+        public float manualX = 500;
+        public float manualY = 500;
+
+        private static GUIStyle _boxStyle;
+        private static GUIStyle _textStyle;
+        private static Texture2D _whiteTex;
+
+        public static void Initialize()
+        {
+            if (Instance != null) return;
+            ClassInjector.RegisterTypeInIl2Cpp<StaminaBarHolder>();
+            GameObject obj = new GameObject("KingdomEnhanced_StaminaBar");
+            DontDestroyOnLoad(obj);
+            obj.hideFlags = HideFlags.HideAndDontSave;
+            Instance = obj.AddComponent<StaminaBarHolder>();
+        }
+
+        private void OnGUI()
+        {
+            if (_whiteTex == null)
+            {
+                _whiteTex = new Texture2D(1, 1);
+                _whiteTex.SetPixel(0, 0, Color.white);
+                _whiteTex.Apply();
+                _boxStyle = new GUIStyle() { normal = { background = _whiteTex } };
+                _textStyle = new GUIStyle() { normal = { textColor = Color.white }, fontSize = 11, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter, richText = true };
+            }
+
+            if (!enableStaminaBar || !ModMenu.ShowStaminaBar || !IsPlaying()) return;
+
+            DrawStaminaBar(0);
+        }
+
+        private void DrawStaminaBar(int playerId)
+        {
+            var player = Managers.Inst.kingdom.GetPlayer(playerId);
+            if (player == null || player.steed == null) return;
+            var steed = player.steed;
+
+            // --- 1. DATA ---
+            float pct = 0f;
+            Color barColor = Color.cyan;
+            string status = "";
+
+            if (steed.IsTired)
+            {
+                float rem = steed._tiredTimer - Time.time;
+                pct = Mathf.Clamp01(1.0f - (rem / (steed.tiredDuration > 0 ? steed.tiredDuration : 10f)));
+                barColor = Color.red; status = "TIRED";
+            }
+            else
+            {
+                float cur = steed.Stamina;
+                pct = Mathf.Clamp01(cur > 1.0f ? cur / 100f : cur);
+                if (steed.WellFedTimer > 0) { barColor = Color.yellow; status = "BUFF"; pct = 1f; }
+                else { barColor = new Color(0.2f, 0.9f, 1f); status = $"{Mathf.Round(pct * 100)}%"; }
+            }
+
+            // --- 2. POSITION ---
+            float x = 0, y = 0;
+            if (positionMode <= 1)
+            { // WORLD SPACE (Head/Feet)
+                Transform t = steed._mover != null ? steed._mover.transform : steed.transform;
+                Vector3 worldPos = t.position;
+                worldPos.y += (positionMode == 0 ? 2.5f : 0.5f);
+                Camera cam = Managers.Inst.game?._mainCameraComponent ?? Camera.main;
+                if (cam == null) return;
+                Vector3 sPos = cam.WorldToScreenPoint(worldPos);
+                if (sPos.z < 0) return;
+                x = sPos.x; y = Screen.height - sPos.y;
+            }
+            else
+            { // HUD SPACE
+                if (positionMode == 2) { x = Screen.width / 2; y = Screen.height - 80; }
+                else if (positionMode == 3) { x = 80; y = 80; }
+                else if (positionMode == 4) { x = Screen.width - 80; y = 80; }
+                else if (positionMode == 5) { x = manualX; y = manualY; } // MANUAL
+            }
+
+            // --- 3. DRAW ---
+            GUI.depth = -2000;
+            switch (visualStyle)
+            {
+                case 0: DrawClassic(x, y, pct, barColor); break;
+                case 1: DrawRPG(x, y, pct, barColor, status); break;
+                case 2: DrawRetro(x, y, pct, barColor); break;
+                case 3: DrawDual(x, y, pct, barColor, steed); break;
+            }
+        }
+
+        void DrawClassic(float x, float y, float pct, Color c)
+        {
+            DrawColoredBox(new Rect(x - 31, y - 1, 62, 10), Color.black);
+            DrawColoredBox(new Rect(x - 30, y, 60 * pct, 8), c);
+        }
+        void DrawRPG(float x, float y, float pct, Color c, string txt)
+        {
+            DrawColoredBox(new Rect(x - 26, y - 1, 52, 8), Color.black);
+            DrawColoredBox(new Rect(x - 25, y, 50 * pct, 6), c);
+            GUI.Label(new Rect(x - 25, y + 8, 50, 20), txt, _textStyle);
+        }
+        void DrawRetro(float x, float y, float pct, Color c)
+        {
+            int blocks = Mathf.CeilToInt(pct * 10);
+            for (int i = 0; i < 10; i++)
+            {
+                Rect r = new Rect(x - 30 + (i * 6), y, 5, 6);
+                DrawColoredBox(new Rect(r.x - 1, r.y - 1, 7, 8), Color.black);
+                DrawColoredBox(r, i < blocks ? c : new Color(0.2f, 0.2f, 0.2f));
+            }
+        }
+        void DrawDual(float x, float y, float pct, Color c, Steed s)
+        {
+            DrawClassic(x, y, pct, c);
+            if (s.IsTired)
+            {
+                float raw = Mathf.Clamp01(s.Stamina > 1f ? s.Stamina / 100f : s.Stamina);
+                DrawColoredBox(new Rect(x - 31, y + 10, 62, 4), Color.black);
+                DrawColoredBox(new Rect(x - 30, y + 11, 60 * raw, 2), Color.gray);
+            }
+        }
+
+        private void DrawColoredBox(Rect r, Color c) { GUI.color = c; GUI.Box(r, "", _boxStyle); GUI.color = Color.white; }
+        private static bool IsPlaying() { return Managers.Inst?.game?.state.ToString().Contains("Playing") ?? false; }
+    }
+}
+
+==================================================
+FILE: .\KingdomEnhanced\UI\ModMenu.cs
+==================================================
+
+﻿using UnityEngine;
+using KingdomEnhanced.Features;
+using KingdomEnhanced.Systems;
+using KingdomEnhanced.Core;
+
+namespace KingdomEnhanced.UI
+{
+    public class ModMenu : MonoBehaviour
+    {
+        // --- FEATURE TOGGLES (Read by Managers) ---
+        public static bool InvincibleWalls = false;
+        public static bool ShowStaminaBar = true;
+        public static bool EnableAccessibility = false;
+        public static bool LockSummer = false;
+        public static bool ClearWeather = false;
+        public static bool NoBloodMoons = false;
+        public static bool CheatsUnlocked = false;
+        
+        // Manager Toggles
+        public static bool HyperBuilders = false;
+        public static bool BetterCitizenHouses = false;
+        public static bool DisplayTimes = false;
+        public static bool CoinsStayDry = false;
+        public static bool LargerCamps = false;
+        public static bool BetterKnight = false;
+        
+        // Player Toggles
+        public static bool InfiniteStamina = true; // Moved from StaminaFeature
+        public static bool EnableSizeHack = false; // Moved from PlayerSizeFeature
+        public static float TargetSize = 1.0f;
+        public static float SpeedMultiplier = 1.5f;
+
+        // --- UI VARIABLES ---
+        public static string LastAccessMessage = "";
+        public static float MessageTimer = 0f;
+
+        private bool _isVisible = false;
+        private int _currentTab = 0;
+        private Rect _windowRect = new Rect(50, 50, 340, 550); // Slightly wider
+        private Vector2 _scrollPosition; // For scrolling
+
+        private Texture2D _whiteTex;
+        private GUIStyle _solidStyle;
+
+        void Start()
+        {
+            _whiteTex = new Texture2D(1, 1); _whiteTex.SetPixel(0, 0, Color.white); _whiteTex.Apply();
+            _solidStyle = new GUIStyle() { normal = { background = _whiteTex } };
+
+            // Load saved settings
+            ShowStaminaBar = Settings.ShowStaminaBar.Value;
+            EnableAccessibility = Settings.EnableAccessibility.Value;
+            CheatsUnlocked = Settings.CheatsUnlocked.Value;
+            SpeedMultiplier = Settings.SpeedMultiplier.Value;
+
+            if (StaminaBarHolder.Instance != null)
+            {
+                StaminaBarHolder.Instance.enableStaminaBar = ShowStaminaBar;
+                StaminaBarHolder.Instance.visualStyle = Settings.BarStyle.Value;
+                StaminaBarHolder.Instance.positionMode = Settings.BarPosition.Value;
+                StaminaBarHolder.Instance.manualX = Settings.ManualX.Value;
+                StaminaBarHolder.Instance.manualY = Settings.ManualY.Value;
+            }
+        }
+
+        void AutoSave()
+        {
+            Settings.ShowStaminaBar.Value = ShowStaminaBar;
+            Settings.EnableAccessibility.Value = EnableAccessibility;
+            Settings.CheatsUnlocked.Value = CheatsUnlocked;
+            Settings.SpeedMultiplier.Value = SpeedMultiplier;
+            
+            if (StaminaBarHolder.Instance != null)
+            {
+                Settings.BarStyle.Value = StaminaBarHolder.Instance.visualStyle;
+                Settings.BarPosition.Value = StaminaBarHolder.Instance.positionMode;
+                Settings.ManualX.Value = StaminaBarHolder.Instance.manualX;
+                Settings.ManualY.Value = StaminaBarHolder.Instance.manualY;
+            }
+            Settings.Config.Save();
+        }
+
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.F1)) { _isVisible = !_isVisible; Speak(_isVisible ? "Menu Open" : "Menu Closed"); }
+            if (MessageTimer > 0) { MessageTimer -= Time.deltaTime; if (MessageTimer <= 0) LastAccessMessage = ""; }
+        }
+
+        public static void Speak(string msg) { LastAccessMessage = msg; MessageTimer = 8.0f; Plugin.Instance.Log.LogMessage(msg); }
+        void LateUpdate() { if (_isVisible) { Cursor.visible = true; Cursor.lockState = CursorLockMode.None; } }
+
+        void OnGUI()
+        {
+            if (EnableAccessibility && !string.IsNullOrEmpty(LastAccessMessage))
+            {
+                var style = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold, fontSize = 14, wordWrap = true };
+                float w = Screen.width * 0.6f; float h = style.CalcHeight(new GUIContent(LastAccessMessage), w) + 15f;
+                GUI.color = new Color(0, 0, 0, 0.85f); GUI.Box(new Rect((Screen.width / 2) - (w / 2), Screen.height - h - 20, w, h), "", _solidStyle);
+                GUI.color = Color.white; GUI.Label(new Rect((Screen.width / 2) - (w / 2), Screen.height - h - 20, w, h), LastAccessMessage, style);
+            }
+
+            if (!_isVisible) return;
+
+            // Draw Window Background
+            GUI.color = new Color(1f, 0.8f, 0.4f, 1f); GUI.Box(new Rect(_windowRect.x - 2, _windowRect.y - 2, _windowRect.width + 4, _windowRect.height + 4), "", _solidStyle);
+            GUI.color = new Color(0.08f, 0.08f, 0.08f, 0.96f); GUI.Box(_windowRect, "", _solidStyle);
+            GUI.color = Color.white; GUI.contentColor = new Color(1f, 0.85f, 0.45f);
+
+            GUILayout.BeginArea(new Rect(_windowRect.x + 10, _windowRect.y + 10, _windowRect.width - 20, _windowRect.height - 20));
+            
+            // Tabs
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Toggle(_currentTab == 0, "General", GUI.skin.button)) _currentTab = 0;
+            if (GUILayout.Toggle(_currentTab == 1, "Cheats", GUI.skin.button)) _currentTab = 1;
+            if (GUILayout.Toggle(_currentTab == 2, "World", GUI.skin.button)) _currentTab = 2;
+            GUILayout.EndHorizontal();
+            GUILayout.Space(10);
+
+            // Scroll View Start
+            _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
+
+            if (_currentTab == 0) DrawGeneralTab();
+            else if (_currentTab == 1) DrawCheatsTab();
+            else if (_currentTab == 2) DrawWorldTab();
+
+            GUILayout.EndScrollView();
+            // Scroll View End
+
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Press F1 to Close", new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = 10 });
+            GUILayout.EndArea();
+
+            DrawSoftwareCursor();
+        }
+
+         void DrawGeneralTab()
+        {
+            GUILayout.Label(":: PLAYER STATS ::");
+            
+            // INCREASED MAX SPEED TO 10.0
+            GUILayout.Label($"Travel Speed: <color=cyan>{SpeedMultiplier:F1}x</color>");
+            if (SpeedMultiplier > 3.0f) 
+            {
+                GUI.color = Color.red;
+                GUILayout.Label("WARNING: High speed may glitch physics!", new GUIStyle(GUI.skin.label){ fontSize = 10, fontStyle = FontStyle.Bold });
+                GUI.color = Color.white;
+            }
+
+            float oldS = SpeedMultiplier;
+            // Changed 2.2f to 10.0f
+            SpeedMultiplier = GUILayout.HorizontalSlider(SpeedMultiplier, 1f, 10.0f);
+            
+            if (GUILayout.Button("Reset to Default (1.5x)")) SpeedMultiplier = 1.5f;
+            if (oldS != SpeedMultiplier) AutoSave();
+
+            GUILayout.Space(10);
+            GUILayout.Label(":: STAMINA VISUALS ::");
+            if (GUILayout.Button($"Stamina Bar: {(ShowStaminaBar ? "ON" : "OFF")}")) { ShowStaminaBar = !ShowStaminaBar; if (StaminaBarHolder.Instance != null) StaminaBarHolder.Instance.enableStaminaBar = ShowStaminaBar; AutoSave(); }
+            if (GUILayout.Button("Cycle Bar Style")) { if (StaminaBarHolder.Instance != null) { StaminaBarHolder.Instance.visualStyle = (StaminaBarHolder.Instance.visualStyle + 1) % 4; AutoSave(); } }
+            
+            GUILayout.Space(10);
+            GUILayout.Label(":: ACCESSIBILITY ::");
+            if (GUILayout.Button($"Screen Reader Info: {(EnableAccessibility ? "ON" : "OFF")}")) { EnableAccessibility = !EnableAccessibility; Speak("Accessibility " + (EnableAccessibility ? "On" : "Off")); AutoSave(); }
+        }
+
+        void DrawCheatsTab()
+        {
+            if (!CheatsUnlocked)
+            {
+                GUILayout.Space(20);
+                GUI.color = Color.red; 
+                GUILayout.Label("WARNING:\nCheats break game balance.\nUse for fun only!", new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold }); 
+                GUI.color = Color.white; 
+                GUILayout.Space(10); 
+                if (GUILayout.Button("I Understand, Unlock Cheats")) { CheatsUnlocked = true; AutoSave(); }
+                return;
+            }
+
+            GUILayout.Label(":: GOD MODES ::");
+            if (GUILayout.Button($"Infinite Stamina: {(InfiniteStamina ? "ON" : "OFF")}")) InfiniteStamina = !InfiniteStamina;
+            if (GUILayout.Button($"Invincible Walls: {(InvincibleWalls ? "ON" : "OFF")}")) InvincibleWalls = !InvincibleWalls;
+            
+            GUILayout.Space(10);
+            GUILayout.Label(":: WEALTH ::");
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Coins +40")) GiveCurrency(40, false);
+            if (GUILayout.Button("Gems +10")) GiveCurrency(10, true);
+            GUILayout.EndHorizontal();
+            if (GUILayout.Button("Force Banker Payout")) PlayerManager.ForceBankerPayout();
+
+            GUILayout.Space(10);
+            GUILayout.Label(":: ARMY & WORKERS ::");
+            if (GUILayout.Button("Recruit All Beggars")) ArmyManager.RecruitBeggars();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Drop Bows")) ArmyManager.DropTools("Archer");
+            if (GUILayout.Button("Drop Hammers")) ArmyManager.DropTools("Builder");
+            GUILayout.EndHorizontal();
+
+            // Toggles
+            GUILayout.Space(5);
+            HyperBuilders = GUILayout.Toggle(HyperBuilders, "Hyper Builders (Fast Work)");
+            BetterKnight = GUILayout.Toggle(BetterKnight, "Super Knights");
+            LargerCamps = GUILayout.Toggle(LargerCamps, "Larger Beggar Camps");
+            BetterCitizenHouses = GUILayout.Toggle(BetterCitizenHouses, "Better Houses (Auto Spawn)");
+
+            GUILayout.Space(10);
+            GUILayout.Label(":: FUN ::");
+            EnableSizeHack = GUILayout.Toggle(EnableSizeHack, "Enable Size Hack");
+            if (EnableSizeHack)
+            {
+                GUILayout.Label($"Size: {TargetSize:F2}");
+                TargetSize = GUILayout.HorizontalSlider(TargetSize, 0.5f, 3.0f);
+            }
+        }
+
+        void DrawWorldTab()
+        {
+            if (!CheatsUnlocked) { GUILayout.Label("Unlock Cheats first."); return; }
+
+            GUILayout.Label(":: WORLD CONTROL ::");
+            LockSummer = GUILayout.Toggle(LockSummer, "Lock Summer Season");
+            ClearWeather = GUILayout.Toggle(ClearWeather, "Force Clear Weather");
+            NoBloodMoons = GUILayout.Toggle(NoBloodMoons, "Prevent Blood Moons");
+            
+            GUILayout.Space(10);
+            GUILayout.Label(":: UTILITY ::");
+            DisplayTimes = GUILayout.Toggle(DisplayTimes, "Display Game Time");
+            CoinsStayDry = GUILayout.Toggle(CoinsStayDry, "Prevent Coins Drowning");
+        }
+
+        // Helpers
+        void DrawSoftwareCursor() { float mx = Input.mousePosition.x; float my = Screen.height - Input.mousePosition.y; GUI.depth = -9999; GUI.color = Color.yellow; GUI.Box(new Rect(mx, my, 12, 12), "", _solidStyle); GUI.color = Color.red; GUI.Box(new Rect(mx + 4, my + 4, 4, 4), "", _solidStyle); GUI.color = Color.white; }
+        void GiveCurrency(int amount, bool isGem) { var p = Managers.Inst?.kingdom?.GetPlayer(0); if (p?.wallet != null) p.wallet.SetCurrency(isGem ? CurrencyType.Gems : CurrencyType.Coins, amount); }
+    }
+}

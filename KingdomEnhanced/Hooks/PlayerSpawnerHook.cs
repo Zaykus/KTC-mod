@@ -13,37 +13,22 @@ namespace KingdomEnhanced.Hooks
         public static void Postfix(Player __instance)
         {
             if (__instance == null) return;
+            GameObject go = __instance.gameObject;
 
-            // Ensure the ModMenu is present
-            if (__instance.GetComponent<ModMenu>() == null)
-            {
-                __instance.gameObject.AddComponent<ModMenu>();
-            }
+            KingdomEnhanced.Core.Plugin.Instance.Log.LogInfo("Player Spawned. Attaching Managers...");
 
-            // ATTACH ALL FEATURES
-            // This uses your SafeAdd to prevent the game from crashing if one feature fails
-            SafeAdd<StaminaFeature>(__instance.gameObject);
-            SafeAdd<EconomyFeature>(__instance.gameObject);
-            SafeAdd<SpeedFeature>(__instance.gameObject);
-            SafeAdd<BuildingFeature>(__instance.gameObject);
-            SafeAdd<RecruitFeature>(__instance.gameObject);
-            SafeAdd<CitizenFeature>(__instance.gameObject);
-            SafeAdd<BankerFeature>(__instance.gameObject);
-            SafeAdd<WalletFeature>(__instance.gameObject);
-            SafeAdd<AccessibilityFeature>(__instance.gameObject);
-            SafeAdd<WorldControlFeature>(__instance.gameObject);
-            SafeAdd<UpgradeFeature>(__instance.gameObject);
-            SafeAdd<PlayerSizeFeature>(__instance.gameObject);
+            // 1. Core UI & Accessibility
+            SafeAdd<ModMenu>(go);
+            SafeAdd<AccessibilityFeature>(go);
 
-            // NEW FEATURES
-            SafeAdd<BetterCitizenHouseFeature>(__instance.gameObject);
-            SafeAdd<DisplayTimesFeature>(__instance.gameObject);
-            SafeAdd<CoinsStayDryFeature>(__instance.gameObject);
-            SafeAdd<LargerCampsFeature>(__instance.gameObject);
-            SafeAdd<BetterKnightFeature>(__instance.gameObject);
-            SafeAdd<FasterWorkerCatchup>(__instance.gameObject);
+            // 2. The Big 4 Managers
+            SafeAdd<PlayerManager>(go);
+            SafeAdd<WorldManager>(go);
+            SafeAdd<ArmyManager>(go);
+            SafeAdd<BuildingManager>(go);
         }
 
+        // Helper to safely add components without crashing
         private static void SafeAdd<T>(GameObject go) where T : MonoBehaviour
         {
             try

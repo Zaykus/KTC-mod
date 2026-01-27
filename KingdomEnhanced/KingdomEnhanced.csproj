@@ -15,6 +15,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="NewFolder\**" />
+	  <EmbeddedResource Remove="NewFolder\**" />
+	  <None Remove="NewFolder\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<!-- Core BepInEx Libraries -->
 		<Reference Include="BepInEx">
 			<!-- FIXED: Pointing to BepInEx.Core.dll as seen in your screenshot -->
@@ -60,10 +66,6 @@
 		<Reference Include="Il2Cppmscorlib">
 			<HintPath>$(InteropDir)\Il2Cppmscorlib.dll</HintPath>
 		</Reference>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="NewFolder\" />
 	</ItemGroup>
 
 	<!-- Auto-Copy Build Artifacts -->
