@@ -1,67 +1,34 @@
 using UnityEngine;
 using KingdomEnhanced.UI;
-using KingdomEnhanced.Core;
+using System.Reflection;
+using HarmonyLib;
 
 namespace KingdomEnhanced.Features
 {
     public class WorldManager : MonoBehaviour
     {
-        private float _slowTimer = 0f;
         private GUIStyle _timeStyle;
+        private float _statusTimer = 0f;
+        
+        // State tracking to prevent notification spam
+        private bool _wasDay = true;
+        private bool _wasBloodMoon = false;
+        private float _lastAttackAlert = 0f;
 
-        void Update()
+        // Reflection caches
+        private FieldInfo _bloodMoonField;
+
+        void Start()
         {
-            // Optimization: Only run expensive world scans once per second
-            _slowTimer += Time.deltaTime;
-            if (_slowTimer < 1.0f) return;
-            _slowTimer = 0f;
-
-            ManageWorldState();
-            if (ModMenu.CoinsStayDry) ProtectCoins();
-        }
-
-        private void ManageWorldState()
-        {
-            if (Managers.Inst == null || Managers.Inst.director == null) return;
-            var d = Managers.Inst.director;
-
-            if (ModMenu.LockSummer) d.SendMessage("SetSeason", 1, SendMessageOptions.DontRequireReceiver);
-            if (ModMenu.ClearWeather) d.SendMessage("SetWeather", 0, SendMessageOptions.DontRequireReceiver);
-            if (ModMenu.NoBloodMoons) 
-            {
-                d.SendMessage("SetIsBloodMoonToday", false, SendMessageOptions.DontRequireReceiver);
-                d.SendMessage("StopRedMoon", SendMessageOptions.DontRequireReceiver);
-            }
-        }
-
-        private void ProtectCoins()
-        {
-            // Optimized: Find Objects is heavy, but running it once per second is acceptable.
-            // Future upgrade: Hook into Coin.Start() to track them in a list instead.
-            var allObjs = FindObjectsOfType<GameObject>();
-            foreach (var obj in allObjs)
-            {
-                if (!obj.activeInHierarchy) continue;
-                string n = obj.name.ToLower();
-                if (n.Contains("coin") || n.Contains("gem"))
-                {
-                    obj.SendMessage("PreventWaterLoss", SendMessageOptions.DontRequireReceiver);
-                    if (obj.transform.position.y < -0.1f)
-                    {
-                        Vector3 fix = obj.transform.position;
-                        fix.y = 0.5f;
-                        obj.transform.position = fix;
-                    }
-                }
-            }
+            // Cache the private field for performance
+            _bloodMoonField = AccessTools.Field(typeof(Director), "_isBloodMoonToday");
         }
 
         void OnGUI()
         {
-            if (!ModMenu.DisplayTimes || Managers.Inst?.director == null) return;
+            if (!ModMenu.DisplayTimes || Managers.Inst == null || Managers.Inst.director == null) return;
 
-            if (_timeStyle == null)
-            {
+            if (_timeStyle == null) {
                 _timeStyle = new GUIStyle();
                 _timeStyle.normal.textColor = Color.yellow;
                 _timeStyle.fontSize = 20;
@@ -69,15 +36,80 @@ namespace KingdomEnhanced.Features
             }
 
             var d = Managers.Inst.director;
-            string timeStr = d.currentTime < 0.5f ? "Day" : "Night";
-            string text = $"Day: {d.CurrentIslandDays} | {timeStr} ({d.currentTime:F2})";
+            int day = d.CurrentIslandDays;
+            float time = d.currentTime; 
 
-            // Shadow
+            string timeStr = time < 0.25f ? "Morning" : time < 0.5f ? "Afternoon" : time < 0.75f ? "Evening" : "Night";
+            string text = $"Day {day} | {timeStr} ({time:F2})";
+
             GUI.color = Color.black;
             GUI.Label(new Rect(Screen.width - 248, 22, 250, 30), text, _timeStyle);
-            // Text
             GUI.color = Color.yellow;
             GUI.Label(new Rect(Screen.width - 250, 20, 250, 30), text, _timeStyle);
+        }
+
+        void Update()
+        {
+            if (Managers.Inst == null || Managers.Inst.director == null) return;
+            
+            _statusTimer += Time.deltaTime;
+            if (_statusTimer < 2.0f) return; // Only check every 2 seconds for performance
+            _statusTimer = 0f;
+
+            CheckGameStatus();
+        }
+
+        private void CheckGameStatus()
+        {
+            var d = Managers.Inst.director;
+
+            // 1. Dawn/Dusk Detection
+            if (d.IsDaytime && !_wasDay)
+            {
+                ModMenu.Speak("<color=orange>The sun rises. A new day begins.</color>");
+                _wasDay = true;
+            }
+            else if (!d.IsDaytime && _wasDay)
+            {
+                ModMenu.Speak("<color=lightblue>Shadows lengthen. Retreat to the walls!</color>");
+                _wasDay = false;
+            }
+
+            // 2. Blood Moon Detection (Using Reflection to avoid compile error)
+            bool isBlood = false;
+            if (_bloodMoonField != null)
+            {
+                try { isBlood = (bool)_bloodMoonField.GetValue(d); } catch { }
+            }
+
+            if (isBlood && !_wasBloodMoon)
+            {
+                ModMenu.Speak("<color=red>THE BLOOD MOON RISES! Prepare for the swarm!</color>");
+                _wasBloodMoon = true;
+            }
+            else if (!isBlood) _wasBloodMoon = false;
+
+            // 3. Enemy Radar (Greed Attack Alert)
+            // Using generic GameObject search to avoid missing 'Greed' type error
+            if (!d.IsDaytime && Time.time > _lastAttackAlert + 45f) 
+            {
+                int greedCount = 0;
+                var allGOS = GameObject.FindObjectsOfType<GameObject>();
+                foreach (var go in allGOS)
+                {
+                    if (go.name.Contains("Greed") || go.name.Contains("Enemy"))
+                    {
+                        greedCount++;
+                        if (greedCount > 5) break;
+                    }
+                }
+
+                if (greedCount > 5)
+                {
+                    ModMenu.Speak("<color=red>Urgent: Enemy movement detected outside the walls!</color>");
+                    _lastAttackAlert = Time.time;
+                }
+            }
         }
     }
 }

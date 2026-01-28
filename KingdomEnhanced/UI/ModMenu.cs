@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
+using System.Text;
 using KingdomEnhanced.Features;
 using KingdomEnhanced.Systems;
 using KingdomEnhanced.Core;
@@ -7,229 +9,324 @@ namespace KingdomEnhanced.UI
 {
     public class ModMenu : MonoBehaviour
     {
-        // --- FEATURE TOGGLES (Read by Managers) ---
-        public static bool InvincibleWalls = false;
-        public static bool ShowStaminaBar = true;
-        public static bool EnableAccessibility = false;
-        public static bool LockSummer = false;
-        public static bool ClearWeather = false;
-        public static bool NoBloodMoons = false;
-        public static bool CheatsUnlocked = false;
-        
-        // Manager Toggles
-        public static bool HyperBuilders = false;
-        public static bool BetterCitizenHouses = false;
-        public static bool DisplayTimes = false;
-        public static bool CoinsStayDry = false;
-        public static bool LargerCamps = false;
-        public static bool BetterKnight = false;
-        
-        // Player Toggles
-        public static bool InfiniteStamina = true; // Moved from StaminaFeature
-        public static bool EnableSizeHack = false; // Moved from PlayerSizeFeature
-        public static float TargetSize = 1.0f;
-        public static float SpeedMultiplier = 1.5f;
+        // --- ALL SETTINGS (Saveable & Uncut) ---
+        public static bool InvincibleWalls, ShowStaminaBar, EnableAccessibility, LockSummer, ClearWeather, NoBloodMoons, CheatsUnlocked, HyperBuilders, BetterCitizenHouses, DisplayTimes, CoinsStayDry, LargerCamps, BetterKnight, InfiniteStamina, EnableSizeHack;
+        public static float TargetSize, SpeedMultiplier;
 
-        // --- UI VARIABLES ---
-        public static string LastAccessMessage = "";
+        // --- NOTIFICATION SYSTEM ---
+        public class Notification
+        {
+            public string Message;
+            public float ExpiryTime;
+            public float Alpha = 1.0f;
+            public Notification(string msg, float duration)
+            {
+                Message = msg;
+                ExpiryTime = Time.time + duration;
+            }
+        }
+        private static List<Notification> _notifications = new List<Notification>();
+        private const float NotificationDuration = 5.0f;
+
+        // --- FEEDBACK SYSTEM ---
+        private Dictionary<string, int> _featureStatus = new Dictionary<string, int>() {
+            {"Movement Controls", 0}, {"Stamina Bar", 0}, {"HUD Overlay", 0},
+            {"Infinite Stamina", 0}, {"Invincible Walls", 0}, {"Economy Actions", 0},
+            {"Military Actions", 0}, {"Hyper Builders", 0}, {"Elite Knights", 0},
+            {"Larger Camps", 0}, {"Player Scaling", 0}
+        };
+
+        public static string LastAccessMessage = ""; 
         public static float MessageTimer = 0f;
 
         private bool _isVisible = false;
         private int _currentTab = 0;
-        private Rect _windowRect = new Rect(50, 50, 340, 550); // Slightly wider
-        private Vector2 _scrollPosition; // For scrolling
-
+        private Rect _windowRect = new Rect(30, 30, 420, 680); 
+        private Vector2 _scrollPosition;
+        
         private Texture2D _whiteTex;
-        private GUIStyle _solidStyle;
+        private GUIStyle _headerStyle;
+        private GUIStyle _cursorStyle;
+        private GUIStyle _statusBtnStyle;
+        private GUIStyle _notifStyle;
 
         void Start()
         {
-            _whiteTex = new Texture2D(1, 1); _whiteTex.SetPixel(0, 0, Color.white); _whiteTex.Apply();
-            _solidStyle = new GUIStyle() { normal = { background = _whiteTex } };
-
-            // Load saved settings
-            ShowStaminaBar = Settings.ShowStaminaBar.Value;
-            EnableAccessibility = Settings.EnableAccessibility.Value;
-            CheatsUnlocked = Settings.CheatsUnlocked.Value;
-            SpeedMultiplier = Settings.SpeedMultiplier.Value;
-
-            if (StaminaBarHolder.Instance != null)
-            {
-                StaminaBarHolder.Instance.enableStaminaBar = ShowStaminaBar;
-                StaminaBarHolder.Instance.visualStyle = Settings.BarStyle.Value;
-                StaminaBarHolder.Instance.positionMode = Settings.BarPosition.Value;
-                StaminaBarHolder.Instance.manualX = Settings.ManualX.Value;
-                StaminaBarHolder.Instance.manualY = Settings.ManualY.Value;
-            }
+            _whiteTex = new Texture2D(1, 1);
+            _whiteTex.SetPixel(0, 0, Color.white);
+            _whiteTex.Apply();
+            LoadFromSettings();
         }
 
-        void AutoSave()
-        {
-            Settings.ShowStaminaBar.Value = ShowStaminaBar;
-            Settings.EnableAccessibility.Value = EnableAccessibility;
-            Settings.CheatsUnlocked.Value = CheatsUnlocked;
-            Settings.SpeedMultiplier.Value = SpeedMultiplier;
+        // --- SPEAK METHOD (Feeds the RPG Log) ---
+        public static void Speak(string msg) 
+        { 
+            // Add to the RPG Log list
+            _notifications.Insert(0, new Notification(msg, NotificationDuration));
             
-            if (StaminaBarHolder.Instance != null)
-            {
-                Settings.BarStyle.Value = StaminaBarHolder.Instance.visualStyle;
-                Settings.BarPosition.Value = StaminaBarHolder.Instance.positionMode;
-                Settings.ManualX.Value = StaminaBarHolder.Instance.manualX;
-                Settings.ManualY.Value = StaminaBarHolder.Instance.manualY;
+            // Limit to 8 visible messages
+            if (_notifications.Count > 8) _notifications.RemoveAt(_notifications.Count - 1);
+
+            // Maintain variables for internal state
+            LastAccessMessage = msg; 
+            MessageTimer = 5.0f; 
+            if (Plugin.Instance != null) Plugin.Instance.Log.LogMessage(msg);
+        }
+
+        void InitStyles()
+        {
+            if (_headerStyle == null) {
+                _headerStyle = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold, fontSize = 15 };
+                _headerStyle.normal.textColor = new Color(1f, 0.75f, 0f); // Kingdom Gold
             }
-            Settings.Config.Save();
+            if (_cursorStyle == null) {
+                _cursorStyle = new GUIStyle(GUI.skin.label) { fontSize = 30, fontStyle = FontStyle.Bold };
+            }
+            if (_statusBtnStyle == null) {
+                _statusBtnStyle = new GUIStyle(GUI.skin.button) { fontStyle = FontStyle.Bold };
+            }
+            if (_notifStyle == null) {
+                _notifStyle = new GUIStyle(GUI.skin.label) { 
+                    fontSize = 14, 
+                    fontStyle = FontStyle.Bold, 
+                    richText = true,
+                    alignment = TextAnchor.MiddleLeft
+                };
+            }
         }
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F1)) { _isVisible = !_isVisible; Speak(_isVisible ? "Menu Open" : "Menu Closed"); }
-            if (MessageTimer > 0) { MessageTimer -= Time.deltaTime; if (MessageTimer <= 0) LastAccessMessage = ""; }
-        }
+            if (Input.GetKeyDown(KeyCode.F1)) { _isVisible = !_isVisible; Speak(_isVisible ? "Menu Visible" : "Menu Hidden"); }
+            if (MessageTimer > 0) MessageTimer -= Time.deltaTime;
 
-        public static void Speak(string msg) { LastAccessMessage = msg; MessageTimer = 8.0f; Plugin.Instance.Log.LogMessage(msg); }
-        void LateUpdate() { if (_isVisible) { Cursor.visible = true; Cursor.lockState = CursorLockMode.None; } }
+            // Cleanup expired notifications
+            _notifications.RemoveAll(n => Time.time > n.ExpiryTime + 1.0f);
+        }
 
         void OnGUI()
         {
-            if (EnableAccessibility && !string.IsNullOrEmpty(LastAccessMessage))
-            {
-                var style = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold, fontSize = 14, wordWrap = true };
-                float w = Screen.width * 0.6f; float h = style.CalcHeight(new GUIContent(LastAccessMessage), w) + 15f;
-                GUI.color = new Color(0, 0, 0, 0.85f); GUI.Box(new Rect((Screen.width / 2) - (w / 2), Screen.height - h - 20, w, h), "", _solidStyle);
-                GUI.color = Color.white; GUI.Label(new Rect((Screen.width / 2) - (w / 2), Screen.height - h - 20, w, h), LastAccessMessage, style);
-            }
+            InitStyles();
+            
+            // 1. DRAW NOTIFICATION LOG (Bottom-Left)
+            DrawNotificationLog();
+
+            // Note: Accessibility center box has been removed as requested.
 
             if (!_isVisible) return;
 
-            // Draw Window Background
-            GUI.color = new Color(1f, 0.8f, 0.4f, 1f); GUI.Box(new Rect(_windowRect.x - 2, _windowRect.y - 2, _windowRect.width + 4, _windowRect.height + 4), "", _solidStyle);
-            GUI.color = new Color(0.08f, 0.08f, 0.08f, 0.96f); GUI.Box(_windowRect, "", _solidStyle);
-            GUI.color = Color.white; GUI.contentColor = new Color(1f, 0.85f, 0.45f);
+            // 2. MAIN WINDOW (IL2CPP Explicit Cast)
+            GUI.backgroundColor = new Color(0.08f, 0.08f, 0.08f, 0.96f);
+            _windowRect = GUI.Window(0, _windowRect, (GUI.WindowFunction)DrawWindow, "<b>KINGDOM ENHANCED v1.1</b>");
 
-            GUILayout.BeginArea(new Rect(_windowRect.x + 10, _windowRect.y + 10, _windowRect.width - 20, _windowRect.height - 20));
-            
-            // Tabs
+            // 3. HAND CURSOR
+            DrawHandCursor();
+        }
+
+        void DrawNotificationLog()
+        {
+            float startY = Screen.height - 100f;
+            float startX = 20f;
+            float spacing = 25f;
+
+            for (int i = 0; i < _notifications.Count; i++)
+            {
+                var n = _notifications[i];
+                float timeLeft = n.ExpiryTime - Time.time;
+                
+                if (timeLeft < 1.0f) n.Alpha = Mathf.Max(0, timeLeft);
+                else n.Alpha = 1.0f;
+
+                if (n.Alpha <= 0) continue;
+
+                // Draw shadow/background for readability
+                GUI.color = new Color(0, 0, 0, n.Alpha * 0.6f);
+                GUI.Box(new Rect(startX - 5, startY - (i * spacing), 320, 22), "");
+
+                // Draw text
+                GUI.color = new Color(1, 1, 1, n.Alpha);
+                GUI.Label(new Rect(startX, startY - (i * spacing), 400, 25), n.Message, _notifStyle);
+            }
+            GUI.color = Color.white;
+        }
+
+        void DrawWindow(int windowID)
+        {
+            GUI.DragWindow(new Rect(0, 0, 10000, 25));
+
             GUILayout.BeginHorizontal();
             if (GUILayout.Toggle(_currentTab == 0, "General", GUI.skin.button)) _currentTab = 0;
             if (GUILayout.Toggle(_currentTab == 1, "Cheats", GUI.skin.button)) _currentTab = 1;
             if (GUILayout.Toggle(_currentTab == 2, "World", GUI.skin.button)) _currentTab = 2;
+            if (GUILayout.Toggle(_currentTab == 3, "Feedback", GUI.skin.button)) _currentTab = 3;
             GUILayout.EndHorizontal();
+
             GUILayout.Space(10);
-
-            // Scroll View Start
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
-
-            if (_currentTab == 0) DrawGeneralTab();
-            else if (_currentTab == 1) DrawCheatsTab();
-            else if (_currentTab == 2) DrawWorldTab();
+            
+            bool changed = false;
+            if (_currentTab == 0) changed = DrawGeneral();
+            else if (_currentTab == 1) changed = DrawCheats();
+            else if (_currentTab == 2) changed = DrawWorld();
+            else if (_currentTab == 3) DrawFeedback();
 
             GUILayout.EndScrollView();
-            // Scroll View End
+            
+            GUI.color = Color.gray;
+            GUILayout.Label("Created by Zaykus | Notifications v1.1", new GUIStyle(GUI.skin.label){fontSize=10, alignment=TextAnchor.MiddleRight});
+            GUI.color = Color.white;
 
-            GUILayout.FlexibleSpace();
-            GUILayout.Label("Press F1 to Close", new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = 10 });
-            GUILayout.EndArea();
-
-            DrawSoftwareCursor();
+            if (changed || GUI.changed) SaveToSettings();
         }
 
-         void DrawGeneralTab()
+        bool DrawGeneral()
         {
-            GUILayout.Label(":: PLAYER STATS ::");
-            
-            // INCREASED MAX SPEED TO 10.0
-            GUILayout.Label($"Travel Speed: <color=cyan>{SpeedMultiplier:F1}x</color>");
-            if (SpeedMultiplier > 3.0f) 
-            {
-                GUI.color = Color.red;
-                GUILayout.Label("WARNING: High speed may glitch physics!", new GUIStyle(GUI.skin.label){ fontSize = 10, fontStyle = FontStyle.Bold });
-                GUI.color = Color.white;
-            }
+            Title("Movement Controls");
+            GUILayout.Label($"Travel Speed: {SpeedMultiplier:F1}x");
+            SpeedMultiplier = GUILayout.HorizontalSlider(SpeedMultiplier, 1f, 10f);
+            if (GUILayout.Button("Reset Speed to 1.5x")) SpeedMultiplier = 1.5f;
 
-            float oldS = SpeedMultiplier;
-            // Changed 2.2f to 10.0f
-            SpeedMultiplier = GUILayout.HorizontalSlider(SpeedMultiplier, 1f, 10.0f);
-            
-            if (GUILayout.Button("Reset to Default (1.5x)")) SpeedMultiplier = 1.5f;
-            if (oldS != SpeedMultiplier) AutoSave();
-
-            GUILayout.Space(10);
-            GUILayout.Label(":: STAMINA VISUALS ::");
-            if (GUILayout.Button($"Stamina Bar: {(ShowStaminaBar ? "ON" : "OFF")}")) { ShowStaminaBar = !ShowStaminaBar; if (StaminaBarHolder.Instance != null) StaminaBarHolder.Instance.enableStaminaBar = ShowStaminaBar; AutoSave(); }
-            if (GUILayout.Button("Cycle Bar Style")) { if (StaminaBarHolder.Instance != null) { StaminaBarHolder.Instance.visualStyle = (StaminaBarHolder.Instance.visualStyle + 1) % 4; AutoSave(); } }
-            
-            GUILayout.Space(10);
-            GUILayout.Label(":: ACCESSIBILITY ::");
-            if (GUILayout.Button($"Screen Reader Info: {(EnableAccessibility ? "ON" : "OFF")}")) { EnableAccessibility = !EnableAccessibility; Speak("Accessibility " + (EnableAccessibility ? "On" : "Off")); AutoSave(); }
-        }
-
-        void DrawCheatsTab()
-        {
-            if (!CheatsUnlocked)
-            {
-                GUILayout.Space(20);
-                GUI.color = Color.red; 
-                GUILayout.Label("WARNING:\nCheats break game balance.\nUse for fun only!", new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold }); 
-                GUI.color = Color.white; 
-                GUILayout.Space(10); 
-                if (GUILayout.Button("I Understand, Unlock Cheats")) { CheatsUnlocked = true; AutoSave(); }
-                return;
-            }
-
-            GUILayout.Label(":: GOD MODES ::");
-            if (GUILayout.Button($"Infinite Stamina: {(InfiniteStamina ? "ON" : "OFF")}")) InfiniteStamina = !InfiniteStamina;
-            if (GUILayout.Button($"Invincible Walls: {(InvincibleWalls ? "ON" : "OFF")}")) InvincibleWalls = !InvincibleWalls;
-            
-            GUILayout.Space(10);
-            GUILayout.Label(":: WEALTH ::");
+            Title("Stamina Bar Settings");
+            ShowStaminaBar = GUILayout.Toggle(ShowStaminaBar, " Enable Stamina Bar");
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Coins +40")) GiveCurrency(40, false);
-            if (GUILayout.Button("Gems +10")) GiveCurrency(10, true);
-            GUILayout.EndHorizontal();
-            if (GUILayout.Button("Force Banker Payout")) PlayerManager.ForceBankerPayout();
-
-            GUILayout.Space(10);
-            GUILayout.Label(":: ARMY & WORKERS ::");
-            if (GUILayout.Button("Recruit All Beggars")) ArmyManager.RecruitBeggars();
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Drop Bows")) ArmyManager.DropTools("Archer");
-            if (GUILayout.Button("Drop Hammers")) ArmyManager.DropTools("Builder");
+            if (GUILayout.Button("Cycle Style")) { if (StaminaBarHolder.Instance) StaminaBarHolder.Instance.visualStyle = (StaminaBarHolder.Instance.visualStyle + 1) % 4; }
+            if (GUILayout.Button("Cycle Position")) { if (StaminaBarHolder.Instance) StaminaBarHolder.Instance.positionMode = (StaminaBarHolder.Instance.positionMode + 1) % 6; }
             GUILayout.EndHorizontal();
 
-            // Toggles
-            GUILayout.Space(5);
-            HyperBuilders = GUILayout.Toggle(HyperBuilders, "Hyper Builders (Fast Work)");
-            BetterKnight = GUILayout.Toggle(BetterKnight, "Super Knights");
-            LargerCamps = GUILayout.Toggle(LargerCamps, "Larger Beggar Camps");
-            BetterCitizenHouses = GUILayout.Toggle(BetterCitizenHouses, "Better Houses (Auto Spawn)");
+            Title("Interface");
+            DisplayTimes = GUILayout.Toggle(DisplayTimes, " Show Island Clock");
+            EnableAccessibility = GUILayout.Toggle(EnableAccessibility, " Vocal Feedback (F5-F10)");
+            return true;
+        }
 
+        bool DrawCheats()
+        {
+            if (!CheatsUnlocked) { if (GUILayout.Button("UNLOCK MOD MENU")) CheatsUnlocked = true; return true; }
+            
+            Title("Invincibility");
+            InfiniteStamina = GUILayout.Toggle(InfiniteStamina, " Infinite Mount Stamina");
+            
+            Title("Economic Actions");
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Add 10 Coins")) GiveCurrency(10, false);
+            if (GUILayout.Button("Add 5 Gems")) GiveCurrency(5, true);
+            GUILayout.EndHorizontal();
+
+            Title("Military Actions");
+            if (GUILayout.Button("Recruit All Vagrants")) ArmyManager.RecruitBeggars();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Drop Archer Bow")) ArmyManager.DropTools("Archer");
+            if (GUILayout.Button("Drop Builder Hammer")) ArmyManager.DropTools("Builder");
+            GUILayout.EndHorizontal();
+
+            Title("Unit Buffs");
+            HyperBuilders = GUILayout.Toggle(HyperBuilders, " Instant Construction");
+            LargerCamps = GUILayout.Toggle(LargerCamps, " Expand Vagrant Camps");
+
+            Title("Player Scaling");
+            EnableSizeHack = GUILayout.Toggle(EnableSizeHack, " Enable Scale Hack");
+            if (EnableSizeHack) {
+                GUILayout.Label($"Scale: {TargetSize:F2}x");
+                TargetSize = GUILayout.HorizontalSlider(TargetSize, 0.5f, 5.0f);
+            }
+            return true;
+        }
+
+        bool DrawWorld()
+        {
+            Title("Development Lab");
+            GUI.color = Color.gray;
+            GUILayout.Label("The following features are being rewritten for stability:");
+            GUILayout.Toggle(false, " Self-Repairing Walls (Testing)");
+            GUILayout.Toggle(false, " Elite Knights - Thor/Hel (Testing)");
+            GUILayout.Toggle(false, " Lock Summer Season (Testing)");
+            GUILayout.Toggle(false, " Clear Weather - No Fog/Rain (Testing)");
+            GUILayout.Toggle(false, " Disable Blood Moons (Testing)");
+            GUILayout.Toggle(false, " Buoyant Currency - Water Fix (Testing)");
+            GUILayout.Toggle(false, " Rapid Citizen Housing (Testing)");
+            GUI.color = Color.white;
+            return false;
+        }
+
+        void DrawFeedback()
+        {
+            Title("Feature Feedback");
+            GUILayout.Label("Cycle status to report if features work for you. Click 'Copy Report' to share with the dev.", new GUIStyle(GUI.skin.label){wordWrap=true});
             GUILayout.Space(10);
-            GUILayout.Label(":: FUN ::");
-            EnableSizeHack = GUILayout.Toggle(EnableSizeHack, "Enable Size Hack");
-            if (EnableSizeHack)
-            {
-                GUILayout.Label($"Size: {TargetSize:F2}");
-                TargetSize = GUILayout.HorizontalSlider(TargetSize, 0.5f, 3.0f);
+
+            List<string> keys = new List<string>(_featureStatus.Keys);
+            foreach (string key in keys) {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(key, GUILayout.Width(220));
+                int status = _featureStatus[key];
+                string btnText = status == 0 ? "[ ? ]" : status == 1 ? "<color=lime>[ OK ]</color>" : "<color=red>[ X ]</color>";
+                if (GUILayout.Button(btnText, _statusBtnStyle, GUILayout.Width(80))) { _featureStatus[key] = (status + 1) % 3; }
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.Space(20);
+            if (GUILayout.Button("COPY REPORT TO CLIPBOARD", GUILayout.Height(40))) {
+                GenerateAndCopyReport();
             }
         }
 
-        void DrawWorldTab()
-        {
-            if (!CheatsUnlocked) { GUILayout.Label("Unlock Cheats first."); return; }
-
-            GUILayout.Label(":: WORLD CONTROL ::");
-            LockSummer = GUILayout.Toggle(LockSummer, "Lock Summer Season");
-            ClearWeather = GUILayout.Toggle(ClearWeather, "Force Clear Weather");
-            NoBloodMoons = GUILayout.Toggle(NoBloodMoons, "Prevent Blood Moons");
-            
-            GUILayout.Space(10);
-            GUILayout.Label(":: UTILITY ::");
-            DisplayTimes = GUILayout.Toggle(DisplayTimes, "Display Game Time");
-            CoinsStayDry = GUILayout.Toggle(CoinsStayDry, "Prevent Coins Drowning");
+        void GenerateAndCopyReport() {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"--- Kingdom Enhanced Feedback Report ---");
+            sb.AppendLine($"Game Version: {Application.version}");
+            sb.AppendLine($"Mod Version: 1.1.0");
+            sb.AppendLine("");
+            foreach(var kvp in _featureStatus) {
+                if(kvp.Value == 0) continue;
+                sb.AppendLine($"- {kvp.Key}: {(kvp.Value == 1 ? "WORKING" : "BROKEN")}");
+            }
+            GUIUtility.systemCopyBuffer = sb.ToString();
+            Speak("Report copied! Paste it in Discord.");
         }
 
-        // Helpers
-        void DrawSoftwareCursor() { float mx = Input.mousePosition.x; float my = Screen.height - Input.mousePosition.y; GUI.depth = -9999; GUI.color = Color.yellow; GUI.Box(new Rect(mx, my, 12, 12), "", _solidStyle); GUI.color = Color.red; GUI.Box(new Rect(mx + 4, my + 4, 4, 4), "", _solidStyle); GUI.color = Color.white; }
-        void GiveCurrency(int amount, bool isGem) { var p = Managers.Inst?.kingdom?.GetPlayer(0); if (p?.wallet != null) p.wallet.SetCurrency(isGem ? CurrencyType.Gems : CurrencyType.Coins, amount); }
+        void Title(string t) { GUILayout.Space(12); GUILayout.Label(t.ToUpper(), _headerStyle); GUILayout.Space(2); }
+
+        void DrawHandCursor()
+        {
+            GUI.depth = -10000;
+            float mx = Input.mousePosition.x;
+            float my = Screen.height - Input.mousePosition.y;
+
+            // Hand Pointer with black shadow/outline
+            GUI.color = Color.black;
+            GUI.Label(new Rect(mx + 1, my + 1, 40, 40), "☝", _cursorStyle);
+            GUI.color = new Color(1f, 0.8f, 0.4f); // Skin tone
+            GUI.Label(new Rect(mx, my, 40, 40), "☝", _cursorStyle);
+            GUI.color = Color.white;
+        }
+
+        void LoadFromSettings() {
+            ShowStaminaBar = Settings.ShowStaminaBar.Value; EnableAccessibility = Settings.EnableAccessibility.Value;
+            CheatsUnlocked = Settings.CheatsUnlocked.Value; SpeedMultiplier = Settings.SpeedMultiplier.Value;
+            InfiniteStamina = Settings.InfiniteStamina.Value; InvincibleWalls = Settings.InvincibleWalls.Value;
+            HyperBuilders = Settings.HyperBuilders.Value; BetterKnight = Settings.BetterKnight.Value;
+            LargerCamps = Settings.LargerCamps.Value; BetterCitizenHouses = Settings.BetterCitizenHouses.Value;
+            EnableSizeHack = Settings.EnableSizeHack.Value; TargetSize = Settings.TargetSize.Value;
+            DisplayTimes = Settings.DisplayTimes.Value;
+        }
+
+        public void SaveToSettings() {
+            Settings.ShowStaminaBar.Value = ShowStaminaBar; Settings.EnableAccessibility.Value = EnableAccessibility;
+            Settings.CheatsUnlocked.Value = CheatsUnlocked; Settings.SpeedMultiplier.Value = SpeedMultiplier;
+            Settings.InfiniteStamina.Value = InfiniteStamina; Settings.InvincibleWalls.Value = InvincibleWalls;
+            Settings.HyperBuilders.Value = HyperBuilders; Settings.BetterKnight.Value = BetterKnight;
+            Settings.LargerCamps.Value = LargerCamps; Settings.BetterCitizenHouses.Value = BetterCitizenHouses;
+            Settings.EnableSizeHack.Value = EnableSizeHack; Settings.TargetSize.Value = TargetSize;
+            Settings.DisplayTimes.Value = DisplayTimes;
+            Settings.Config.Save();
+        }
+
+        void GiveCurrency(int a, bool g) { 
+            var p = Managers.Inst?.kingdom?.GetPlayer(0); 
+            if (p?.wallet != null) {
+                p.wallet.AddCurrency(g ? CurrencyType.Gems : CurrencyType.Coins, a);
+                Speak($"<color={(g?"cyan":"yellow")}>+{(g?5:10)} {(g?"Gems":"Coins")}</color>");
+            }
+        }
     }
 }
