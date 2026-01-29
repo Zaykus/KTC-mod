@@ -110,12 +110,18 @@ namespace KingdomEnhanced.UI
         private GUIStyle _notifStyle;
         private GUIStyle _tabStyle;
         private GUIStyle _buttonStyle;
+        private GUIStyle _solidStyle; // This was causing the crash
+
         #endregion
 
         #region Constants
-        private const string MOD_VERSION = "v2.0.0";
+        private const string MOD_VERSION = "v1.0.0";
         private const string CREATOR_CREDIT = "Created by Zaykus | Thanks to Abevol";
         private const KeyCode MENU_TOGGLE_KEY = KeyCode.F1;
+        
+        // URLs
+        private const string ZAYKUS_REPO = "https://github.com/Zaykus/KTC-mod";
+        private const string ABEVOL_REPO = "https://github.com/abevol/KingdomMod";
         #endregion
 
         #region Unity Lifecycle
@@ -128,29 +134,52 @@ namespace KingdomEnhanced.UI
 
         void Update()
         {
-            HandleInput();
-            UpdateNotifications();
+            // Toggle Menu
+            if (Input.GetKeyDown(MENU_TOGGLE_KEY)) 
+            { 
+                _isVisible = !_isVisible; 
+                
+                // Enforce cursor state on toggle
+                Cursor.visible = _isVisible;
+                Cursor.lockState = _isVisible ? CursorLockMode.None : CursorLockMode.Locked;
+                
+                Speak(_isVisible ? "Menu Visible" : "Menu Hidden"); 
+            }
+
+            // Enforce Mouse Visibility Every Frame while Menu is Open to prevent game overriding it
+            if (_isVisible)
+            {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            }
+            
+            // Notification Cleanup
+            if (MessageTimer > 0) MessageTimer -= Time.deltaTime;
+            _notifications.RemoveAll(n => Time.time > n.ExpiryTime + 1.0f);
         }
 
         void OnGUI()
         {
             InitializeStyles();
             DrawNotificationLog();
+            DrawSoftwareCursor();
 
             if (!_isVisible) return;
 
             GUI.backgroundColor = new Color(0.08f, 0.08f, 0.08f, 0.96f);
             _windowRect = GUI.Window(0, _windowRect, (GUI.WindowFunction)DrawWindow, $"<b>KINGDOM ENHANCED {MOD_VERSION}</b>");
-            DrawCustomCursor();
         }
         #endregion
 
         #region Initialization
         private void InitializeResources()
         {
-            _whiteTex = new Texture2D(1, 1);
-            _whiteTex.SetPixel(0, 0, Color.white);
-            _whiteTex.Apply();
+            if (_whiteTex == null)
+            {
+                _whiteTex = new Texture2D(1, 1);
+                _whiteTex.SetPixel(0, 0, Color.white);
+                _whiteTex.Apply();
+            }
         }
 
         private void InitializeStyles()
@@ -230,6 +259,16 @@ namespace KingdomEnhanced.UI
                     fontStyle = FontStyle.Normal
                 };
             }
+
+            // CRASH FIX: Properly initializing _solidStyle
+            if (_solidStyle == null)
+            {
+                _solidStyle = new GUIStyle(GUI.skin.box);
+                if (_whiteTex != null)
+                {
+                    _solidStyle.normal.background = _whiteTex;
+                }
+            }
         }
         #endregion
 
@@ -263,6 +302,7 @@ namespace KingdomEnhanced.UI
 
             LastAccessMessage = message;
             MessageTimer = 5.0f;
+            // Debug.Log is kept for external log files
             Debug.Log($"[ModMenu] {message}");
         }
 
@@ -432,7 +472,7 @@ namespace KingdomEnhanced.UI
             if (!CheatsUnlocked)
             {
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("🔓 UNLOCK CHEAT MENU", GUILayout.Height(50)))
+                if (GUILayout.Button("! UNLOCK CHEAT MENU", GUILayout.Height(50)))
                 {
                     CheatsUnlocked = true;
                     Speak("Cheat menu unlocked!");
@@ -449,11 +489,11 @@ namespace KingdomEnhanced.UI
             // Economy
             DrawSectionHeader("Economy");
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("💰 Add 10 Coins", _buttonStyle))
+            if (GUILayout.Button("$ Add 10 Coins", _buttonStyle))
             {
                 GiveCurrency(10, false);
             }
-            if (GUILayout.Button("💎 Add 5 Gems", _buttonStyle))
+            if (GUILayout.Button("♦ Add 5 Gems", _buttonStyle))
             {
                 GiveCurrency(5, true);
             }
@@ -558,19 +598,26 @@ namespace KingdomEnhanced.UI
 
             GUILayout.Space(20);
             
-            if (GUILayout.Button("📋 COPY REPORT TO CLIPBOARD", GUILayout.Height(45)))
+            if (GUILayout.Button(" COPY REPORT TO CLIPBOARD", GUILayout.Height(45)))
             {
                 GenerateAndCopyReport();
             }
             
+            GUILayout.Space(20);
+            DrawSectionHeader("Repositories");
+            
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("🔗 Zaykus Repo", _buttonStyle))
+            {
+                Application.OpenURL(ZAYKUS_REPO);
+            }
+            if (GUILayout.Button("🔗 Abevol Repo", _buttonStyle))
+            {
+                Application.OpenURL(ABEVOL_REPO);
+            }
+            GUILayout.EndHorizontal();
+            
             GUILayout.Space(10);
-            GUILayout.Label("Report will be copied to your clipboard for easy sharing.", 
-                new GUIStyle(GUI.skin.label) 
-                { 
-                    fontSize = 10,
-                    alignment = TextAnchor.MiddleCenter,
-                    normal = { textColor = new Color(0.7f, 0.7f, 0.7f) }
-                });
         }
 
         private void DrawFeatureStatusButton(string featureName)
@@ -638,23 +685,24 @@ namespace KingdomEnhanced.UI
             GUILayout.Label(title.ToUpper(), _headerStyle);
             GUILayout.Space(4);
         }
-
-        private void DrawCustomCursor()
-        {
-            GUI.depth = -10000;
+        
+        // Custom software cursor for in-menu use
+        void DrawSoftwareCursor() 
+        { 
+            float mx = Input.mousePosition.x; 
+            float my = Screen.height - Input.mousePosition.y; 
             
-            float mouseX = Input.mousePosition.x;
-            float mouseY = Screen.height - Input.mousePosition.y;
-
-            // Shadow
-            GUI.color = Color.black;
-            GUI.Label(new Rect(mouseX + 1, mouseY + 1, 40, 40), "☝", _cursorStyle);
+            GUI.depth = -9999; 
             
-            // Main cursor
-            GUI.color = new Color(1f, 0.8f, 0.4f);
-            GUI.Label(new Rect(mouseX, mouseY, 40, 40), "☝", _cursorStyle);
+            // Outer box (Yellow)
+            GUI.color = Color.yellow; 
+            GUI.Box(new Rect(mx, my, 12, 12), "", _solidStyle); 
             
-            GUI.color = Color.white;
+            // Inner dot (Red)
+            GUI.color = Color.red; 
+            GUI.Box(new Rect(mx + 4, my + 4, 4, 4), "", _solidStyle); 
+            
+            GUI.color = Color.white; 
         }
         #endregion
 
@@ -727,7 +775,7 @@ namespace KingdomEnhanced.UI
                 
                 string color = isGems ? "cyan" : "yellow";
                 string currencyName = isGems ? "Gems" : "Coins";
-                string icon = isGems ? "💎" : "💰";
+                string icon = isGems ? "♦" : "$";
                 Speak($"<color={color}>{icon} +{amount} {currencyName}</color>");
             }
             catch (System.Exception ex)

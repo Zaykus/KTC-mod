@@ -168,7 +168,7 @@ namespace KingdomEnhanced.Features
             {
                 DrawShadowedLabel(
                     new Rect(hudX, hudY + 25, hudWidth, 22), 
-                    $"💰 Bag: {bagCoins} Coins", 
+                    $" Bag: {bagCoins} Coins", 
                     _coinStyle
                 );
             }
@@ -297,14 +297,13 @@ namespace KingdomEnhanced.Features
         }
         #endregion
 
-        #region Game Status Monitoring
+        #region Game Status Monitor
         private void CheckGameStatus()
         {
             var director = Managers.Inst.director;
             if (director == null) return;
             
             CheckDayNightTransition(director);
-            CheckBloodMoon(director);
         }
 
         private void CheckDayNightTransition(Director director)
@@ -313,12 +312,12 @@ namespace KingdomEnhanced.Features
             {
                 if (director.IsDaytime && !_wasDay)
                 {
-                    ModMenu.Speak("<color=orange>☀ The sun rises.</color>");
+                    ModMenu.Speak("<color=orange> ● The sun rises.</color>");
                     _wasDay = true;
                 }
                 else if (!director.IsDaytime && _wasDay)
                 {
-                    ModMenu.Speak("<color=lightblue>🌙 Night approaches.</color>");
+                    ModMenu.Speak("<color=lightblue> ★ Stars appear.</color>");
                     _wasDay = false;
                 }
             }
@@ -328,43 +327,7 @@ namespace KingdomEnhanced.Features
             }
         }
 
-        private void CheckBloodMoon(Director director)
-        {
-            try
-            {
-                bool isBloodMoon = false;
-
-                // Try field first
-                if (_bloodMoonField != null)
-                {
-                    isBloodMoon = (bool)_bloodMoonField.GetValue(director);
-                }
-                // Try property
-                else if (_bloodMoonProperty != null)
-                {
-                    isBloodMoon = (bool)_bloodMoonProperty.GetValue(director);
-                }
-                else
-                {
-                    return; // No blood moon detection available
-                }
-                
-                if (isBloodMoon && !_wasBloodMoon)
-                {
-                    ModMenu.Speak("<color=red><b>🌑 BLOOD MOON!</b></color>");
-                    _wasBloodMoon = true;
-                }
-                else if (!isBloodMoon && _wasBloodMoon)
-                {
-                    _wasBloodMoon = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                // Silent fail - blood moon detection is optional
-            }
-        }
-
+        
         private void CheckForGreedAttack()
         {
             // Only check at night
@@ -385,6 +348,7 @@ namespace KingdomEnhanced.Features
             }
             catch (Exception ex)
             {
+                Debug.LogError($"[WorldManager] Error checking for greed attack: {ex.Message}");
                 // Silent fail - greed detection is optional
             }
         }
