@@ -39,34 +39,30 @@ namespace KingdomEnhanced.Core
         {
             Config = config;
 
-            // 1. Visuals
-            ShowStaminaBar = config.Bind("1. Visuals", "ShowStaminaBar", true, "Show the stamina bar?");
-            BarStyle = config.Bind("1. Visuals", "BarStyle", 0, "0=Classic, 1=RPG, 2=Retro, 3=Dual");
-            BarPosition = config.Bind("1. Visuals", "BarPosition", 0, "0=Head, 1=Feet, 2=Bottom, 3=Left, 4=Right, 5=Manual");
-            ManualX = config.Bind("1. Visuals", "ManualX", 500f, "Custom X Position");
-            ManualY = config.Bind("1. Visuals", "ManualY", 500f, "Custom Y Position");
-            DisplayTimes = config.Bind("1. Visuals", "DisplayTimes", false, "Show Day and Time?");
+            ShowStaminaBar = config.Bind("1. Visuals", "ShowStaminaBar", true, "Show the energy bar");
+            BarStyle = config.Bind("1. Visuals", "BarStyle", 0, "Visual style index");
+            BarPosition = config.Bind("1. Visuals", "BarPosition", 0, "Position index");
+            ManualX = config.Bind("1. Visuals", "ManualX", 500f, "Custom X");
+            ManualY = config.Bind("1. Visuals", "ManualY", 500f, "Custom Y");
+            DisplayTimes = config.Bind("1. Visuals", "DisplayTimes", true, "Show day and time");
 
-            // 2. Accessibility
-            EnableAccessibility = config.Bind("2. Accessibility", "EnableScreenReader", false, "Enable text logging");
+            EnableAccessibility = config.Bind("2. Accessibility", "EnableScreenReader", false, "Enable vocal feedback");
 
-            // 3. Gameplay
-            SpeedMultiplier = config.Bind("3. Gameplay", "SpeedMultiplier", 1.5f, "Player movement speed");
-            CheatsUnlocked = config.Bind("3. Gameplay", "CheatsUnlocked", false, "Cheats enabled?");
-            InfiniteStamina = config.Bind("3. Gameplay", "InfiniteStamina", true, "Unlimited Horse Stamina");
-            InvincibleWalls = config.Bind("3. Gameplay", "InvincibleWalls", false, "Walls heal automatically");
-            HyperBuilders = config.Bind("3. Gameplay", "HyperBuilders", false, "Fast building speed");
-            BetterKnight = config.Bind("3. Gameplay", "BetterKnight", false, "Stronger Knights");
-            LargerCamps = config.Bind("3. Gameplay", "LargerCamps", false, "Larger Beggar Camps");
-            BetterCitizenHouses = config.Bind("3. Gameplay", "BetterCitizenHouses", false, "Houses auto-spawn");
-            EnableSizeHack = config.Bind("3. Gameplay", "EnableSizeHack", false, "Change player size");
-            TargetSize = config.Bind("3. Gameplay", "TargetSize", 1.0f, "Player Size Multiplier");
+            SpeedMultiplier = config.Bind("3. Gameplay", "SpeedMultiplier", 1.5f, "Travel speed");
+            CheatsUnlocked = config.Bind("3. Gameplay", "CheatsUnlocked", false, "Unlock menu");
+            InfiniteStamina = config.Bind("3. Gameplay", "InfiniteStamina", true, "Unlimited energy");
+            InvincibleWalls = config.Bind("3. Gameplay", "InvincibleWalls", false, "Self-repairing walls");
+            HyperBuilders = config.Bind("3. Gameplay", "HyperBuilders", false, "Instant build");
+            BetterKnight = config.Bind("3. Gameplay", "BetterKnight", false, "Elite Knights");
+            LargerCamps = config.Bind("3. Gameplay", "LargerCamps", false, "Large vagrant camps");
+            BetterCitizenHouses = config.Bind("3. Gameplay", "BetterCitizenHouses", false, "Rapid housing");
+            EnableSizeHack = config.Bind("3. Gameplay", "EnableSizeHack", false, "Size modification");
+            TargetSize = config.Bind("3. Gameplay", "TargetSize", 1.0f, "Size scale");
 
-            // 4. World
-            LockSummer = config.Bind("4. World", "LockSummer", false, "Lock season to Summer");
-            ClearWeather = config.Bind("4. World", "ClearWeather", false, "Force clear weather");
-            NoBloodMoons = config.Bind("4. World", "NoBloodMoons", false, "Disable Blood Moon");
-            CoinsStayDry = config.Bind("4. World", "CoinsStayDry", false, "Prevent coins from sinking");
+            LockSummer = config.Bind("4. World", "LockSummer", false, "Persistent Summer");
+            ClearWeather = config.Bind("4. World", "ClearWeather", false, "Clear skies");
+            NoBloodMoons = config.Bind("4. World", "NoBloodMoons", false, "No red moons");
+            CoinsStayDry = config.Bind("4. World", "CoinsStayDry", false, "Floating coins");
         }
     }
 }

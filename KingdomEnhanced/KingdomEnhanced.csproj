@@ -9,7 +9,7 @@
 		<LangVersion>latest</LangVersion>
 
 		<!-- PATH CONFIGURATION -->
-		<GameDir>F:\vs CODE\Mods</GameDir>
+		<GameDir>F:\vs CODE\KTC dev\Kingdom.Two.Crowns.Build.21681591</GameDir>
 		<BepInExDir>$(GameDir)\BepInEx</BepInExDir>
 		<InteropDir>$(BepInExDir)\interop</InteropDir>
 	</PropertyGroup>
@@ -66,6 +66,10 @@
 		<Reference Include="Il2Cppmscorlib">
 			<HintPath>$(InteropDir)\Il2Cppmscorlib.dll</HintPath>
 		</Reference>
+		<Reference Include="System.Core">
+			<HintPath>$(InteropDir)\Il2CppSystem.Core.dll</HintPath>
+		</Reference>
+
 	</ItemGroup>
 
 	<!-- Auto-Copy Build Artifacts -->

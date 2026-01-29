@@ -14,26 +14,19 @@ namespace KingdomEnhanced.UI
         public static float TargetSize, SpeedMultiplier;
 
         // --- NOTIFICATION SYSTEM ---
-        public class Notification
-        {
-            public string Message;
-            public float ExpiryTime;
-            public float Alpha = 1.0f;
-            public Notification(string msg, float duration)
-            {
-                Message = msg;
-                ExpiryTime = Time.time + duration;
-            }
+        public class Notification {
+            public string Message; public float ExpiryTime; public float Alpha = 1.0f;
+            public Notification(string msg, float duration) { Message = msg; ExpiryTime = Time.time + duration; }
         }
         private static List<Notification> _notifications = new List<Notification>();
         private const float NotificationDuration = 5.0f;
 
         // --- FEEDBACK SYSTEM ---
         private Dictionary<string, int> _featureStatus = new Dictionary<string, int>() {
-            {"Movement Controls", 0}, {"Stamina Bar", 0}, {"HUD Overlay", 0},
-            {"Infinite Stamina", 0}, {"Invincible Walls", 0}, {"Economy Actions", 0},
-            {"Military Actions", 0}, {"Hyper Builders", 0}, {"Elite Knights", 0},
-            {"Larger Camps", 0}, {"Player Scaling", 0}
+            {"Movement Controls", 0}, {"Stamina Bar", 0}, {"Celestial Scroll Map", 0},
+            {"Treasury Counter", 0}, {"Infinite Stamina", 0}, {"Economy Actions", 0},
+            {"Military Actions", 0}, {"Hyper Builders", 0}, {"Larger Camps", 0}, 
+            {"Player Scaling", 0}, {"Greed Radar", 0}
         };
 
         public static string LastAccessMessage = ""; 
@@ -45,10 +38,7 @@ namespace KingdomEnhanced.UI
         private Vector2 _scrollPosition;
         
         private Texture2D _whiteTex;
-        private GUIStyle _headerStyle;
-        private GUIStyle _cursorStyle;
-        private GUIStyle _statusBtnStyle;
-        private GUIStyle _notifStyle;
+        private GUIStyle _headerStyle, _cursorStyle, _creditStyle, _statusBtnStyle, _notifStyle;
 
         void Start()
         {
@@ -58,18 +48,11 @@ namespace KingdomEnhanced.UI
             LoadFromSettings();
         }
 
-        // --- SPEAK METHOD (Feeds the RPG Log) ---
         public static void Speak(string msg) 
         { 
-            // Add to the RPG Log list
             _notifications.Insert(0, new Notification(msg, NotificationDuration));
-            
-            // Limit to 8 visible messages
             if (_notifications.Count > 8) _notifications.RemoveAt(_notifications.Count - 1);
-
-            // Maintain variables for internal state
-            LastAccessMessage = msg; 
-            MessageTimer = 5.0f; 
+            LastAccessMessage = msg; MessageTimer = 5.0f; 
             if (Plugin.Instance != null) Plugin.Instance.Log.LogMessage(msg);
         }
 
@@ -77,21 +60,21 @@ namespace KingdomEnhanced.UI
         {
             if (_headerStyle == null) {
                 _headerStyle = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold, fontSize = 15 };
-                _headerStyle.normal.textColor = new Color(1f, 0.75f, 0f); // Kingdom Gold
+                _headerStyle.normal.textColor = new Color(1f, 0.75f, 0f);
             }
             if (_cursorStyle == null) {
                 _cursorStyle = new GUIStyle(GUI.skin.label) { fontSize = 30, fontStyle = FontStyle.Bold };
+                _cursorStyle.normal.textColor = Color.white;
+            }
+            if (_creditStyle == null) {
+                _creditStyle = new GUIStyle(GUI.skin.label) { fontSize = 11, alignment = TextAnchor.LowerRight };
+                _creditStyle.normal.textColor = Color.gray;
             }
             if (_statusBtnStyle == null) {
                 _statusBtnStyle = new GUIStyle(GUI.skin.button) { fontStyle = FontStyle.Bold };
             }
             if (_notifStyle == null) {
-                _notifStyle = new GUIStyle(GUI.skin.label) { 
-                    fontSize = 14, 
-                    fontStyle = FontStyle.Bold, 
-                    richText = true,
-                    alignment = TextAnchor.MiddleLeft
-                };
+                _notifStyle = new GUIStyle(GUI.skin.label) { fontSize = 14, fontStyle = FontStyle.Bold, richText = true, alignment = TextAnchor.MiddleLeft };
             }
         }
 
@@ -99,27 +82,16 @@ namespace KingdomEnhanced.UI
         {
             if (Input.GetKeyDown(KeyCode.F1)) { _isVisible = !_isVisible; Speak(_isVisible ? "Menu Visible" : "Menu Hidden"); }
             if (MessageTimer > 0) MessageTimer -= Time.deltaTime;
-
-            // Cleanup expired notifications
             _notifications.RemoveAll(n => Time.time > n.ExpiryTime + 1.0f);
         }
 
         void OnGUI()
         {
             InitStyles();
-            
-            // 1. DRAW NOTIFICATION LOG (Bottom-Left)
             DrawNotificationLog();
-
-            // Note: Accessibility center box has been removed as requested.
-
             if (!_isVisible) return;
-
-            // 2. MAIN WINDOW (IL2CPP Explicit Cast)
             GUI.backgroundColor = new Color(0.08f, 0.08f, 0.08f, 0.96f);
-            _windowRect = GUI.Window(0, _windowRect, (GUI.WindowFunction)DrawWindow, "<b>KINGDOM ENHANCED v1.1</b>");
-
-            // 3. HAND CURSOR
+            _windowRect = GUI.Window(0, _windowRect, (GUI.WindowFunction)DrawWindow, "<b>KINGDOM ENHANCED v1.5.0</b>");
             DrawHandCursor();
         }
 
@@ -128,22 +100,13 @@ namespace KingdomEnhanced.UI
             float startY = Screen.height - 100f;
             float startX = 20f;
             float spacing = 25f;
-
-            for (int i = 0; i < _notifications.Count; i++)
-            {
+            for (int i = 0; i < _notifications.Count; i++) {
                 var n = _notifications[i];
                 float timeLeft = n.ExpiryTime - Time.time;
-                
-                if (timeLeft < 1.0f) n.Alpha = Mathf.Max(0, timeLeft);
-                else n.Alpha = 1.0f;
-
+                n.Alpha = (timeLeft < 1.0f) ? Mathf.Max(0, timeLeft) : 1.0f;
                 if (n.Alpha <= 0) continue;
-
-                // Draw shadow/background for readability
                 GUI.color = new Color(0, 0, 0, n.Alpha * 0.6f);
                 GUI.Box(new Rect(startX - 5, startY - (i * spacing), 320, 22), "");
-
-                // Draw text
                 GUI.color = new Color(1, 1, 1, n.Alpha);
                 GUI.Label(new Rect(startX, startY - (i * spacing), 400, 25), n.Message, _notifStyle);
             }
@@ -153,29 +116,23 @@ namespace KingdomEnhanced.UI
         void DrawWindow(int windowID)
         {
             GUI.DragWindow(new Rect(0, 0, 10000, 25));
-
             GUILayout.BeginHorizontal();
-            if (GUILayout.Toggle(_currentTab == 0, "General", GUI.skin.button)) _currentTab = 0;
+            if (GUILayout.Toggle(_currentTab == 0, "Main", GUI.skin.button)) _currentTab = 0;
             if (GUILayout.Toggle(_currentTab == 1, "Cheats", GUI.skin.button)) _currentTab = 1;
-            if (GUILayout.Toggle(_currentTab == 2, "World", GUI.skin.button)) _currentTab = 2;
+            if (GUILayout.Toggle(_currentTab == 2, "Lab", GUI.skin.button)) _currentTab = 2;
             if (GUILayout.Toggle(_currentTab == 3, "Feedback", GUI.skin.button)) _currentTab = 3;
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
-            
             bool changed = false;
             if (_currentTab == 0) changed = DrawGeneral();
             else if (_currentTab == 1) changed = DrawCheats();
-            else if (_currentTab == 2) changed = DrawWorld();
+            else if (_currentTab == 2) changed = DrawUpcoming();
             else if (_currentTab == 3) DrawFeedback();
-
             GUILayout.EndScrollView();
             
-            GUI.color = Color.gray;
-            GUILayout.Label("Created by Zaykus | Notifications v1.1", new GUIStyle(GUI.skin.label){fontSize=10, alignment=TextAnchor.MiddleRight});
-            GUI.color = Color.white;
-
+            GUILayout.Label("Created by Zaykus | Thanks to Abevol", _creditStyle);
             if (changed || GUI.changed) SaveToSettings();
         }
 
@@ -194,7 +151,7 @@ namespace KingdomEnhanced.UI
             GUILayout.EndHorizontal();
 
             Title("Interface");
-            DisplayTimes = GUILayout.Toggle(DisplayTimes, " Show Island Clock");
+            DisplayTimes = GUILayout.Toggle(DisplayTimes, " Enable Royal Scroll HUD");
             EnableAccessibility = GUILayout.Toggle(EnableAccessibility, " Vocal Feedback (F5-F10)");
             return true;
         }
@@ -202,27 +159,22 @@ namespace KingdomEnhanced.UI
         bool DrawCheats()
         {
             if (!CheatsUnlocked) { if (GUILayout.Button("UNLOCK MOD MENU")) CheatsUnlocked = true; return true; }
-            
             Title("Invincibility");
             InfiniteStamina = GUILayout.Toggle(InfiniteStamina, " Infinite Mount Stamina");
-            
-            Title("Economic Actions");
+            Title("Economy Actions");
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Add 10 Coins")) GiveCurrency(10, false);
             if (GUILayout.Button("Add 5 Gems")) GiveCurrency(5, true);
             GUILayout.EndHorizontal();
-
             Title("Military Actions");
-            if (GUILayout.Button("Recruit All Vagrants")) ArmyManager.RecruitBeggars();
+            if (GUILayout.Button("Recruit All Beggars")) ArmyManager.RecruitBeggars();
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Drop Archer Bow")) ArmyManager.DropTools("Archer");
             if (GUILayout.Button("Drop Builder Hammer")) ArmyManager.DropTools("Builder");
             GUILayout.EndHorizontal();
-
-            Title("Unit Buffs");
+            Title("Passive Buffs");
             HyperBuilders = GUILayout.Toggle(HyperBuilders, " Instant Construction");
             LargerCamps = GUILayout.Toggle(LargerCamps, " Expand Vagrant Camps");
-
             Title("Player Scaling");
             EnableSizeHack = GUILayout.Toggle(EnableSizeHack, " Enable Scale Hack");
             if (EnableSizeHack) {
@@ -232,18 +184,18 @@ namespace KingdomEnhanced.UI
             return true;
         }
 
-        bool DrawWorld()
+        bool DrawUpcoming()
         {
             Title("Development Lab");
             GUI.color = Color.gray;
-            GUILayout.Label("The following features are being rewritten for stability:");
-            GUILayout.Toggle(false, " Self-Repairing Walls (Testing)");
-            GUILayout.Toggle(false, " Elite Knights - Thor/Hel (Testing)");
-            GUILayout.Toggle(false, " Lock Summer Season (Testing)");
-            GUILayout.Toggle(false, " Clear Weather - No Fog/Rain (Testing)");
-            GUILayout.Toggle(false, " Disable Blood Moons (Testing)");
-            GUILayout.Toggle(false, " Buoyant Currency - Water Fix (Testing)");
-            GUILayout.Toggle(false, " Rapid Citizen Housing (Testing)");
+            GUILayout.Label("Testing for next update:");
+            GUILayout.Toggle(false, " Self-Repairing Walls");
+            GUILayout.Toggle(false, " Elite Knights - Thor/Hel");
+            GUILayout.Toggle(false, " Lock Summer Season");
+            GUILayout.Toggle(false, " Clear Weather - No Fog/Rain");
+            GUILayout.Toggle(false, " Disable Blood Moons");
+            GUILayout.Toggle(false, " Buoyant Currency - Water Fix");
+            GUILayout.Toggle(false, " Rapid Citizen Housing");
             GUI.color = Color.white;
             return false;
         }
@@ -251,9 +203,8 @@ namespace KingdomEnhanced.UI
         void DrawFeedback()
         {
             Title("Feature Feedback");
-            GUILayout.Label("Cycle status to report if features work for you. Click 'Copy Report' to share with the dev.", new GUIStyle(GUI.skin.label){wordWrap=true});
+            GUILayout.Label("<b>Legend:</b>\n[ ? ] Untested   [ OK ] Working   [ X ] Broken", new GUIStyle(GUI.skin.label){richText=true});
             GUILayout.Space(10);
-
             List<string> keys = new List<string>(_featureStatus.Keys);
             foreach (string key in keys) {
                 GUILayout.BeginHorizontal();
@@ -263,7 +214,6 @@ namespace KingdomEnhanced.UI
                 if (GUILayout.Button(btnText, _statusBtnStyle, GUILayout.Width(80))) { _featureStatus[key] = (status + 1) % 3; }
                 GUILayout.EndHorizontal();
             }
-
             GUILayout.Space(20);
             if (GUILayout.Button("COPY REPORT TO CLIPBOARD", GUILayout.Height(40))) {
                 GenerateAndCopyReport();
@@ -273,15 +223,10 @@ namespace KingdomEnhanced.UI
         void GenerateAndCopyReport() {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"--- Kingdom Enhanced Feedback Report ---");
-            sb.AppendLine($"Game Version: {Application.version}");
-            sb.AppendLine($"Mod Version: 1.1.0");
-            sb.AppendLine("");
-            foreach(var kvp in _featureStatus) {
-                if(kvp.Value == 0) continue;
-                sb.AppendLine($"- {kvp.Key}: {(kvp.Value == 1 ? "WORKING" : "BROKEN")}");
-            }
+            sb.AppendLine($"Game Version: {Application.version} | Mod Version: 1.5.0");
+            foreach(var kvp in _featureStatus) { if(kvp.Value > 0) sb.AppendLine($"- {kvp.Key}: {(kvp.Value==1?"WORKING":"BROKEN")}"); }
             GUIUtility.systemCopyBuffer = sb.ToString();
-            Speak("Report copied! Paste it in Discord.");
+            Speak("Report copied!");
         }
 
         void Title(string t) { GUILayout.Space(12); GUILayout.Label(t.ToUpper(), _headerStyle); GUILayout.Space(2); }
@@ -289,14 +234,9 @@ namespace KingdomEnhanced.UI
         void DrawHandCursor()
         {
             GUI.depth = -10000;
-            float mx = Input.mousePosition.x;
-            float my = Screen.height - Input.mousePosition.y;
-
-            // Hand Pointer with black shadow/outline
-            GUI.color = Color.black;
-            GUI.Label(new Rect(mx + 1, my + 1, 40, 40), "☝", _cursorStyle);
-            GUI.color = new Color(1f, 0.8f, 0.4f); // Skin tone
-            GUI.Label(new Rect(mx, my, 40, 40), "☝", _cursorStyle);
+            float mx = Input.mousePosition.x; float my = Screen.height - Input.mousePosition.y;
+            GUI.color = Color.black; GUI.Label(new Rect(mx + 1, my + 1, 40, 40), "☝", _cursorStyle);
+            GUI.color = new Color(1f, 0.8f, 0.4f); GUI.Label(new Rect(mx, my, 40, 40), "☝", _cursorStyle);
             GUI.color = Color.white;
         }
 
