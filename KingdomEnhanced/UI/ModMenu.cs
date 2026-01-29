@@ -78,8 +78,8 @@ namespace KingdomEnhanced.UI
         {
             {"Movement Controls", 0},
             {"Stamina Bar", 0},
-            {"Celestial Scroll Map", 0},
-            {"Map Overlay (M key)", 0},
+            {"HUD Display", 0},
+            {"Coin Counter", 0},
             {"Infinite Stamina", 0},
             {"Economy Actions", 0},
             {"Military Actions", 0},
@@ -103,15 +103,17 @@ namespace KingdomEnhanced.UI
         #region UI Resources
         private Texture2D _whiteTex;
         private GUIStyle _headerStyle;
+        private GUIStyle _subHeaderStyle;
         private GUIStyle _cursorStyle;
         private GUIStyle _creditStyle;
         private GUIStyle _statusBtnStyle;
         private GUIStyle _notifStyle;
         private GUIStyle _tabStyle;
+        private GUIStyle _buttonStyle;
         #endregion
 
         #region Constants
-        private const string MOD_VERSION = "v1.5.0";
+        private const string MOD_VERSION = "v2.0.0";
         private const string CREATOR_CREDIT = "Created by Zaykus | Thanks to Abevol";
         private const KeyCode MENU_TOGGLE_KEY = KeyCode.F1;
         #endregion
@@ -163,6 +165,16 @@ namespace KingdomEnhanced.UI
                 };
             }
 
+            if (_subHeaderStyle == null)
+            {
+                _subHeaderStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontStyle = FontStyle.Bold,
+                    fontSize = 12,
+                    normal = { textColor = new Color(0.9f, 0.9f, 0.9f) }
+                };
+            }
+
             if (_cursorStyle == null)
             {
                 _cursorStyle = new GUIStyle(GUI.skin.label)
@@ -210,6 +222,14 @@ namespace KingdomEnhanced.UI
                     fontStyle = FontStyle.Bold
                 };
             }
+
+            if (_buttonStyle == null)
+            {
+                _buttonStyle = new GUIStyle(GUI.skin.button)
+                {
+                    fontStyle = FontStyle.Normal
+                };
+            }
         }
         #endregion
 
@@ -243,8 +263,6 @@ namespace KingdomEnhanced.UI
 
             LastAccessMessage = message;
             MessageTimer = 5.0f;
-
-            // Log to Unity console instead of Plugin
             Debug.Log($"[ModMenu] {message}");
         }
 
@@ -269,11 +287,11 @@ namespace KingdomEnhanced.UI
 
                 float currentY = yPosition - (i * spacing);
 
-                // Draw background
+                // Background
                 GUI.color = new Color(0, 0, 0, notification.Alpha * 0.6f);
                 GUI.Box(new Rect(startX - 5, currentY, 320, 22), "");
 
-                // Draw text
+                // Text
                 GUI.color = new Color(1, 1, 1, notification.Alpha);
                 GUI.Label(new Rect(startX, currentY, 400, 25), notification.Message, _notifStyle);
             }
@@ -345,38 +363,46 @@ namespace KingdomEnhanced.UI
         #region Tab: Main
         private bool DrawMainTab()
         {
-            DrawSection("Movement", () =>
-            {
-                GUILayout.Label($"Travel Speed: {SpeedMultiplier:F1}x");
-                SpeedMultiplier = GUILayout.HorizontalSlider(SpeedMultiplier, 1f, 10f);
-            });
+            // Movement Section
+            DrawSectionHeader("Movement");
+            GUILayout.Label($"Travel Speed: {SpeedMultiplier:F1}x");
+            SpeedMultiplier = GUILayout.HorizontalSlider(SpeedMultiplier, 1f, 10f);
+            GUILayout.Space(5);
 
-            DrawSection("Stamina Bar", () =>
+            // Stamina Bar Section
+            DrawSectionHeader("Stamina Bar");
+            ShowStaminaBar = GUILayout.Toggle(ShowStaminaBar, " Enable Energy Bar");
+            
+            if (ShowStaminaBar)
             {
-                ShowStaminaBar = GUILayout.Toggle(ShowStaminaBar, " Enable Energy Bar");
-                
                 GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Cycle Style"))
+                if (GUILayout.Button("Cycle Style", _buttonStyle))
                 {
                     CycleStaminaBarStyle();
                 }
-                if (GUILayout.Button("Cycle Position"))
+                if (GUILayout.Button("Cycle Position", _buttonStyle))
                 {
                     CycleStaminaBarPosition();
                 }
                 GUILayout.EndHorizontal();
-            });
+            }
+            GUILayout.Space(5);
 
-            DrawSection("Interface", () =>
+            // Interface Section
+            DrawSectionHeader("Interface");
+            DisplayTimes = GUILayout.Toggle(DisplayTimes, " Enable HUD Display");
+            
+            if (DisplayTimes)
             {
-                DisplayTimes = GUILayout.Toggle(DisplayTimes, " Enable Celestial Scroll Map");
-                GUILayout.Label("  • Press M to toggle map overlay", new GUIStyle(GUI.skin.label) 
+                GUILayout.Label("  • Shows: Day/Night, Time, Coin Count", new GUIStyle(GUI.skin.label) 
                 { 
-                    fontSize = 11, 
-                    normal = { textColor = Color.gray } 
+                    fontSize = 10, 
+                    normal = { textColor = new Color(0.7f, 0.7f, 0.7f) } 
                 });
-                EnableAccessibility = GUILayout.Toggle(EnableAccessibility, " Vocal Feedback (F5-F10)");
-            });
+            }
+            
+            EnableAccessibility = GUILayout.Toggle(EnableAccessibility, " Vocal Feedback (F5-F10)");
+            GUILayout.Space(5);
 
             return true;
         }
@@ -386,7 +412,7 @@ namespace KingdomEnhanced.UI
             if (StaminaBarHolder.Instance != null)
             {
                 StaminaBarHolder.Instance.visualStyle = (StaminaBarHolder.Instance.visualStyle + 1) % 4;
-                Speak($"Stamina bar style: {StaminaBarHolder.Instance.visualStyle}");
+                Speak($"Stamina bar style changed");
             }
         }
 
@@ -395,7 +421,7 @@ namespace KingdomEnhanced.UI
             if (StaminaBarHolder.Instance != null)
             {
                 StaminaBarHolder.Instance.positionMode = (StaminaBarHolder.Instance.positionMode + 1) % 6;
-                Speak($"Stamina bar position: {StaminaBarHolder.Instance.positionMode}");
+                Speak($"Stamina bar position changed");
             }
         }
         #endregion
@@ -405,68 +431,69 @@ namespace KingdomEnhanced.UI
         {
             if (!CheatsUnlocked)
             {
-                if (GUILayout.Button("🔓 UNLOCK MOD MENU", GUILayout.Height(40)))
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("🔓 UNLOCK CHEAT MENU", GUILayout.Height(50)))
                 {
                     CheatsUnlocked = true;
                     Speak("Cheat menu unlocked!");
                 }
+                GUILayout.FlexibleSpace();
                 return true;
             }
 
-            DrawSection("Invincibility", () =>
-            {
-                InfiniteStamina = GUILayout.Toggle(InfiniteStamina, " Infinite Mount Stamina");
-            });
+            // Invincibility
+            DrawSectionHeader("Invincibility");
+            InfiniteStamina = GUILayout.Toggle(InfiniteStamina, " Infinite Mount Stamina");
+            GUILayout.Space(5);
 
-            DrawSection("Economy", () =>
+            // Economy
+            DrawSectionHeader("Economy");
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("💰 Add 10 Coins", _buttonStyle))
             {
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Add 10 Coins"))
-                {
-                    GiveCurrency(10, false);
-                }
-                if (GUILayout.Button("Add 5 Gems"))
-                {
-                    GiveCurrency(5, true);
-                }
-                GUILayout.EndHorizontal();
-            });
+                GiveCurrency(10, false);
+            }
+            if (GUILayout.Button("💎 Add 5 Gems", _buttonStyle))
+            {
+                GiveCurrency(5, true);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(5);
 
-            DrawSection("Military", () =>
+            // Military
+            DrawSectionHeader("Military");
+            if (GUILayout.Button("Recruit All Beggars", _buttonStyle))
             {
-                if (GUILayout.Button("Recruit All Beggars"))
-                {
-                    ArmyManager.RecruitBeggars();
-                }
-                
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Drop Archer Bow"))
-                {
-                    ArmyManager.DropTools("Archer");
-                }
-                if (GUILayout.Button("Drop Builder Hammer"))
-                {
-                    ArmyManager.DropTools("Builder");
-                }
-                GUILayout.EndHorizontal();
-            });
+                ArmyManager.RecruitBeggars();
+            }
+            
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Drop Archer Bow", _buttonStyle))
+            {
+                ArmyManager.DropTools("Archer");
+            }
+            if (GUILayout.Button("Drop Builder Hammer", _buttonStyle))
+            {
+                ArmyManager.DropTools("Builder");
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(5);
 
-            DrawSection("Passive Buffs", () =>
-            {
-                HyperBuilders = GUILayout.Toggle(HyperBuilders, " Instant Construction");
-                LargerCamps = GUILayout.Toggle(LargerCamps, " Expand Vagrant Camps");
-            });
+            // Passive Buffs
+            DrawSectionHeader("Passive Buffs");
+            HyperBuilders = GUILayout.Toggle(HyperBuilders, " Instant Construction");
+            LargerCamps = GUILayout.Toggle(LargerCamps, " Expand Vagrant Camps");
+            GUILayout.Space(5);
 
-            DrawSection("Player Scaling", () =>
+            // Player Scaling
+            DrawSectionHeader("Player Scaling");
+            EnableSizeHack = GUILayout.Toggle(EnableSizeHack, " Enable Scale Hack");
+            
+            if (EnableSizeHack)
             {
-                EnableSizeHack = GUILayout.Toggle(EnableSizeHack, " Enable Scale Hack");
-                
-                if (EnableSizeHack)
-                {
-                    GUILayout.Label($"Scale: {TargetSize:F2}x");
-                    TargetSize = GUILayout.HorizontalSlider(TargetSize, 0.5f, 5.0f);
-                }
-            });
+                GUILayout.Label($"Scale: {TargetSize:F2}x");
+                TargetSize = GUILayout.HorizontalSlider(TargetSize, 0.5f, 5.0f);
+            }
 
             return true;
         }
@@ -477,9 +504,13 @@ namespace KingdomEnhanced.UI
         {
             DrawSectionHeader("Development Lab");
             
-            GUI.color = Color.gray;
-            GUILayout.Label("Testing for next update:", new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Italic });
-            GUILayout.Space(5);
+            GUI.color = new Color(0.7f, 0.7f, 0.7f);
+            GUILayout.Label("Testing features for future updates:", new GUIStyle(GUI.skin.label) 
+            { 
+                fontStyle = FontStyle.Italic,
+                fontSize = 11
+            });
+            GUILayout.Space(8);
             
             GUILayout.Toggle(false, " Self-Repairing Walls");
             GUILayout.Toggle(false, " Elite Knights - Thor/Hel");
@@ -488,9 +519,18 @@ namespace KingdomEnhanced.UI
             GUILayout.Toggle(false, " Disable Blood Moons");
             GUILayout.Toggle(false, " Buoyant Currency - Water Fix");
             GUILayout.Toggle(false, " Rapid Citizen Housing");
-            GUILayout.Toggle(false, " Advanced Map Markers");
+            GUILayout.Toggle(false, " Advanced Structure Tracking");
             
             GUI.color = Color.white;
+            
+            GUILayout.Space(15);
+            GUILayout.Label("These features are in development and not yet functional.", 
+                new GUIStyle(GUI.skin.label) 
+                { 
+                    fontSize = 10,
+                    fontStyle = FontStyle.Italic,
+                    normal = { textColor = new Color(0.6f, 0.6f, 0.6f) }
+                });
             
             return false;
         }
@@ -502,11 +542,13 @@ namespace KingdomEnhanced.UI
             DrawSectionHeader("Feature Feedback");
             
             GUILayout.Label(
-                "<b>Legend:</b>\n[ ? ] Untested   [ OK ] Working   [ X ] Broken",
-                new GUIStyle(GUI.skin.label) { richText = true }
+                "<b>Help improve the mod by reporting feature status!</b>\n\n" +
+                "<b>Legend:</b>\n" +
+                "[ ? ] Untested   <color=lime>[ OK ]</color> Working   <color=red>[ X ]</color> Broken",
+                new GUIStyle(GUI.skin.label) { richText = true, fontSize = 11 }
             );
             
-            GUILayout.Space(10);
+            GUILayout.Space(15);
 
             var keys = new List<string>(_featureStatus.Keys);
             foreach (string key in keys)
@@ -516,10 +558,19 @@ namespace KingdomEnhanced.UI
 
             GUILayout.Space(20);
             
-            if (GUILayout.Button("📋 COPY REPORT TO CLIPBOARD", GUILayout.Height(40)))
+            if (GUILayout.Button("📋 COPY REPORT TO CLIPBOARD", GUILayout.Height(45)))
             {
                 GenerateAndCopyReport();
             }
+            
+            GUILayout.Space(10);
+            GUILayout.Label("Report will be copied to your clipboard for easy sharing.", 
+                new GUIStyle(GUI.skin.label) 
+                { 
+                    fontSize = 10,
+                    alignment = TextAnchor.MiddleCenter,
+                    normal = { textColor = new Color(0.7f, 0.7f, 0.7f) }
+                });
         }
 
         private void DrawFeatureStatusButton(string featureName)
@@ -552,21 +603,28 @@ namespace KingdomEnhanced.UI
         private void GenerateAndCopyReport()
         {
             var report = new StringBuilder();
-            report.AppendLine("=== Kingdom Enhanced Feedback Report ===");
+            report.AppendLine("╔══════════════════════════════════════════╗");
+            report.AppendLine("║   Kingdom Enhanced Feedback Report      ║");
+            report.AppendLine("╚══════════════════════════════════════════╝");
+            report.AppendLine();
             report.AppendLine($"Game Version: {Application.version}");
             report.AppendLine($"Mod Version: {MOD_VERSION}");
             report.AppendLine($"Report Date: {System.DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             report.AppendLine();
             report.AppendLine("Feature Status:");
+            report.AppendLine("─────────────────────────────────────────");
             
             foreach (var feature in _featureStatus)
             {
                 if (feature.Value > 0)
                 {
-                    string status = feature.Value == 1 ? "WORKING" : "BROKEN";
-                    report.AppendLine($"  • {feature.Key}: {status}");
+                    string status = feature.Value == 1 ? "✓ WORKING" : "✗ BROKEN";
+                    report.AppendLine($"  {status,-12} {feature.Key}");
                 }
             }
+            
+            report.AppendLine();
+            report.AppendLine("Thank you for your feedback!");
             
             GUIUtility.systemCopyBuffer = report.ToString();
             Speak("Feedback report copied to clipboard!");
@@ -574,17 +632,11 @@ namespace KingdomEnhanced.UI
         #endregion
 
         #region UI Helpers
-        private void DrawSection(string title, System.Action content)
-        {
-            DrawSectionHeader(title);
-            content?.Invoke();
-        }
-
         private void DrawSectionHeader(string title)
         {
             GUILayout.Space(12);
             GUILayout.Label(title.ToUpper(), _headerStyle);
-            GUILayout.Space(2);
+            GUILayout.Space(4);
         }
 
         private void DrawCustomCursor()
@@ -627,7 +679,7 @@ namespace KingdomEnhanced.UI
             }
             catch (System.Exception ex)
             {
-                LogError($"Error loading settings: {ex.Message}");
+                Debug.LogError($"[ModMenu] Error loading settings: {ex.Message}");
             }
         }
 
@@ -653,7 +705,7 @@ namespace KingdomEnhanced.UI
             }
             catch (System.Exception ex)
             {
-                LogError($"Error saving settings: {ex.Message}");
+                Debug.LogError($"[ModMenu] Error saving settings: {ex.Message}");
             }
         }
         #endregion
@@ -666,7 +718,7 @@ namespace KingdomEnhanced.UI
                 var player = Managers.Inst?.kingdom?.GetPlayer(0);
                 if (player?.wallet == null)
                 {
-                    Speak("Error: Player wallet not found");
+                    Speak("<color=red>Error: Player wallet not found</color>");
                     return;
                 }
 
@@ -675,19 +727,14 @@ namespace KingdomEnhanced.UI
                 
                 string color = isGems ? "cyan" : "yellow";
                 string currencyName = isGems ? "Gems" : "Coins";
-                Speak($"<color={color}>+{amount} {currencyName}</color>");
+                string icon = isGems ? "💎" : "💰";
+                Speak($"<color={color}>{icon} +{amount} {currencyName}</color>");
             }
             catch (System.Exception ex)
             {
-                LogError($"Error giving currency: {ex.Message}");
+                Debug.LogError($"[ModMenu] Error giving currency: {ex.Message}");
+                Speak("<color=red>Error adding currency</color>");
             }
-        }
-        #endregion
-
-        #region Logging
-        private void LogError(string message)
-        {
-            Debug.LogError($"[ModMenu] {message}");
         }
         #endregion
     }

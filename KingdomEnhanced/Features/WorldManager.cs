@@ -5,7 +5,6 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using KingdomMod;
-using Il2CppInterop.Runtime;
 
 namespace KingdomEnhanced.Features
 {
@@ -14,16 +13,16 @@ namespace KingdomEnhanced.Features
     /// </summary>
     public class WorldManager : MonoBehaviour
     {
-        #region Styles
+        #region GUI Styles
         private GUIStyle _timeStyle;
-        private GUIStyle _mapLabelStyle;
-        private GUIStyle _minimapStyle;
+        private GUIStyle _coinStyle;
         #endregion
 
         #region Timers
         private float _statusTimer = 0f;
         private float _radarTimer = 0f;
         private float _lastAttackAlert = 0f;
+        
         private const float STATUS_CHECK_INTERVAL = 2.0f;
         private const float RADAR_CHECK_INTERVAL = 4.0f;
         private const float ATTACK_ALERT_COOLDOWN = 60f;
@@ -36,41 +35,29 @@ namespace KingdomEnhanced.Features
 
         #region Reflection Caches
         private FieldInfo _bloodMoonField;
+        private PropertyInfo _bloodMoonProperty;
         private FieldInfo _enemiesListField;
         private bool _fieldsDiscovered = false;
-        #endregion
-
-        #region Map Overlay
-        private bool _showMinimap = false;
-        private Dictionary<string, Vector2> _mapMarkers = new Dictionary<string, Vector2>();
         #endregion
 
         #region Unity Lifecycle
         void Start()
         {
             DiscoverFields();
-            InitializeMapMarkers();
+            Debug.Log("[WorldManager] Started - HUD Display Mode");
         }
 
         void Update()
         {
             if (!IsManagersValid()) return;
-            
             UpdateTimers(Time.deltaTime);
-            HandleInput();
         }
 
         void OnGUI()
         {
             if (!ModMenu.DisplayTimes || !IsManagersValid()) return;
-
             InitializeStyles();
             DrawHUD();
-            
-            if (_showMinimap)
-            {
-                DrawMinimap();
-            }
         }
         #endregion
 
@@ -81,29 +68,58 @@ namespace KingdomEnhanced.Features
 
             try
             {
-                // Find Blood Moon Field with fallback
-                _bloodMoonField = AccessTools.Field(typeof(Director), "_isBloodMoonToday") 
-                               ?? AccessTools.Field(typeof(Director), "isBloodMoonToday");
-
-                if (_bloodMoonField == null)
+                // Try multiple approaches to find Blood Moon indicator
+                var directorType = typeof(Director);
+                
+                // Approach 1: Search for bool fields with "blood" or "moon" in name
+                var allFields = directorType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                foreach (var field in allFields)
                 {
-                    LogWarning("Blood Moon field not found");
+                    string fieldName = field.Name.ToLower();
+                    if (field.FieldType == typeof(bool) && (fieldName.Contains("blood") || fieldName.Contains("moon")))
+                    {
+                        _bloodMoonField = field;
+                        Debug.Log($"[WorldManager] Found blood moon field: {field.Name}");
+                        break;
+                    }
                 }
 
-                // Find Enemy List for Radar
-                _enemiesListField = AccessTools.Field(typeof(EnemyManager), "_enemies");
-
-                if (_enemiesListField == null)
+                // Approach 2: Try properties
+                if (_bloodMoonField == null)
                 {
-                    LogWarning("Enemy list field not found");
+                    var allProps = directorType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    foreach (var prop in allProps)
+                    {
+                        string propName = prop.Name.ToLower();
+                        if (prop.PropertyType == typeof(bool) && (propName.Contains("blood") || propName.Contains("moon")))
+                        {
+                            _bloodMoonProperty = prop;
+                            Debug.Log($"[WorldManager] Found blood moon property: {prop.Name}");
+                            break;
+                        }
+                    }
+                }
+
+                // Try to find Enemy List for radar
+                var enemyType = typeof(EnemyManager);
+                var enemyFields = enemyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                
+                foreach (var field in enemyFields)
+                {
+                    string fieldName = field.Name.ToLower();
+                    if (fieldName.Contains("enem") || fieldName.Contains("list"))
+                    {
+                        _enemiesListField = field;
+                        Debug.Log($"[WorldManager] Found enemy list field: {field.Name}");
+                        break;
+                    }
                 }
 
                 _fieldsDiscovered = true;
-                LogInfo("Fields discovered successfully");
             }
             catch (Exception ex)
             {
-                LogError($"Error discovering fields: {ex.Message}");
+                Debug.LogError($"[WorldManager] Error discovering fields: {ex.Message}");
             }
         }
 
@@ -120,55 +136,40 @@ namespace KingdomEnhanced.Features
                 };
             }
 
-            if (_mapLabelStyle == null)
+            if (_coinStyle == null)
             {
-                _mapLabelStyle = new GUIStyle(GUI.skin.label)
+                _coinStyle = new GUIStyle(GUI.skin.label)
                 {
-                    normal = { textColor = new Color(0.8f, 1f, 0.8f) },
-                    fontSize = 12,
+                    normal = { textColor = new Color(1f, 0.85f, 0.2f) },
+                    fontSize = 14,
                     fontStyle = FontStyle.Bold,
-                    alignment = TextAnchor.MiddleLeft
+                    alignment = TextAnchor.MiddleCenter
                 };
             }
-
-            if (_minimapStyle == null)
-            {
-                _minimapStyle = new GUIStyle(GUI.skin.box)
-                {
-                    normal = { textColor = Color.white }
-                };
-            }
-        }
-
-        private void InitializeMapMarkers()
-        {
-            // Initialize with common map markers
-            _mapMarkers.Clear();
-            _mapMarkers.Add("Portal", Vector2.zero);
-            _mapMarkers.Add("Camp", Vector2.zero);
         }
         #endregion
 
         #region HUD Drawing
         private void DrawHUD()
         {
-            const float hudWidth = 280f;
+            const float hudWidth = 320f;
             float hudX = (Screen.width / 2) - (hudWidth / 2);
             float hudY = 20f;
 
             var director = Managers.Inst.director;
             
-            // Time information
+            // Time Display
             string timeDisplay = FormatTimeDisplay(director);
             DrawShadowedLabel(new Rect(hudX, hudY, hudWidth, 25), timeDisplay, _timeStyle);
             
-            // Optional: Draw map toggle hint
-            if (_showMinimap)
+            // Coin Count Display
+            int bagCoins = GetPlayerCoins();
+            if (bagCoins >= 0)
             {
                 DrawShadowedLabel(
-                    new Rect(hudX, hudY + 25, hudWidth, 20), 
-                    "Press M to hide map", 
-                    _mapLabelStyle
+                    new Rect(hudX, hudY + 25, hudWidth, 22), 
+                    $"💰 Bag: {bagCoins} Coins", 
+                    _coinStyle
                 );
             }
         }
@@ -177,98 +178,102 @@ namespace KingdomEnhanced.Features
         {
             if (director == null) return "ERROR";
 
-            float rawTime = director.currentTime;
-            float totalHours = rawTime % 24f;
-            int hours = Mathf.FloorToInt(totalHours);
-            int minutes = Mathf.FloorToInt((totalHours % 1f) * 60f);
-            
-            string clock = string.Format("{0:00}:{1:00}", hours, minutes);
-            string timeStr = director.IsDaytime ? "Day" : "Night";
-            
-            return $"DAY {director.CurrentIslandDays} | {timeStr} ({clock})";
+            try
+            {
+                float rawTime = director.currentTime;
+                float totalHours = rawTime % 24f;
+                int hours = Mathf.FloorToInt(totalHours);
+                int minutes = Mathf.FloorToInt((totalHours % 1f) * 60f);
+                
+                string clock = string.Format("{0:00}:{1:00}", hours, minutes);
+                string timeStr = director.IsDaytime ? "Day" : "Night";
+                
+                return $"DAY {director.CurrentIslandDays} | {timeStr} ({clock})";
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[WorldManager] Error formatting time: {ex.Message}");
+                return "TIME ERROR";
+            }
         }
 
         private void DrawShadowedLabel(Rect rect, string text, GUIStyle style)
         {
             Color originalColor = GUI.color;
             
-            // Draw shadow
+            // Shadow
             GUI.color = new Color(0, 0, 0, 0.8f);
             GUI.Label(new Rect(rect.x + 2, rect.y + 2, rect.width, rect.height), text, style);
             
-            // Draw main text
+            // Main text
             GUI.color = originalColor;
             GUI.Label(rect, text, style);
         }
         #endregion
 
-        #region Minimap System
-        private void DrawMinimap()
-        {
-            const float mapWidth = 300f;
-            const float mapHeight = 200f;
-            float mapX = Screen.width - mapWidth - 20f;
-            float mapY = 20f;
-
-            Rect mapRect = new Rect(mapX, mapY, mapWidth, mapHeight);
-            
-            // Draw map background
-            DrawMapBackground(mapRect);
-            
-            // Draw player position
-            DrawPlayerMarker(mapRect);
-            
-            // Draw markers
-            DrawMapMarkers(mapRect);
-        }
-
-        private void DrawMapBackground(Rect rect)
-        {
-            Color originalColor = GUI.color;
-            GUI.color = new Color(0.1f, 0.1f, 0.15f, 0.9f);
-            GUI.Box(rect, "Map Overlay", _minimapStyle);
-            GUI.color = originalColor;
-        }
-
-        private void DrawPlayerMarker(Rect mapRect)
+        #region Coin Counting
+        private int GetPlayerCoins()
         {
             try
             {
                 var player = Managers.Inst?.kingdom?.GetPlayer(0);
-                if (player != null)
+                if (player == null)
                 {
-                    // Center position for player
-                    float centerX = mapRect.x + mapRect.width / 2;
-                    float centerY = mapRect.y + mapRect.height / 2;
-                    
-                    Color originalColor = GUI.color;
-                    GUI.color = Color.yellow;
-                    GUI.Box(new Rect(centerX - 3, centerY - 3, 6, 6), "");
-                    GUI.color = originalColor;
+                    return -1;
                 }
+
+                // Try to get wallet
+                var wallet = player.wallet;
+                if (wallet == null)
+                {
+                    return -1;
+                }
+
+                // Method 1: Try GetCurrency method
+                try
+                {
+                    int coins = wallet.GetCurrency(CurrencyType.Coins);
+                    return coins;
+                }
+                catch
+                {
+                    // Method 2: Try reflection to find coins field
+                    var walletType = wallet.GetType();
+                    var fields = walletType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    
+                    foreach (var field in fields)
+                    {
+                        string fieldName = field.Name.ToLower();
+                        if ((fieldName.Contains("coin") && !fieldName.Contains("gem")) || 
+                            fieldName == "_coins" || 
+                            fieldName == "coins")
+                        {
+                            if (field.FieldType == typeof(int))
+                            {
+                                return (int)field.GetValue(wallet);
+                            }
+                        }
+                    }
+
+                    // Method 3: Try properties
+                    var properties = walletType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    foreach (var prop in properties)
+                    {
+                        string propName = prop.Name.ToLower();
+                        if ((propName.Contains("coin") && !propName.Contains("gem")) && prop.PropertyType == typeof(int))
+                        {
+                            return (int)prop.GetValue(wallet);
+                        }
+                    }
+                }
+
+                return -1;
             }
             catch (Exception ex)
             {
-                LogError($"Error drawing player marker: {ex.Message}");
+                Debug.LogError($"[WorldManager] Error getting player coins: {ex.Message}");
+                return -1;
             }
-        }
-
-        private void DrawMapMarkers(Rect mapRect)
-        {
-            // Placeholder for map markers
-            // In a full implementation, this would draw discovered locations, portals, etc.
-            Color originalColor = GUI.color;
-            GUI.color = new Color(0.5f, 1f, 0.5f);
-            
-            float labelY = mapRect.y + 30;
-            foreach (var marker in _mapMarkers)
-            {
-                GUI.Label(new Rect(mapRect.x + 10, labelY, mapRect.width - 20, 20), 
-                         $"• {marker.Key}", _mapLabelStyle);
-                labelY += 20;
-            }
-            
-            GUI.color = originalColor;
         }
         #endregion
 
@@ -290,16 +295,6 @@ namespace KingdomEnhanced.Features
                 CheckForGreedAttack();
             }
         }
-
-        private void HandleInput()
-        {
-            // Toggle minimap with M key
-            if (Input.GetKeyDown(KeyCode.M))
-            {
-                _showMinimap = !_showMinimap;
-                ModMenu.Speak(_showMinimap ? "Map Overlay Enabled" : "Map Overlay Disabled");
-            }
-        }
         #endregion
 
         #region Game Status Monitoring
@@ -314,25 +309,45 @@ namespace KingdomEnhanced.Features
 
         private void CheckDayNightTransition(Director director)
         {
-            if (director.IsDaytime && !_wasDay)
+            try
             {
-                ModMenu.Speak("<color=orange>☀ The sun rises.</color>");
-                _wasDay = true;
+                if (director.IsDaytime && !_wasDay)
+                {
+                    ModMenu.Speak("<color=orange>☀ The sun rises.</color>");
+                    _wasDay = true;
+                }
+                else if (!director.IsDaytime && _wasDay)
+                {
+                    ModMenu.Speak("<color=lightblue>🌙 Night approaches.</color>");
+                    _wasDay = false;
+                }
             }
-            else if (!director.IsDaytime && _wasDay)
+            catch (Exception ex)
             {
-                ModMenu.Speak("<color=lightblue>🌙 Night approaches.</color>");
-                _wasDay = false;
+                Debug.LogError($"[WorldManager] Error checking day/night: {ex.Message}");
             }
         }
 
         private void CheckBloodMoon(Director director)
         {
-            if (_bloodMoonField == null) return;
-
             try
             {
-                bool isBloodMoon = (bool)_bloodMoonField.GetValue(director);
+                bool isBloodMoon = false;
+
+                // Try field first
+                if (_bloodMoonField != null)
+                {
+                    isBloodMoon = (bool)_bloodMoonField.GetValue(director);
+                }
+                // Try property
+                else if (_bloodMoonProperty != null)
+                {
+                    isBloodMoon = (bool)_bloodMoonProperty.GetValue(director);
+                }
+                else
+                {
+                    return; // No blood moon detection available
+                }
                 
                 if (isBloodMoon && !_wasBloodMoon)
                 {
@@ -346,7 +361,7 @@ namespace KingdomEnhanced.Features
             }
             catch (Exception ex)
             {
-                LogError($"Error checking blood moon: {ex.Message}");
+                // Silent fail - blood moon detection is optional
             }
         }
 
@@ -370,7 +385,7 @@ namespace KingdomEnhanced.Features
             }
             catch (Exception ex)
             {
-                LogError($"Error checking for greed attack: {ex.Message}");
+                // Silent fail - greed detection is optional
             }
         }
 
@@ -381,10 +396,20 @@ namespace KingdomEnhanced.Features
                 var enemyList = _enemiesListField.GetValue(enemyManager);
                 if (enemyList == null) return 0;
 
+                // Try to get count from list
                 var countProperty = enemyList.GetType().GetProperty("Count");
-                if (countProperty == null) return 0;
+                if (countProperty != null)
+                {
+                    return (int)countProperty.GetValue(enemyList);
+                }
 
-                return (int)countProperty.GetValue(enemyList);
+                var countField = enemyList.GetType().GetField("Count");
+                if (countField != null)
+                {
+                    return (int)countField.GetValue(enemyList);
+                }
+
+                return 0;
             }
             catch
             {
@@ -404,24 +429,6 @@ namespace KingdomEnhanced.Features
         private bool IsManagersValid()
         {
             return Managers.Inst != null && Managers.Inst.director != null;
-        }
-
-        private void LogInfo(string message)
-        {
-            // Logging removed to avoid Plugin dependency
-            // Use ModMenu.Speak for important messages if needed
-        }
-
-        private void LogWarning(string message)
-        {
-            // Logging removed to avoid Plugin dependency
-            Debug.LogWarning($"[WorldManager] {message}");
-        }
-
-        private void LogError(string message)
-        {
-            // Logging removed to avoid Plugin dependency
-            Debug.LogError($"[WorldManager] {message}");
         }
         #endregion
     }
