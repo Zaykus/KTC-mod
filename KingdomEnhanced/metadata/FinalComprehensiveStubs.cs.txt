@@ -1,0 +1,2680 @@
+// ==============================================================================
+// COMPREHENSIVE C# CLASS STUBS - Assembly-CSharp.dll
+// Extracted from Kingdom Two Crowns
+// For use with Harmony Reflection and AccessTools
+// ==============================================================================
+
+using UnityEngine;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+
+// ==============================================================================
+// Director
+// Found: 364 fields, 726 properties, 263 methods
+// ==============================================================================
+public class Director : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private object APCenterDay;
+    private object APCenterNight;
+    private float AppleGrowthTimeProgress;
+    private float BlinkTimes;
+    private object CLOSE;
+    private object CONNECTION;
+    private object ChallengeDays;
+    private int ChariotDayID;
+    private int ChariotNightID;
+    private object DARKNESS;
+    private object DESPAWN;
+    private object DIRE;
+    private object DIRECTOR;
+    private int DayNightID;
+    private float DebugTimescale;
+    private object ENTER;
+    private object FADE;
+    private float FetchTime;
+    private object FireNightDelay;
+    private object FollowKnight;
+    private object GAME;
+    private object HermitKnight;
+    private int HermitKnightID;
+    private object INITIALIZATION;
+    private object INPUT;
+    private object IconGameObjectHermitKnight;
+    private object IconGameObjectMountDayNight;
+    private object IconGameObjectStatueKnight;
+    private object KINGDOM;
+    private object Knight;
+    private string KnightStatueButtonText;
+    private object LastDayLootWasSpawned;
+    private object MIN;
+    private object MOVE;
+    private object NETWORK;
+    private object OPEN;
+    private object OnDayEnd;
+    private object OnDayFlip;
+    private bool OnDayPhaseChange;
+    private object OnDayStart;
+    private bool OnIslandDayUpdatedFromNetwork;
+    private object OnSeasonChange;
+    private object OnSeasonalEventsFetched;
+    private object PSNExpirationDays;
+    private object RED;
+    private object REEL;
+    private float RemainingSwapTime;
+    private object SAVE;
+    private object SEASONS;
+    private float SPUnscaledTime;
+    private object SeasonAutumn;
+    private object SeasonSpring;
+    private object SeasonSummer;
+    private object SeasonWinter;
+    private float SetUnscaledTimeBuffer;
+    private object SpawnStartDay;
+    private object StatueExpirationDay;
+    private float TIMESLICE;
+    private float TIMESTAMP;
+    private float TimeScales;
+    private float TimeSinceLastActive;
+    private float TimeSinceLastRelocation;
+    private float Timeline;
+    private float TimesMarked;
+    private float Timestamp;
+    private float UtcTimeStamp;
+    private object WAIT;
+    private object WORLD;
+    private float abilityActiveTime;
+    private object achievement;
+    private object achvOnTheEighthDay;
+    private object achvOnTheEighthDayDesc;
+    private object achvOnTheFifthDay;
+    private object achvOnTheFifthDayDesc;
+    private object achvOnTheFirstDay;
+    private object achvOnTheFirstDayDesc;
+    private object achvOnTheFourthDay;
+    private object achvOnTheFourthDayDesc;
+    private object achvOnTheNinthDay;
+    private object achvOnTheNinthDayDesc;
+    private object achvOnTheSecondDay;
+    private object achvOnTheSecondDayDesc;
+    private object achvOnTheSeventhDay;
+    private object achvOnTheSeventhDayDesc;
+    private object achvOnTheSixthDay;
+    private object achvOnTheSixthDayDesc;
+    private object achvOnTheTenthDay;
+    private object achvOnTheTenthDayDesc;
+    private object achvOnTheThirdDay;
+    private object achvOnTheThirdDayDesc;
+    private float activateSpawnWaitTime;
+    private bool activeMockSeasonalEventInfo;
+    private bool activeSeasonalEventInfo;
+    private float activeTime;
+    private float addStateTimeP1;
+    private float addStateTimeP2;
+    private float ambushTime;
+    private float anchorTime;
+    private float anchorTimeEnd;
+    private float animationTime;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public object APCenterDay { get; set; }
+    public object APCenterNight { get; set; }
+    public float AccumulatedTime { get; set; }
+    public float AccumulatedTimeF { get; set; }
+    public float AppleGrowthTimeProgress { get; set; }
+    public float BlinkTimes { get; set; }
+    public float CLOSE_TIME { get; set; }
+    public float CONNECTION_TIMEOUT_SECONDS { get; set; }
+    public object ChallengeDays { get; set; }
+    public int ChariotDayID { get; set; }
+    public int ChariotNightID { get; set; }
+    public object CurrentDayForSpawning { get; set; }
+    public bool CurrentDaysSinceFirstLandingThisReign { get; set; }
+    public bool CurrentIslandDays { get; set; }
+    public object CurrentSchedulerDay { get; set; }
+    public object CurrentSeason { get; set; }
+    public object CurrentSeasonDay { get; set; }
+    public object CurrentSeasonStartDay { get; set; }
+    public float CurrentTimesOfDay { get; set; }
+    public float DARKNESS_FADE_TIME { get; set; }
+    public float DESPAWN_TIME { get; set; }
+    public int DIRECTOR_CAMERA_OVERRIDE { get; set; }
+    public object DIRECTOR_DAY_QUEUE_SYNC { get; set; }
+    public float DIRECTOR_HOST_TIME { get; set; }
+    public object DIRECTOR_PLAYING_SYNC { get; set; }
+    public object DIRECTOR_PLAYING_SYNC_REQUEST { get; set; }
+    public object DIRECTOR_SEASON_CHANGE { get; set; }
+    public object DIRECTOR_SYNC_BLENDER { get; set; }
+    public object DIRECTOR_SYNC_LANDDATA { get; set; }
+    public object DIRE_CURSED_TRAVEL_DAYS_REQUIREMENT { get; set; }
+    public int DayNightID { get; set; }
+    public float DebugTimescale { get; set; }
+    public float DeltaTime { get; set; }
+    public float DeltaTimeF { get; set; }
+    public float ENTER_EXIT_WAIT_TIMEOUT_MS { get; set; }
+    public float FADE_IN_TIME { get; set; }
+    public float FADE_OUT_TIME { get; set; }
+    public float FetchTime { get; set; }
+    public object FireNightDelay { get; set; }
+    public object FirstDay { get; set; }
+    public object FollowKnight { get; set; }
+    public float GAME_CORE_TIMEOUT_SECONDS { get; set; }
+    public float GAME_START_TIME { get; set; }
+    public float GAME_TIME_UP { get; set; }
+    public float GetBankerHintTimesShown { get; set; }
+    public float GetGrazingHintTimesShown { get; set; }
+    public float GetSailAwayHintTimesShown { get; set; }
+    public float HasModifiedTimescale { get; set; }
+    public float HasTimeToLive { get; set; }
+    public object HermitKnight { get; set; }
+    public int HermitKnightID { get; set; }
+    public float INITIALIZATION_TIMEOUT_SECONDS { get; set; }
+    public float INPUT_TIMEOUT { get; set; }
+    public object IconGameObjectHermitKnight { get; set; }
+    public object IconGameObjectMountDayNight { get; set; }
+    public object IconGameObjectStatueKnight { get; set; }
+    public float IsDaytime { get; set; }
+    public bool IsNight { get; set; }
+    public float IsPlayedTimeUpdated { get; set; }
+    public float IsRedMoonPauseTime { get; set; }
+    public float IsTimePaused { get; set; }
+    public int KINGDOM_KNIGHT_COUNT_CHANGE { get; set; }
+    public object Knight { get; set; }
+    public int KnightCount { get; set; }
+    public int KnightSide { get; set; }
+    public string KnightStatueButtonText { get; set; }
+    public object Knights { get; set; }
+    public object LastDayLootWasSpawned { get; set; }
+    public float LastModifiedTimestamp { get; set; }
+    public float MIN_TIME_BETWEEN_ROCKS { get; set; }
+    public float MOVE_TO_HEAD_TIME { get; set; }
+    public float MoveTimeUntilNearTarget { get; set; }
+    public float NETWORK_SETUP_TIMEOUT_S { get; set; }
+    public float OPEN_TIME { get; set; }
+    public object OnDayEnd { get; set; }
+    public object OnDayFlip { get; set; }
+    public bool OnDayPhaseChange { get; set; }
+    public object OnDayStart { get; set; }
+    public bool OnIslandDayUpdatedFromNetwork { get; set; }
+    public object OnSeasonChange { get; set; }
+    public object OnSeasonalEventsFetched { get; set; }
+    public object PSNExpirationDays { get; set; }
+    public object PreviousSeason { get; set; }
+    public float RED_MOON_FADE_TIME { get; set; }
+    public float REEL_IN_TIME { get; set; }
+    public float RemainingSwapTime { get; set; }
+    public float SAVE_RESPONSE_TIMEOUT { get; set; }
+    public float SAVE_TIME_STAMP { get; set; }
+    public object SEASONS { get; set; }
+    public float SPUnscaledTime { get; set; }
+    public object SeasonAutumn { get; set; }
+    public object SeasonSpring { get; set; }
+    public object SeasonSummer { get; set; }
+    public object SeasonWinter { get; set; }
+    public float SetUnscaledTimeBuffer { get; set; }
+    public object SpawnStartDay { get; set; }
+    public object StatueExpirationDay { get; set; }
+    public float TIMESLICE_MAX_FRAMES { get; set; }
+    public float TIMESLICE_SHARED_FRAME_OFFSET { get; set; }
+    public float TIMESTAMP_SUFFIX { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    private int AddClientsideDay_Private_Void_Int32_Day_Weather_Season_TimesOfDay_0(int value) { }
+    private void AddDay_Private_Void_Day_Wave_TimesOfDay_0() { }
+    private string AddEntryToQueue_Private_Void_CloudTransactionType_String_DateTime_Il2CppStructArray_1_Byte_0(string text) { }
+    private string AddEntryToQueue_Private_Void_PlayfabTransactionType_String_DateTime_Il2CppStructArray_1_Byte_0(string text) { }
+    public void AddEvent_Public_Void_DirectorEvent_0() { }
+    public void AddFirstDayOfSeason_Public_Void_Day_Season_Wave_TimesOfDay_0() { }
+    public void AddKnight_Public_Void_Knight_0() { }
+    private void AddSeasonStartEvent_Private_Void_Season_0() { }
+    public int AddTimePlayedCampaign_Public_Void_UInt64_Int32_0(int value) { }
+    public void AddTimePlayedGlobal_Public_Void_UInt64_0() { }
+    public void AddTimePlayedIsland_Public_Void_UInt64_0() { }
+    public void AddTimeStopper_Public_Void_TimeStopper_0() { }
+    private float AddTransitionEvent_Private_Void_Weather_PartOfDay_Single_Single_Season_0(float value) { }
+    public void AddedDirectorEventForTrack_Public_Void_AudioEmitter_0() { }
+    public int AdjustDayForYearlyCycle_Public_Int32_Int32_0(int value) { }
+    public float AdjustTime_Public_Void_Single_0(float value) { }
+    public bool AdvanceTimeTo_Public_Void_Single_Boolean_0(bool flag, float value) { }
+    public float AdvanceTime_Public_Void_Single_0(float value) { }
+    public bool AllowedMultiplayerPlatform_Public_Boolean_RuntimePlatform_0(bool flag) { }
+    private bool ApplyRampupDays_Private_Void_Boolean_Boolean_Int32_Boolean_0(int value, bool flag) { }
+    public float ApplyTime_Public_Void_Single_0(float value) { }
+    private float CalculateOffsetTimeOfDay_Private_Single_TimeOfDayEvent_TimeOfDayOffset_Single_0(float value) { }
+    public void CatchupQueuedWeatherState_Public_Void_WeatherData_0() { }
+    private void ChangeSpeedAccordingToDayPhase_Private_Void_DayPhase_0() { }
+    private void CheckForSeasonalEventRoutine_Private_IEnumerator_0() { }
+    private void CheckSeasonalEvents_Private_Void_0() { }
+    public string ConvertToUtcIso_Public_Static_String_DateTime_0(string text) { }
+    private void CopyAll_Private_Static_Void_DirectoryInfo_DirectoryInfo_0() { }
+    private void CreateHagletBehaviourTime_Private_Static_Void_0() { }
+    public bool CreateInGameTimer_Public_Static_Void_Single_Int32_Boolean_0(int value, bool flag, float value) { }
+    private int DayCounterShow_Private_IEnumerator_1_Yield_Int32_0(int value) { }
+    public void DayToLookupIndices_Public_Static_Tuple_2_Byte_Byte_Director_Day_0() { }
+    private string DeleteLocalTimestamp_Private_Static_Void_String_0(string text) { }
+    private void DespawnTimer_Private_IEnumerator_0() { }
+    public void Disband_Public_Void_Knight_0() { }
+    public void DistributeKnightsAcrossSides_Public_Void_0() { }
+    public void ExtractDateTime_Public_KingdomDateTime_0() { }
+    public void ExtractIslandDateTimes_Public_Il2CppReferenceArray_1_KingdomDateTime_0() { }
+    public void ExtractQueuedWeatherEvents_Public_Il2CppReferenceArray_1_WeatherData_0() { }
+    private void ForceUpdateSeason_Private_Void_0() { }
+    public object GetActiveEvent_Public_SeasonalEventData_0() { }
+    public int GetAdjustedYearDay_Public_Int32_Int32_0(int value) { }
+    private object GetAnimSwap_Private_RuntimeAnimatorController_RuntimeAnimatorController_0() { }
+    private object GetAnimatorController_Private_Static_RuntimeAnimatorController_MonarchType_0() { }
+    public object GetBlenderWeatherState_Public_BlenderState_Weather_Season_PartOfDay_0() { }
+    public object GetColorByCurrentDayType_Public_Color_0() { }
+    private object GetCurrentSeasonValues_Private_SeasonValues_0() { }
+    public int GetCycleForDay_Public_CycleData_Int32_0(int value) { }
+    public int GetCycleForDay_Public_CycleData_Int32_byref_Int32_0(int value) { }
+    private string GetDateTimeInternal_Private_Static_DateTime_String_0(string text) { }
+}
+
+// ==============================================================================
+// Banker
+// Found: 25 fields, 41 properties, 11 methods
+// ==============================================================================
+public class Banker : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private object Banker;
+    private int BankerID;
+    private object GemBankChest;
+    private object GoldenAppleGrown;
+    private int GoldenApplePaid;
+    private object banker;
+    private object bankerPrefab;
+    private object conditionDireGoldCoopChallenge;
+    private object conditionPlagueGoldCoopChallenge;
+    private object conditionSkullGoldCoopChallenge;
+    private object conditionTradeRoutesGoldChallenge;
+    private object conditionTradeRoutesGoldCoopChallenge;
+    private object goldCrownAudio;
+    private object goldRankRequirement;
+    private object goldTierConditions;
+    private object goldTierConditionsMultiplayerP1;
+    private object goldTierConditionsMultiplayerP2;
+    private object hintChallengeGold;
+    private object leaderboard;
+    private object rankAchievedGold;
+    private object stash;
+    private object stashHeight;
+    private object stashedCoins;
+    private object statBankers;
+    private object statBiggestStash;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public object Banker { get; set; }
+    public int BankerID { get; set; }
+    public object GemBankChest { get; set; }
+    public float GetBankerHintTimesShown { get; set; }
+    public object GoldenAppleGrown { get; set; }
+    public int GoldenApplePaid { get; set; }
+    public float _GetBankerHintTimesShown_k__BackingField { get; set; }
+    public object __giantGoldenAppleTree_5__2 { get; set; }
+    public int _delayedStashCountRoutine { get; set; }
+    public int _dropGoldNuggetRpcIndex { get; set; }
+    public object _giantGoldenAppleTree { get; set; }
+    public object _goldNuggetPrefab { get; set; }
+    public object _goldNuggetRequired { get; set; }
+    public object _goldNuggetSpawnForceRangeX { get; set; }
+    public object _goldNuggetSpawnForceRangeY { get; set; }
+    public object _goldNuggetSpawnTransform { get; set; }
+    public object _goldenApple { get; set; }
+    public object _goldenAppleFX { get; set; }
+    public object _goldenAppleSpriteRenderer { get; set; }
+    public int _sendStashCountIndex { get; set; }
+    public object _stashedCoins { get; set; }
+    public object banker { get; set; }
+    public object bankerPrefab { get; set; }
+    public object conditionDireGoldCoopChallenge { get; set; }
+    public object conditionPlagueGoldCoopChallenge { get; set; }
+    public object conditionSkullGoldCoopChallenge { get; set; }
+    public object conditionTradeRoutesGoldChallenge { get; set; }
+    public object conditionTradeRoutesGoldCoopChallenge { get; set; }
+    public object goldCrownAudio { get; set; }
+    public object goldRankRequirement { get; set; }
+    public object goldTierConditions { get; set; }
+    public object goldTierConditionsMultiplayerP1 { get; set; }
+    public object goldTierConditionsMultiplayerP2 { get; set; }
+    public object hintChallengeGold { get; set; }
+    public object leaderboard_biggest_stash { get; set; }
+    public object rankAchievedGold { get; set; }
+    public object stash { get; set; }
+    public object stashHeight { get; set; }
+    public object stashedCoins { get; set; }
+    public object statBankers { get; set; }
+    public object statBiggestStash { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    public bool CanDropGoldNugget_Public_Static_Boolean_Int32_0(int value, bool flag) { }
+    private void DelayedSendStashCount_Private_IEnumerator_0() { }
+    private void DropGoldNugget_Private_PlayerCargo_Nullable_1_Int16_Nullable_1_Vector2_0() { }
+    private void GrowGoldenAppleRoutine_Private_IEnumerator_0() { }
+    private void OnGoldenApplePaid_Private_Void_0() { }
+    private void ReceiveDropGoldNugget_Private_Void_0() { }
+    private void RecvStashCount_Private_Void_0() { }
+    private void SendDropGoldNugget_Private_Void_Int16_Vector2_0() { }
+    public int SendHeroStatLargestStash_Public_Static_Void_String_byref_Guid_Int32_0(int value, string text) { }
+    private void SendStashCount_Private_Void_0() { }
+    public int SetStash_Public_Void_Int32_0(int value) { }
+}
+
+// ==============================================================================
+// Castle
+// Found: 39 fields, 60 properties, 45 methods
+// ==============================================================================
+public class Castle : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private object Castle0;
+    private object Castle1;
+    private object Castle2;
+    private object Castle3;
+    private object Castle4;
+    private object Castle5;
+    private object Castle6;
+    private object Castle7;
+    private object GoToCastle;
+    private int HermitHorseKeeperID;
+    private object HermitHorsekeeper;
+    private object OnCastleBuilt;
+    private object OnPayableUpgraded;
+    private object StableKeeper;
+    private object StableKeeperTool;
+    private object beenToCastle;
+    private object blockPaymentUpgrade;
+    private object castleBanner;
+    private object castleX;
+    private object deactivateAfterUpgrade;
+    private Vector3 gatherAtCastlePostLoss;
+    private object hintUpgradeCastle1;
+    private object hintUpgradeCastle2;
+    private object hintUpgradeCastle3;
+    private bool isHornUpgrade;
+    private object keepTech;
+    private Vector3 keepZPosition;
+    private object leaderboard;
+    private object passengerUpgrades;
+    private object stableKeepers;
+    private object stash;
+    private object stashHeight;
+    private object stashedCoins;
+    private object statBiggestStash;
+    private object technologyUpgrade;
+    private object upgradeSpriteAsset;
+    private object upgradeTier;
+    private object useStableKeepers;
+    private object waveAtCastle;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public object Castle0 { get; set; }
+    public object Castle1 { get; set; }
+    public object Castle2 { get; set; }
+    public object Castle3 { get; set; }
+    public object Castle4 { get; set; }
+    public object Castle5 { get; set; }
+    public object Castle6 { get; set; }
+    public object Castle7 { get; set; }
+    public object EmbarkeeParent { get; set; }
+    public object GoToCastle { get; set; }
+    public int HermitHorseKeeperID { get; set; }
+    public object HermitHorsekeeper { get; set; }
+    public object OnCastleBuilt { get; set; }
+    public object OnPayableUpgraded { get; set; }
+    public object StableKeeper { get; set; }
+    public object StableKeeperTool { get; set; }
+    public object _castleBuilt_k__BackingField { get; set; }
+    public object _castleConstructing_k__BackingField { get; set; }
+    public object _castle_k__BackingField { get; set; }
+    public object _currentUpgradeTier { get; set; }
+    public object _debugUpgradeNow { get; set; }
+    public int _delayedStashCountRoutine { get; set; }
+    public int _dividerUpgradeTime { get; set; }
+    public object _embarkeeParent { get; set; }
+    public bool _isUpgrade { get; set; }
+    public object _keep { get; set; }
+    public object _payableUpgrade { get; set; }
+    public int _sendStashCountIndex { get; set; }
+    public object _stableKeepers { get; set; }
+    public object _stashedCoins { get; set; }
+    public object _upgrade { get; set; }
+    public object _upgradeVFX { get; set; }
+    public object _upgradeable_5__5 { get; set; }
+    public object beenToCastle { get; set; }
+    public object blockPaymentUpgrade { get; set; }
+    public object castle { get; set; }
+    public object castleBanner { get; set; }
+    public object castleBuilt { get; set; }
+    public object castleConstructing { get; set; }
+    public object castleX { get; set; }
+    public object deactivateAfterUpgrade { get; set; }
+    public object gatherAtCastlePostLoss { get; set; }
+    public object hintUpgradeCastle1 { get; set; }
+    public object hintUpgradeCastle2 { get; set; }
+    public object hintUpgradeCastle3 { get; set; }
+    public bool isHornUpgrade { get; set; }
+    public object keepTech { get; set; }
+    public object keepZPosition { get; set; }
+    public object leaderboard_biggest_stash { get; set; }
+    public object passengerUpgrades { get; set; }
+    public object stableKeepers { get; set; }
+    public object stash { get; set; }
+    public object stashHeight { get; set; }
+    public object stashedCoins { get; set; }
+    public object statBiggestStash { get; set; }
+    public object technologyUpgrade { get; set; }
+    public object upgradeSpriteAsset { get; set; }
+    public object upgradeTier { get; set; }
+    public object useStableKeepers { get; set; }
+    public object waveAtCastle { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    public void AddStableKeeper_Public_Void_StableKeeper_0() { }
+    public void ApplyUpgradeData_Public_Abstract_Virtual_New_Void_GameObject_0() { }
+    public void ApplyUpgradeData_Public_Virtual_Final_New_Void_GameObject_0() { }
+    public bool CanAddStableKeeper_Public_Boolean_0(bool flag) { }
+    private bool CanUpgradeToRank_Private_Boolean_Int32_Stat_Int32_Boolean_0(int value, bool flag) { }
+    public void CastleBuilt_Public_Void_Castle_0() { }
+    private void CloseCastleDoor_Private_Void_0() { }
+    private void DelayCastleCatchup_Private_IEnumerator_0() { }
+    private void DelayedSendStashCount_Private_IEnumerator_0() { }
+    public bool GetClosestStableKeeper_Public_StableKeeper_Single_Boolean_0(bool flag, float value) { }
+    private bool GetUpgradePrefab_Private_GameObject_Boolean_0(bool flag) { }
+    public object GetUpgradeableType_Public_Abstract_Virtual_New_Type_0() { }
+    public object GetUpgradeableType_Public_Virtual_Final_New_Type_0() { }
+    private void GoToCastle_Private_IEnumerator_0() { }
+    private void HandleOnKeepConstructionComplete_Private_Void_0() { }
+    public void HandleOnPayableUpgrade_Public_Void_GameObject_0() { }
+    private void HandleOnPayableUpgraded_Private_Void_GameObject_0() { }
+    private void HandleOnUpgraded_Private_Void_GameObject_0() { }
+    public bool HasUpgrade_Public_Boolean_0(bool flag) { }
+    private void InternalUpgradeDivider_Private_IEnumerator_0() { }
+    private void Kingdom_OnCastleBuilt_Private_Void_0() { }
+    public void OnCastleBuilt_Public_Void_0() { }
+    public void OnUpgradeFrom_Public_Void_TeleporterRift_0() { }
+    public void OnUpgraded_Public_Abstract_Virtual_New_Void_0() { }
+    public void OnUpgraded_Public_Virtual_Final_New_Void_0() { }
+    private void OpenCastleDoor_Private_Void_0() { }
+    public void PlayUpgradeEffect_Public_Void_0() { }
+    private void RecvStashCount_Private_Void_0() { }
+    public void RemoveStableKeeper_Public_Void_StableKeeper_0() { }
+    public int SendHeroStatLargestStash_Public_Static_Void_String_byref_Guid_Int32_0(int value, string text) { }
+    private void SendStashCount_Private_Void_0() { }
+    public void SetCastle_Public_Void_Castle_0() { }
+    public int SetStash_Public_Void_Int32_0(int value) { }
+    public bool TryFetchStableKeeper_Public_Boolean_0(bool flag) { }
+    public void UpgradeDivider_Public_Void_0() { }
+    public void UpgradeNow_Public_Void_0() { }
+    private int UpgradeTowerToLevel_Private_Void_GameObject_Int32_0(int value) { }
+    private int UpgradeTowers_Private_Void_Single_Int32_0(int value, float value) { }
+    public void UpgradeTransitionFX_Public_Void_0() { }
+    private bool UpgradeWallToLevel_Private_Boolean_GameObject_Int32_0(int value, bool flag) { }
+    private int UpgradeWallsOrWrecks_Private_Void_Single_Int32_0(int value, float value) { }
+    public void add_OnCastleBuilt_Public_add_Void_Action_0() { }
+    public void add_OnPayableUpgraded_Public_add_Void_PayableUpgradeEvent_0() { }
+    public void remove_OnCastleBuilt_Public_rem_Void_Action_0() { }
+    public void remove_OnPayableUpgraded_Public_rem_Void_PayableUpgradeEvent_0() { }
+}
+
+// ==============================================================================
+// Kingdom
+// Found: 200 fields, 361 properties, 360 methods
+// ==============================================================================
+public class Kingdom : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private object ALLOW;
+    private object APPlayersNearby;
+    private object APPouncingAtPlayer;
+    private object APPouncingAtPlayerFalse;
+    private object CitizenHouse;
+    private object Citizens;
+    private int CollideWithPlayerObstacles;
+    private object FollowPlayer;
+    private object GuardKingdom;
+    private object INITIAL;
+    private bool IsPlayerTwoGhost;
+    private object KINGDOM;
+    private object MAX;
+    private object MIN;
+    private object MoveToPlayer;
+    private object MultiplayerImage;
+    private int OnLoaderPlayerHidden;
+    private object OnLoaderPlayerShown;
+    private object OnPlayerAppearanceChanged;
+    private object OnPlayerCargoPickedUp;
+    private object OnPlayerEntered;
+    private int OnPlayerRides;
+    private int OnPlayerStopRiding;
+    private int OnSetupPlayerId;
+    private int OwningPlayerId;
+    private Vector3 P1SingleplayerXPos;
+    private object PENALTY;
+    private object PLAYER;
+    private object PerPlayerStats;
+    private object Player;
+    private int Player1ID;
+    private int Player2ID;
+    private int PlayerBeckonHintlocIdHint;
+    private object PlayerControl;
+    private int PlayerId;
+    private int PlayerInside;
+    private int PlayerNotPresentHintlocIdHint;
+    private int PlayerPresentHintlocIdHint;
+    private int PlayerSteedCloneID;
+    private object PlayerTorch;
+    private object REQUEST;
+    private object SELECT;
+    private int SPPlayerId;
+    private object WaitForPlayer;
+    private object activatedByPlayer;
+    private object allowedMultiplayerPlatforms;
+    private object anyPlayerTarget;
+    private object attractedToPlayerSound;
+    private object bronzeTierConditionsMultiplayerP1;
+    private object bronzeTierConditionsMultiplayerP2;
+    private int buttonIdentifier;
+    private object cachedPlayerCameraTransforms;
+    private int cachedPlayerId;
+    private object challengePlayedInMultiplayer;
+    private object citizenCache;
+    private int citizenCount;
+    private object citizenPuntXForce;
+    private object citizenPuntYForce;
+    private object citizenPuntsBeforeRoar;
+    private object citizenTags;
+    private object citizens;
+    private object citizensLayer;
+    private object closestGreedToPlayerL;
+    private object closestGreedToPlayerR;
+    private object closestPortalToPlayerL;
+    private object closestPortalToPlayerR;
+    private bool coinInWaterPlayerDistance;
+    private int conditionNumInfectedCitizens;
+    private object coopSwapPlayers;
+    private int crownlessPlayerOverrideController;
+    private object currentChallengePlayedInMultiplayer;
+    private int currentPlayerId;
+    private object cursedTierConditionsMultiplayer;
+    private int fleeRangeOutsideKingdom;
+    private bool followDistForTargPlayer;
+    private object followPlayer;
+    private object followPlayerSound;
+    private object followingPlayer;
+    private object fullscreenEffectsMaterialPlayerOne;
+    private object fullscreenEffectsMaterialPlayerTwo;
+    private int gamePlayerId;
+    private int gamePlayerIdCounter;
+    private object goldTierConditionsMultiplayerP1;
+    private object goldTierConditionsMultiplayerP2;
+    private bool greedProtectPlayerDist;
+    private object hintEmpowerYourCitizens;
+    private object interactingPlayerHermitType;
+    private bool isInfectedCitizen;
+    private bool isLeadPlayer;
+    private bool isMultiplayer;
+    private bool isPlayerClose;
+    private bool isPlayerTwo;
+    private object kingdom;
+    private string kingdomText;
+    private object largeMultiplayerIcon;
+    private object largeSinglePlayerIcon;
+    private object loaderPlayerP1;
+    private object loaderPlayerP2;
+    private object maxHitCitizens;
+    private object maxPlayers;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public object ALLOW_PLAYER_REROLL { get; set; }
+    public object APPlayersNearby { get; set; }
+    public object APPouncingAtPlayer { get; set; }
+    public object APPouncingAtPlayerFalse { get; set; }
+    public object AcceptsMultiplayerInvites { get; set; }
+    public bool ActivePlayers { get; set; }
+    public object AllowPlayerAppearanceReroll { get; set; }
+    public bool BlocksPlayerPaymentWhenActive { get; set; }
+    public object CitizenHouse { get; set; }
+    public object Citizens { get; set; }
+    public int CollideWithPlayerObstacles { get; set; }
+    public object FollowPlayer { get; set; }
+    public object GetPlayerSlot { get; set; }
+    public object GuardKingdom { get; set; }
+    public object INITIAL_CONNECT_PLAYER_MODEL { get; set; }
+    public bool IsInfectedCitizen { get; set; }
+    public bool IsPlayerTwoGhost { get; set; }
+    public int KINGDOM_ARCHER_COUNT_CHANGE { get; set; }
+    public object KINGDOM_DESPAWN_PSEUDODYN { get; set; }
+    public int KINGDOM_FLEETBOAT_COUNT_CHANGE { get; set; }
+    public int KINGDOM_KNIGHT_COUNT_CHANGE { get; set; }
+    public object KINGDOM_MERCHANTSTATE { get; set; }
+    public object KINGDOM_SPAWNP2 { get; set; }
+    public object KINGDOM_SPAWN_DOG { get; set; }
+    public object KINGDOM_SPAWN_FREESTEED { get; set; }
+    public object KINGDOM_SPAWN_HERMIT { get; set; }
+    public object KINGDOM_SPAWN_SAILINBOAT { get; set; }
+    public object KINGDOM_TECHSTATE { get; set; }
+    public int MAX_FLEE_RANGE_OUTSIDE_KINGDOM { get; set; }
+    public bool MAX_PLAYER_DIST_TO_TROJAN { get; set; }
+    public bool MIN_PLAYER_DIST_TO_TROJAN { get; set; }
+    public object MoveToPlayer { get; set; }
+    public object MultiplayerImage { get; set; }
+    public int OnLoaderPlayerHidden { get; set; }
+    public object OnLoaderPlayerShown { get; set; }
+    public object OnPlayerAppearanceChanged { get; set; }
+    public object OnPlayerCargoPickedUp { get; set; }
+    public object OnPlayerEntered { get; set; }
+    public int OnPlayerRides { get; set; }
+    public int OnPlayerStopRiding { get; set; }
+    public int OnSetupPlayerId { get; set; }
+    public int OwningPlayerId { get; set; }
+    public object P1SingleplayerXPos { get; set; }
+    public object PENALTY_UNSAFE_KINGDOM { get; set; }
+    public object PLAYER_CARGO_DATA_FOLDER_PATH { get; set; }
+    public float PLAYER_COIN_SPEED_MODIFIER { get; set; }
+    public object PerPlayerStats { get; set; }
+    public object Player { get; set; }
+    public int Player1ID { get; set; }
+    public int Player2ID { get; set; }
+    public int PlayerBeckonHintlocIdHint { get; set; }
+    public object PlayerControl { get; set; }
+    public int PlayerId { get; set; }
+    public int PlayerInside { get; set; }
+    public object PlayerMice { get; set; }
+    public int PlayerNotPresentHintlocIdHint { get; set; }
+    public object PlayerPrefsKeyPrefix { get; set; }
+    public int PlayerPresentHintlocIdHint { get; set; }
+    public object PlayerSelecting { get; set; }
+    public int PlayerSteedCloneID { get; set; }
+    public int PlayerThatSpawnBombId { get; set; }
+    public object PlayerTorch { get; set; }
+    public object REQUEST_PLAYER_REROLL { get; set; }
+    public int RewiredPlayerIds { get; set; }
+    public object SELECT_PLAYER_SKIN { get; set; }
+    public int SPPlayerId { get; set; }
+    public object ShouldWaitForPlayer { get; set; }
+    public object ShowPlayer { get; set; }
+    public object ShowTwoPlayersRequiredPrompt { get; set; }
+    public object UseAllRewiredGamePlayers { get; set; }
+    public object UsePlayingPlayersOnly { get; set; }
+    public object UseRewiredSystemPlayer { get; set; }
+    public object WaitForPlayer { get; set; }
+    public int _PlayerId_k__BackingField { get; set; }
+    public object _PlayerSelecting_k__BackingField { get; set; }
+    public int _PlayerThatSpawnBombId_k__BackingField { get; set; }
+    public object __3__player { get; set; }
+    public object __3__skipOtherPlayers { get; set; }
+    public int __numberOfAvailableCitizens_k__BackingField { get; set; }
+    public object __playerTagPool { get; set; }
+    public object _activateOnlyWhenPlayerNear { get; set; }
+    public bool _activePlayers { get; set; }
+    public object _allowPlayerAppearanceReroll { get; set; }
+    public object _attractedToPlayerSound { get; set; }
+    public bool _blocksPlayerPaymentWhenActive { get; set; }
+    public bool _canTeleportPlayer { get; set; }
+    public object _chanceAroundPlayer { get; set; }
+    public object _chanceCloseToPlayer { get; set; }
+    public int _changePlayerRPCIndex { get; set; }
+    public bool _chasePlayerRoutine { get; set; }
+    public object _citizenLayer { get; set; }
+    public bool _citizenScanner { get; set; }
+    public object _citizensFilter { get; set; }
+    public object _coopRectPlayer1 { get; set; }
+    public object _coopRectPlayer2 { get; set; }
+    public object _coopSwapPlayers { get; set; }
+    public object _currentPlayer { get; set; }
+    public object _currentPlayerBags { get; set; }
+    public object _debuffMulitiplayer { get; set; }
+    public int _fleeRangeOutsideKingdom { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    private int ActivateElements_Private_Void_Player_Int32_0(int value) { }
+    public void ActivatePortal_Public_Void_Player_0() { }
+    private bool AddControllerElementByRoleMapEntry_Private_Boolean_Player_Controller_ActionElementMap_byref_Dictionary_2_String_ControllerElementByRoleMap_0(bool flag, string text) { }
+    private void AddCurrencyIndicators_Private_Void_Player_0() { }
+    public bool AllowedMultiplayerPlatform_Public_Boolean_RuntimePlatform_0(bool flag) { }
+    private bool AnyPresentPlayerValidToTrigger_Private_Boolean_0(bool flag) { }
+    private int AppendControllerMapKeyCommonSuffix_Private_Static_Void_StringBuilder_Player_ControllerIdentifier_Int32_Int32_Int32_0(int value) { }
+    private int AppendControllerMapKey_Private_Static_Void_StringBuilder_Player_ControllerIdentifier_Int32_Int32_Int32_0(int value) { }
+    private int AppendControllerMapKnownActionIdsKey_Private_Static_Void_StringBuilder_Player_ControllerIdentifier_Int32_Int32_Int32_0(int value) { }
+    private string AppendPlayerKey_Private_Static_Void_StringBuilder_Player_0() { }
+    private void ApplyAppearance_Private_Void_Player_Player_byref_Hermit_byref_Hermit_byref_Hermit_byref_Hermit_byref_Hermit_byref_Hermit_byref_Hermit_0() { }
+    public bool ApplyAuxiliaryEffects_Public_Void_Kingdom_Boolean_Boolean_Boolean_0(bool flag) { }
+    private void ApplyCarryForwardCurrency_Private_Void_Player_Player_0() { }
+    private bool ApplyCompanions_Private_Void_Boolean_Boolean_byref_Hermit_byref_Hermit_byref_Hermit_byref_Hermit_byref_Hermit_byref_Hermit_byref_Hermit_Player_Player_0(bool flag) { }
+    private bool ApplyInventory_Private_Void_Kingdom_Player_Player_Boolean_Boolean_Boolean_0(bool flag) { }
+    private bool ApplyStartPosition_Private_Void_Player_Player_Boat_WreckPlaceholder_Boolean_Boolean_Boolean_0(bool flag) { }
+    private int AssignController_Private_Void_Player_Int32_0(int value) { }
+    private void AssignJoysticksToPlayers_Private_Void_0() { }
+    private int AssignNextPlayer_Private_Void_Int32_0(int value) { }
+    private void BoatSailRoutine_Private_IEnumerator_1_Yield_Player_0() { }
+    private float BuffCitizensRoutine_Private_IEnumerator_Single_0(float value) { }
+    public float BuffCitizens_Public_Void_Single_0(float value) { }
+    public bool CanPay_Public_Abstract_Virtual_New_Boolean_Player_0(bool flag) { }
+    public bool CanPay_Public_Virtual_Boolean_Player_0(bool flag) { }
+    public bool CanPay_Public_Virtual_Final_New_Boolean_Player_0(bool flag) { }
+    public bool CanPay_Public_Virtual_New_Boolean_Player_0(bool flag) { }
+    private bool CanPlayerBash_Private_Boolean_0(bool flag) { }
+    public bool CanPlayerBoard_Public_Static_Boolean_Int32_0(int value, bool flag) { }
+    private bool CanPlayerControl_Private_Boolean_0(bool flag) { }
+    public bool CanSelect_Public_Virtual_Boolean_Player_0(bool flag) { }
+    public bool CanSelect_Public_Virtual_New_Boolean_Player_0(bool flag) { }
+    public void CancelTwoPlayersRequiredPrompt_Public_Void_0() { }
+    public bool CatchupPlayers_Public_Boolean_0(bool flag) { }
+    private void ChasePlayerRoutine_Private_IEnumerator_1_Yield_0() { }
+    private void CheckAndModifyRulerApperance_Private_Void_byref_PlayerAppearance_0() { }
+    private int CheckForPause_Private_Void_Player_Int32_0(int value) { }
+    public void CheckLastControllerInput_Public_Static_Void_Player_0() { }
+    protected void CheckPlayerInput_Protected_Virtual_New_Void_0() { }
+    protected void CheckPlayerInput_Protected_Virtual_Void_0() { }
+    public bool ClearTargetPlayer_Public_Void_Boolean_0(bool flag) { }
+    private void ClearVarsOnPlayerChange_Private_Void_0() { }
+    public void Clone_Public_PlayerSetting_0() { }
+    public bool ContainsPlayer_Public_Boolean_Int32_0(int value, bool flag) { }
+    private int CreatePointerEventData_Private_PlayerPointerEventData_Int32_Int32_Int32_PointerEventType_0(int value) { }
+    public void DebugDeactivatePlayerSprite_Public_Void_0() { }
+    public void DefeatGreedRoutine_Public_IEnumerator_Player_0() { }
+    private void DelayedInputBackupRoutine_Private_IEnumerator_Player_0() { }
+    public void DeliverCargo_Public_PlayerCargoData_0() { }
+    public void Deselect_Public_Void_Player_0() { }
+    public void DestroyPlayerStructure_Public_Abstract_Virtual_New_Void_0() { }
+}
+
+// ==============================================================================
+// EnemyManager
+// Found: 191 fields, 458 properties, 339 methods
+// ==============================================================================
+public class EnemyManager : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private object AP;
+    private object APDespawn;
+    private object APOnSpawnBegin;
+    private object APOnSpawnComplete;
+    private object APSpawn;
+    private object ATHENA;
+    private bool BoarSpawnDistance;
+    private object CurrencySpawnInterval;
+    private object CurrentEnemyPolicy;
+    private object DESPAWN;
+    private bool DebugDisableSpawns;
+    private object ENEMY;
+    private object Enemy;
+    private object EnemyMask;
+    private object EnemySpawn;
+    private object GAME;
+    private object GREED;
+    private object GREEDDEFEATES;
+    private object GoToSpawner;
+    private object GreedQueen;
+    private int GreedQueenID;
+    private object GreedWaveDefeated;
+    private object GreedWaveSpawned;
+    private object HERMES;
+    private bool HasSpawned;
+    private bool IsSpawned;
+    private object KINGDOM;
+    private object LastDayLootWasSpawned;
+    private object LootTrollSpawnAttempts;
+    private bool MISC;
+    private object OnDespawn;
+    private object OnEnemiesSpawned;
+    private object OnEnemyKilled;
+    private object RewardSpawned;
+    private object ShouldSpawn;
+    private float SpawnDuration;
+    private object SpawnStartDay;
+    private object SpawnedLootTrolls;
+    private object Spawning;
+    private object StrikeEnemy;
+    private object WAVE;
+    private object WORLD;
+    private float activateSpawnWaitTime;
+    private object basePooledPrefabToSpawn;
+    private object berryRespawnInterval;
+    private object boarSpawnGroup;
+    private object boarSpawnGroupPrefab;
+    private object boatSpawnOffset;
+    private object bossWave;
+    private object catSpawnChance;
+    private object catSpawnCheckInterval;
+    private object catSpawnCooldown;
+    private object closestEnemy;
+    private object closestGreedToDogL;
+    private object closestGreedToDogR;
+    private object closestGreedToPlayerL;
+    private object closestGreedToPlayerR;
+    private object conditionGreedKilledWithDireWolf;
+    private object crownstealerSpawnedSound;
+    private object damagedByGreed;
+    private object defenseSpawnCooldown;
+    private object defenseSpawnDelay;
+    private object delayGemSpawn;
+    private object delaySpawn;
+    private object despawnInfo;
+    private object despawnObject;
+    private object despawnOnLoad;
+    private int despawnRPCIndex;
+    private float despawnTime;
+    private object destroyLootOnDespawn;
+    private object dogSpawns;
+    private object dustSpawner;
+    private int endlessNightWaveNum;
+    private object enemiesSpawnedSound;
+    private object enemy;
+    private object enemyClaimer;
+    private object enemyClearanceRange;
+    private object enemyImage;
+    private object enemyObject;
+    private bool enemyScanInterval;
+    private bool enemyScanner;
+    private bool enemyScannerFrequency;
+    private object enemySightRange;
+    private object enemySpotRange;
+    private bool fishSpawnOffset;
+    private float fishSpawnTime;
+    private int formationSpawnerAvoidanceRange;
+    private object fragmentsSpawner;
+    private object gooSpawner;
+    private float greedBarkForTime;
+    private bool greedBarkPositionDistance;
+    private object greedDangerArea;
+    private bool greedProtectPlayerDist;
+    private bool greedReactionDist;
+    private bool hasSpawned;
+    private bool hasSpawnedBoarThisSeason;
+    private int hideAfterSpawn;
+    private object hintGreedDefeated;
+    private object hostAuthorativeDespawn;
+    private object iceSpawnSound;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public object APDespawn { get; set; }
+    public object APOnSpawnBegin { get; set; }
+    public object APOnSpawnComplete { get; set; }
+    public object APSpawn { get; set; }
+    public object AP_EnemyType { get; set; }
+    public object ATHENA_DEFEND_FROM_GREED { get; set; }
+    public object AllPartsSpawned { get; set; }
+    public object AllWaveSpawners { get; set; }
+    public bool BoarSpawnDistance { get; set; }
+    public object BottomWave { get; set; }
+    public object CurrencySpawnInterval { get; set; }
+    public object CurrentDayForSpawning { get; set; }
+    public object CurrentEnemyPolicy { get; set; }
+    public object CurrentRetaliationWave { get; set; }
+    public float DESPAWN_TIME { get; set; }
+    public bool DebugDisableSpawns { get; set; }
+    public object DespawnOnLoad { get; set; }
+    public object ENEMY_CROWNSTEALER_SPAWNED { get; set; }
+    public object ENEMY_DARKNESS_END { get; set; }
+    public object ENEMY_DARKNESS_START { get; set; }
+    public object ENEMY_REDMOON_END { get; set; }
+    public object ENEMY_REDMOON_START { get; set; }
+    public object Enemy { get; set; }
+    public object EnemyMask { get; set; }
+    public object EnemySpawn { get; set; }
+    public object GAME_GREED_DEFEAT { get; set; }
+    public object GREEDDEFEATES { get; set; }
+    public object GREED_DEFEAT_DELAY { get; set; }
+    public object GREED_DEFEAT_DELAY_LOAD { get; set; }
+    public object GoToSpawner { get; set; }
+    public object GreedArchers { get; set; }
+    public object GreedGolems { get; set; }
+    public object GreedQueen { get; set; }
+    public int GreedQueenID { get; set; }
+    public object GreedWaveDefeated { get; set; }
+    public object GreedWaveSpawned { get; set; }
+    public object HERMES_DEFEND_FROM_GREED { get; set; }
+    public bool HasSpawned { get; set; }
+    public bool IsBeggarSpawnAllowed { get; set; }
+    public bool IsDespawning { get; set; }
+    public bool IsSpawned { get; set; }
+    public bool IsSpawning { get; set; }
+    public bool IsSpawningVolley { get; set; }
+    public object KINGDOM_DESPAWN_PSEUDODYN { get; set; }
+    public object KINGDOM_SPAWNP2 { get; set; }
+    public object KINGDOM_SPAWN_DOG { get; set; }
+    public object KINGDOM_SPAWN_FREESTEED { get; set; }
+    public object KINGDOM_SPAWN_HERMIT { get; set; }
+    public object KINGDOM_SPAWN_SAILINBOAT { get; set; }
+    public object LastDayLootWasSpawned { get; set; }
+    public object LootTrollSpawnAttempts { get; set; }
+    public bool MISC_DEBUG_SPAWN { get; set; }
+    public object NextSpawner { get; set; }
+    public object OnDespawn { get; set; }
+    public object OnEnemiesSpawned { get; set; }
+    public object OnEnemyKilled { get; set; }
+    public int PlayerThatSpawnBombId { get; set; }
+    public object RewardSpawned { get; set; }
+    public object ShouldSpawn { get; set; }
+    public float SpawnDuration { get; set; }
+    public bool SpawnOnDisembark { get; set; }
+    public object SpawnPositionY { get; set; }
+    public object SpawnStartDay { get; set; }
+    public object SpawnedFormation { get; set; }
+    public object SpawnedLootTrolls { get; set; }
+    public object Spawner { get; set; }
+    public object Spawning { get; set; }
+    public object SpawningBlocked { get; set; }
+    public bool SpawningEnabled { get; set; }
+    public object SplashWave { get; set; }
+    public object StrikeEnemy { get; set; }
+    public object TopWave { get; set; }
+    public float WAVE_CENTER_SPEED { get; set; }
+    public object WAVE_POSITION_UPDATE_INTERVAL { get; set; }
+    public object WORLD_POOL_DESPAWN { get; set; }
+    public object WORLD_POOL_SPAWN { get; set; }
+    public object WORLD_REQUEST_SPAWN_WINTER_BOAR { get; set; }
+    public object WORLD_SPAWN_WINTER_BOAR { get; set; }
+    public object WaveCenter { get; set; }
+    public object _BottomWave_k__BackingField { get; set; }
+    public object _DespawnOnLoad_k__BackingField { get; set; }
+    public object _GreedQueen_k__BackingField { get; set; }
+    public int _PlayerThatSpawnBombId_k__BackingField { get; set; }
+    public object _SpawnedFormation_k__BackingField { get; set; }
+    public object _Spawner_k__BackingField { get; set; }
+    public object _SpawningBlocked_k__BackingField { get; set; }
+    public object _SplashWave_k__BackingField { get; set; }
+    public object _TopWave_k__BackingField { get; set; }
+    public object _WaveCenter_k__BackingField { get; set; }
+    public float __timePassedSinceLastSpawn_k__BackingField { get; set; }
+    public bool _activeSteedSpawn { get; set; }
+    public object _actuallyDespawnShop { get; set; }
+    public object _adjustedVFXSpawnPos { get; set; }
+    public object _allWaves { get; set; }
+    public object _animationSpawnDelay { get; set; }
+    public object _archersToSpawn { get; set; }
+    public object _attackRockSpawnHeight { get; set; }
+    public object _bbbDefenseWave { get; set; }
+    public object _berryBushSpawnSeconds { get; set; }
+    public bool _boarClosestSpawnDistanceFromCampfire { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    private void AddDay_Private_Void_Day_Wave_TimesOfDay_0() { }
+    private int AddEnemies_Private_Void_EnemyType_AnimationCurve_Int32_Single_List_1_EnemyBlueprint_byref_String_0(int value, float value, string text) { }
+    public void AddEnemyWaveSpawner_Public_Void_EnemyWaveSpawner_0() { }
+    public void AddEnemy_Public_Void_Enemy_0() { }
+    public void AddFirstDayOfSeason_Public_Void_Day_Season_Wave_TimesOfDay_0() { }
+    public void AddGreedArcher_Public_Void_GreedArcher_0() { }
+    public void AddGreedGolem_Public_Void_GreedGolem_0() { }
+    private int AddSpawninfoToText_Private_Static_Void_Int32_Int32_Int32_byref_String_0(int value, string text) { }
+    private float AddWaveEvents_Private_Void_Wave_Single_0(float value) { }
+    private bool AllSpawnersComplete_Private_Boolean_0(bool flag) { }
+    private bool AttemptSpawnSync_Private_CRPCHeader_GameObject_Int16_Boolean_Boolean_0(bool flag) { }
+    public int BeginInvoke_Public_Virtual_New_IAsyncResult_Int32_IAssembledBuildProjectSpawner_AsyncCallback_Object_0(int value) { }
+    private void BossSpawnRoutine_Private_IEnumerator_1_Yield_0() { }
+    public bool CanBePickedUpByEnemy_Public_Boolean_0(bool flag) { }
+    private bool CanSeeEnemy_Private_Boolean_0(bool flag) { }
+    private bool CanSpawnBerryBush_Private_Boolean_Single_0(bool flag, float value) { }
+    public bool CanSpawnNewFarmland_Public_Boolean_0(bool flag) { }
+    public bool CanSpawnThicket_Public_Boolean_Grass_0(bool flag) { }
+    private bool CanSpawnWinterCritters_Private_Boolean_0(bool flag) { }
+    public bool CanSpawn_Public_Static_Boolean_Int32_0(int value, bool flag) { }
+    private void CatchupPoolSpawns_Private_IEnumerator_0() { }
+    public bool CaveSpawnerCountCheck_Public_Boolean_0(bool flag) { }
+    public void CheckShouldSpawnShieldWall_Public_Void_Wall_0() { }
+    public void ClearSpawnQueue_Public_Void_0() { }
+    private void ClearSpawnedObjects_Private_Void_0() { }
+    public void ClosestSpawnerOnSameSideOfCampfire_Public_Portal_Transform_0() { }
+    public bool ClosestSpawner_Public_Portal_Side_Boolean_0(bool flag) { }
+    private bool ContainsEnemyType_Private_Boolean_IEnumerable_1_EnemyBlueprint_EnemyType_0(bool flag) { }
+    private void DeSpawnPeasants_Private_Void_0() { }
+    public void DebugSpawnFinishedObject_Public_Void_0() { }
+    private void DebugSpawn_Private_Void_GameObject_0() { }
+    private float DefeatGreedDelay_Private_IEnumerator_Single_0(float value) { }
+    public void DefeatGreedRoutine_Public_IEnumerator_Player_0() { }
+    public bool DefeatGreed_Public_Void_Boolean_Single_0(bool flag, float value) { }
+    private void DelayDespawn_Private_IEnumerator_0() { }
+    private void DelayGemSpawn_Private_IEnumerator_1_Yield_0() { }
+    private void DelayShopSpawn_Private_IEnumerator_ShopType_0() { }
+    private void DespawnAfterSeconds_Private_IEnumerator_0() { }
+    private float DespawnAfterSeconds_Private_IEnumerator_Single_0(float value) { }
+    private void DespawnAllManualAttackObjects_Private_Void_0() { }
+    private void DespawnBarrier_Private_Void_0() { }
+    private void DespawnBuildingRoutine_Private_IEnumerator_1_Yield_GameObject_0() { }
+    public void DespawnCurrency_Public_Void_BagCurrency_0() { }
+    public void DespawnImmediately_Public_Void_0() { }
+    public void DespawnObjectFromNetwork_Public_Void_PoolDespawn_0() { }
+    private void DespawnOnLoadRoutine_Private_IEnumerator_0() { }
+    public void DespawnOrDestroyImmediate_Public_Static_Void_GameObject_0() { }
+    public float DespawnOrDestroy_Public_Static_Void_GameObject_Single_0(float value) { }
+    private void DespawnRoutine_Private_IEnumerator_0() { }
+    protected bool DespawnRoutine_Protected_Abstract_Virtual_New_IEnumerator_Portal_Single_Boolean_0(bool flag, float value) { }
+}
+
+// ==============================================================================
+// EnemyWaveSpawner
+// Found: 167 fields, 421 properties, 321 methods
+// ==============================================================================
+public class EnemyWaveSpawner : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private object AP;
+    private object APDespawn;
+    private object APOnSpawnBegin;
+    private object APOnSpawnComplete;
+    private object APSpawn;
+    private bool BoarSpawnDistance;
+    private object CurrencySpawnInterval;
+    private object CurrentEnemyPolicy;
+    private object DESPAWN;
+    private bool DebugDisableSpawns;
+    private object ENEMY;
+    private object Enemy;
+    private object EnemyMask;
+    private object EnemySpawn;
+    private object GoToSpawner;
+    private object GreedWaveDefeated;
+    private object GreedWaveSpawned;
+    private bool HasSpawned;
+    private bool IsSpawned;
+    private object KINGDOM;
+    private object LastDayLootWasSpawned;
+    private object LootTrollSpawnAttempts;
+    private bool MISC;
+    private object OnDespawn;
+    private object OnEnemiesSpawned;
+    private object OnEnemyKilled;
+    private object RewardSpawned;
+    private object ShouldSpawn;
+    private float SpawnDuration;
+    private object SpawnStartDay;
+    private object SpawnedLootTrolls;
+    private object Spawning;
+    private object StrikeEnemy;
+    private object WAVE;
+    private object WORLD;
+    private float activateSpawnWaitTime;
+    private object basePooledPrefabToSpawn;
+    private object berryRespawnInterval;
+    private object boarSpawnGroup;
+    private object boarSpawnGroupPrefab;
+    private object boatSpawnOffset;
+    private object bossWave;
+    private object catSpawnChance;
+    private object catSpawnCheckInterval;
+    private object catSpawnCooldown;
+    private object closestEnemy;
+    private object crownstealerSpawnedSound;
+    private object defenseSpawnCooldown;
+    private object defenseSpawnDelay;
+    private object delayGemSpawn;
+    private object delaySpawn;
+    private object despawnInfo;
+    private object despawnObject;
+    private object despawnOnLoad;
+    private int despawnRPCIndex;
+    private float despawnTime;
+    private object destroyLootOnDespawn;
+    private object dogSpawns;
+    private object dustSpawner;
+    private int endlessNightWaveNum;
+    private object enemiesSpawnedSound;
+    private object enemy;
+    private object enemyClaimer;
+    private object enemyClearanceRange;
+    private object enemyImage;
+    private object enemyObject;
+    private bool enemyScanInterval;
+    private bool enemyScanner;
+    private bool enemyScannerFrequency;
+    private object enemySightRange;
+    private object enemySpotRange;
+    private bool fishSpawnOffset;
+    private float fishSpawnTime;
+    private int formationSpawnerAvoidanceRange;
+    private object fragmentsSpawner;
+    private object gooSpawner;
+    private bool hasSpawned;
+    private bool hasSpawnedBoarThisSeason;
+    private int hideAfterSpawn;
+    private object hostAuthorativeDespawn;
+    private object iceSpawnSound;
+    private object invertSpawnDirection;
+    private bool isSpawning;
+    private object leavesSpawner;
+    private int maxNumHitEnemys;
+    private int maxNumSpawnedTrolls;
+    private object merchantSpawnState;
+    private object netSpawnedCrownstealer;
+    private float nextCatSpawnTime;
+    private Vector3 nextSpawnPostfix;
+    private int nextWaveID;
+    private object normalEnemyBlueprint;
+    private int numRetaliationWavesSpawned;
+    private object onSpawnDelegates;
+    private object onlyDespawnOnHost;
+    private object onlySpawnInWalledForest;
+    private Vector3 randomPositionSpawn;
+    private object recoveryWave;
+    private object regularWave;
+    private object retaliationWave;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public object APDespawn { get; set; }
+    public object APOnSpawnBegin { get; set; }
+    public object APOnSpawnComplete { get; set; }
+    public object APSpawn { get; set; }
+    public object AP_EnemyType { get; set; }
+    public object AllPartsSpawned { get; set; }
+    public object AllWaveSpawners { get; set; }
+    public bool BoarSpawnDistance { get; set; }
+    public object BottomWave { get; set; }
+    public object CurrencySpawnInterval { get; set; }
+    public object CurrentDayForSpawning { get; set; }
+    public object CurrentEnemyPolicy { get; set; }
+    public object CurrentRetaliationWave { get; set; }
+    public float DESPAWN_TIME { get; set; }
+    public bool DebugDisableSpawns { get; set; }
+    public object DespawnOnLoad { get; set; }
+    public object ENEMY_CROWNSTEALER_SPAWNED { get; set; }
+    public object ENEMY_DARKNESS_END { get; set; }
+    public object ENEMY_DARKNESS_START { get; set; }
+    public object ENEMY_REDMOON_END { get; set; }
+    public object ENEMY_REDMOON_START { get; set; }
+    public object Enemy { get; set; }
+    public object EnemyMask { get; set; }
+    public object EnemySpawn { get; set; }
+    public object GoToSpawner { get; set; }
+    public object GreedWaveDefeated { get; set; }
+    public object GreedWaveSpawned { get; set; }
+    public bool HasSpawned { get; set; }
+    public bool IsBeggarSpawnAllowed { get; set; }
+    public bool IsDespawning { get; set; }
+    public bool IsSpawned { get; set; }
+    public bool IsSpawning { get; set; }
+    public bool IsSpawningVolley { get; set; }
+    public object KINGDOM_DESPAWN_PSEUDODYN { get; set; }
+    public object KINGDOM_SPAWNP2 { get; set; }
+    public object KINGDOM_SPAWN_DOG { get; set; }
+    public object KINGDOM_SPAWN_FREESTEED { get; set; }
+    public object KINGDOM_SPAWN_HERMIT { get; set; }
+    public object KINGDOM_SPAWN_SAILINBOAT { get; set; }
+    public object LastDayLootWasSpawned { get; set; }
+    public object LootTrollSpawnAttempts { get; set; }
+    public bool MISC_DEBUG_SPAWN { get; set; }
+    public object NextSpawner { get; set; }
+    public object OnDespawn { get; set; }
+    public object OnEnemiesSpawned { get; set; }
+    public object OnEnemyKilled { get; set; }
+    public int PlayerThatSpawnBombId { get; set; }
+    public object RewardSpawned { get; set; }
+    public object ShouldSpawn { get; set; }
+    public float SpawnDuration { get; set; }
+    public bool SpawnOnDisembark { get; set; }
+    public object SpawnPositionY { get; set; }
+    public object SpawnStartDay { get; set; }
+    public object SpawnedFormation { get; set; }
+    public object SpawnedLootTrolls { get; set; }
+    public object Spawner { get; set; }
+    public object Spawning { get; set; }
+    public object SpawningBlocked { get; set; }
+    public bool SpawningEnabled { get; set; }
+    public object SplashWave { get; set; }
+    public object StrikeEnemy { get; set; }
+    public object TopWave { get; set; }
+    public float WAVE_CENTER_SPEED { get; set; }
+    public object WAVE_POSITION_UPDATE_INTERVAL { get; set; }
+    public object WORLD_POOL_DESPAWN { get; set; }
+    public object WORLD_POOL_SPAWN { get; set; }
+    public object WORLD_REQUEST_SPAWN_WINTER_BOAR { get; set; }
+    public object WORLD_SPAWN_WINTER_BOAR { get; set; }
+    public object WaveCenter { get; set; }
+    public object _BottomWave_k__BackingField { get; set; }
+    public object _DespawnOnLoad_k__BackingField { get; set; }
+    public int _PlayerThatSpawnBombId_k__BackingField { get; set; }
+    public object _SpawnedFormation_k__BackingField { get; set; }
+    public object _Spawner_k__BackingField { get; set; }
+    public object _SpawningBlocked_k__BackingField { get; set; }
+    public object _SplashWave_k__BackingField { get; set; }
+    public object _TopWave_k__BackingField { get; set; }
+    public object _WaveCenter_k__BackingField { get; set; }
+    public float __timePassedSinceLastSpawn_k__BackingField { get; set; }
+    public bool _activeSteedSpawn { get; set; }
+    public object _actuallyDespawnShop { get; set; }
+    public object _adjustedVFXSpawnPos { get; set; }
+    public object _allWaves { get; set; }
+    public object _animationSpawnDelay { get; set; }
+    public object _archersToSpawn { get; set; }
+    public object _attackRockSpawnHeight { get; set; }
+    public object _bbbDefenseWave { get; set; }
+    public object _berryBushSpawnSeconds { get; set; }
+    public bool _boarClosestSpawnDistanceFromCampfire { get; set; }
+    public object _boarSpawnOffset { get; set; }
+    public object _bossEnemySpawn { get; set; }
+    public object _bottomWave { get; set; }
+    public float _bottomWaveSpeed { get; set; }
+    public object _bowWaves { get; set; }
+    public float _bowWavesSpeedThreshold { get; set; }
+    public float _chaseEnemyTime { get; set; }
+    public int _clientsideHasSpawned { get; set; }
+    public object _closeAfterSpawn { get; set; }
+    public object _closestContentLayerSpawn { get; set; }
+    public object _cooldownOfSpawning { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    private void AddDay_Private_Void_Day_Wave_TimesOfDay_0() { }
+    private int AddEnemies_Private_Void_EnemyType_AnimationCurve_Int32_Single_List_1_EnemyBlueprint_byref_String_0(int value, float value, string text) { }
+    public void AddEnemyWaveSpawner_Public_Void_EnemyWaveSpawner_0() { }
+    public void AddEnemy_Public_Void_Enemy_0() { }
+    public void AddFirstDayOfSeason_Public_Void_Day_Season_Wave_TimesOfDay_0() { }
+    private int AddSpawninfoToText_Private_Static_Void_Int32_Int32_Int32_byref_String_0(int value, string text) { }
+    private float AddWaveEvents_Private_Void_Wave_Single_0(float value) { }
+    private bool AllSpawnersComplete_Private_Boolean_0(bool flag) { }
+    private bool AttemptSpawnSync_Private_CRPCHeader_GameObject_Int16_Boolean_Boolean_0(bool flag) { }
+    public int BeginInvoke_Public_Virtual_New_IAsyncResult_Int32_IAssembledBuildProjectSpawner_AsyncCallback_Object_0(int value) { }
+    private void BossSpawnRoutine_Private_IEnumerator_1_Yield_0() { }
+    public bool CanBePickedUpByEnemy_Public_Boolean_0(bool flag) { }
+    private bool CanSeeEnemy_Private_Boolean_0(bool flag) { }
+    private bool CanSpawnBerryBush_Private_Boolean_Single_0(bool flag, float value) { }
+    public bool CanSpawnNewFarmland_Public_Boolean_0(bool flag) { }
+    public bool CanSpawnThicket_Public_Boolean_Grass_0(bool flag) { }
+    private bool CanSpawnWinterCritters_Private_Boolean_0(bool flag) { }
+    public bool CanSpawn_Public_Static_Boolean_Int32_0(int value, bool flag) { }
+    private void CatchupPoolSpawns_Private_IEnumerator_0() { }
+    public bool CaveSpawnerCountCheck_Public_Boolean_0(bool flag) { }
+    public void CheckShouldSpawnShieldWall_Public_Void_Wall_0() { }
+    public void ClearSpawnQueue_Public_Void_0() { }
+    private void ClearSpawnedObjects_Private_Void_0() { }
+    public void ClosestSpawnerOnSameSideOfCampfire_Public_Portal_Transform_0() { }
+    public bool ClosestSpawner_Public_Portal_Side_Boolean_0(bool flag) { }
+    private bool ContainsEnemyType_Private_Boolean_IEnumerable_1_EnemyBlueprint_EnemyType_0(bool flag) { }
+    private void DeSpawnPeasants_Private_Void_0() { }
+    public void DebugSpawnFinishedObject_Public_Void_0() { }
+    private void DebugSpawn_Private_Void_GameObject_0() { }
+    private void DelayDespawn_Private_IEnumerator_0() { }
+    private void DelayGemSpawn_Private_IEnumerator_1_Yield_0() { }
+    private void DelayShopSpawn_Private_IEnumerator_ShopType_0() { }
+    private void DespawnAfterSeconds_Private_IEnumerator_0() { }
+    private float DespawnAfterSeconds_Private_IEnumerator_Single_0(float value) { }
+    private void DespawnAllManualAttackObjects_Private_Void_0() { }
+    private void DespawnBarrier_Private_Void_0() { }
+    private void DespawnBuildingRoutine_Private_IEnumerator_1_Yield_GameObject_0() { }
+    public void DespawnCurrency_Public_Void_BagCurrency_0() { }
+    public void DespawnImmediately_Public_Void_0() { }
+    public void DespawnObjectFromNetwork_Public_Void_PoolDespawn_0() { }
+    private void DespawnOnLoadRoutine_Private_IEnumerator_0() { }
+    public void DespawnOrDestroyImmediate_Public_Static_Void_GameObject_0() { }
+    public float DespawnOrDestroy_Public_Static_Void_GameObject_Single_0(float value) { }
+    private void DespawnRoutine_Private_IEnumerator_0() { }
+    protected bool DespawnRoutine_Protected_Abstract_Virtual_New_IEnumerator_Portal_Single_Boolean_0(bool flag, float value) { }
+    protected bool DespawnRoutine_Protected_Virtual_IEnumerator_Portal_Single_Boolean_0(bool flag, float value) { }
+    private void DespawnShop_Private_IEnumerator_1_Yield_ShopType_0() { }
+    private int DespawnSpitOverMax_Private_Void_Int32_0(int value) { }
+    private void DespawnTimer_Private_IEnumerator_0() { }
+    public void DespawnUnits_Public_Abstract_Virtual_New_Void_0() { }
+}
+
+// ==============================================================================
+// Steed
+// Found: 152 fields, 303 properties, 116 methods
+// ==============================================================================
+public class Steed : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private int APOnSteedRide;
+    private float APRowSpeed;
+    private float APSpeed;
+    private float APVerticalSpeed;
+    private float DebugInfiniteStamina;
+    private object DebugReplaceSteed;
+    private float HasSpeedChanged;
+    private int HermitHorseKeeperID;
+    private object HermitHorsekeeper;
+    private object IconGameObjectHermitHorse;
+    private object IconGameObjectMountBear;
+    private object IconGameObjectMountBeetle;
+    private object IconGameObjectMountCatCart;
+    private object IconGameObjectMountCerberus;
+    private object IconGameObjectMountChariot;
+    private object IconGameObjectMountChimera;
+    private object IconGameObjectMountDayNight;
+    private object IconGameObjectMountDonkey;
+    private object IconGameObjectMountFastHorse;
+    private object IconGameObjectMountGamigin;
+    private object IconGameObjectMountGolem;
+    private object IconGameObjectMountGriffin;
+    private object IconGameObjectMountGullinbursti;
+    private object IconGameObjectMountHippocampus;
+    private object IconGameObjectMountHound;
+    private object IconGameObjectMountKelpie;
+    private object IconGameObjectMountLizard;
+    private object IconGameObjectMountPegasus;
+    private object IconGameObjectMountReindeer;
+    private object IconGameObjectMountSleipnir;
+    private int IconGameObjectMountSpider;
+    private object IconGameObjectMountStag;
+    private object IconGameObjectMountUnicorn;
+    private object IconGameObjectMountWarhorse;
+    private object IconGameObjectMountWolf;
+    private object KINGDOM;
+    private object OnSteedChange;
+    private int P1DefaultHorseID;
+    private int P2DefaultHorseID;
+    private object PLAYER;
+    private int PlayerSteedCloneID;
+    private float SPWaterSpeed;
+    private float SpeedModifer;
+    private int SteedBarrierID;
+    private int SteedBearID;
+    private int SteedBloodstainedID;
+    private int SteedBonus1ID;
+    private int SteedBonus2ID;
+    private int SteedBurstID;
+    private int SteedFastID;
+    private int SteedGriffinID;
+    private int SteedGullingurstiID;
+    private int SteedLizardID;
+    private int SteedP1WarhorseID;
+    private int SteedP1WolfID;
+    private int SteedP2GriffinID;
+    private int SteedP2StagID;
+    private int SteedP2WarhorseID;
+    private int SteedP2WolfID;
+    private int SteedReindeerID;
+    private int SteedSpookyID;
+    private int SteedStagID;
+    private int SteedStaminaID;
+    private int SteedTrapID;
+    private int SteedUnicornID;
+    private object TrojanHorse;
+    private object TrojanHorseUnits;
+    private object WAVE;
+    private float WindScrollSpeedMultiplier;
+    private object achievement;
+    private int amount;
+    private float batMovementSpeed;
+    private object biomeSteeds;
+    private float bulletSpeed;
+    private object changeSteedSound;
+    private float chargeAnimPlaySpeed;
+    private float chargeSpeed;
+    private float chaseSpeed;
+    private float clockSpeedModifier;
+    private int currencyAmount;
+    private object customSteeds;
+    private int damageAmount;
+    private float dampeningPerSpeed;
+    private bool disableSteedSwitching;
+    private float eatFullStaminaDelay;
+    private float forestSpeedMultiplier;
+    private float gameSpeedModifier;
+    private int glideStaminaRate;
+    private object horseRearTriggerObject;
+    private float hungerInterval;
+    private float infiniteStaminaButton;
+    private int isFixedAmount;
+    private float jumpSpeed;
+    private float lootSpeed;
+    private float maxLeadSpeed;
+    private int maxNumSteeds;
+    private string mountName;
+    private float moveSpeed;
+    private int normalizedAmount;
+    private object objectSteedTypePairs;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public int APOnSteedRide { get; set; }
+    public float APRowSpeed { get; set; }
+    public float APSpeed { get; set; }
+    public float APVerticalSpeed { get; set; }
+    public float ActualSpeed { get; set; }
+    public float ClockSpeedModifier { get; set; }
+    public float CurrentSpeed { get; set; }
+    public float DebugInfiniteStamina { get; set; }
+    public object DebugReplaceSteed { get; set; }
+    public float HasSpeedChanged { get; set; }
+    public int HermitHorseKeeperID { get; set; }
+    public object HermitHorsekeeper { get; set; }
+    public object IconGameObjectHermitHorse { get; set; }
+    public object IconGameObjectMountBear { get; set; }
+    public object IconGameObjectMountBeetle { get; set; }
+    public object IconGameObjectMountCatCart { get; set; }
+    public object IconGameObjectMountCerberus { get; set; }
+    public object IconGameObjectMountChariot { get; set; }
+    public object IconGameObjectMountChimera { get; set; }
+    public object IconGameObjectMountDayNight { get; set; }
+    public object IconGameObjectMountDonkey { get; set; }
+    public object IconGameObjectMountFastHorse { get; set; }
+    public object IconGameObjectMountGamigin { get; set; }
+    public object IconGameObjectMountGolem { get; set; }
+    public object IconGameObjectMountGriffin { get; set; }
+    public object IconGameObjectMountGullinbursti { get; set; }
+    public object IconGameObjectMountHippocampus { get; set; }
+    public object IconGameObjectMountHound { get; set; }
+    public object IconGameObjectMountKelpie { get; set; }
+    public object IconGameObjectMountLizard { get; set; }
+    public object IconGameObjectMountPegasus { get; set; }
+    public object IconGameObjectMountReindeer { get; set; }
+    public object IconGameObjectMountSleipnir { get; set; }
+    public int IconGameObjectMountSpider { get; set; }
+    public object IconGameObjectMountStag { get; set; }
+    public object IconGameObjectMountUnicorn { get; set; }
+    public object IconGameObjectMountWarhorse { get; set; }
+    public object IconGameObjectMountWolf { get; set; }
+    public object KINGDOM_SPAWN_FREESTEED { get; set; }
+    public object OnSteedChange { get; set; }
+    public int P1DefaultHorseID { get; set; }
+    public int P2DefaultHorseID { get; set; }
+    public float PLAYER_COIN_SPEED_MODIFIER { get; set; }
+    public int PlayerSteedCloneID { get; set; }
+    public float SPWaterSpeed { get; set; }
+    public object SerpentLevelTrojanHorse { get; set; }
+    public float Speed { get; set; }
+    public float SpeedModifer { get; set; }
+    public float Stamina { get; set; }
+    public object Steed { get; set; }
+    public int SteedBarrierID { get; set; }
+    public int SteedBearID { get; set; }
+    public int SteedBloodstainedID { get; set; }
+    public int SteedBonus1ID { get; set; }
+    public int SteedBonus2ID { get; set; }
+    public int SteedBurstID { get; set; }
+    public int SteedFastID { get; set; }
+    public int SteedGriffinID { get; set; }
+    public int SteedGullingurstiID { get; set; }
+    public int SteedLizardID { get; set; }
+    public int SteedP1WarhorseID { get; set; }
+    public int SteedP1WolfID { get; set; }
+    public int SteedP2GriffinID { get; set; }
+    public int SteedP2StagID { get; set; }
+    public int SteedP2WarhorseID { get; set; }
+    public int SteedP2WolfID { get; set; }
+    public int SteedReindeerID { get; set; }
+    public int SteedSpookyID { get; set; }
+    public object SteedSpriteExtraFX { get; set; }
+    public object SteedSpriteFX { get; set; }
+    public int SteedStagID { get; set; }
+    public int SteedStaminaID { get; set; }
+    public int SteedTrapID { get; set; }
+    public int SteedUnicornID { get; set; }
+    public object TrojanHorse { get; set; }
+    public object TrojanHorseUnits { get; set; }
+    public float WAVE_CENTER_SPEED { get; set; }
+    public float WalkSpeed { get; set; }
+    public float WindScrollSpeedMultiplier { get; set; }
+    public float _AnimSpeedCurve { get; set; }
+    public float _ClockSpeedModifier_k__BackingField { get; set; }
+    public object _SerpentLevelTrojanHorse_k__BackingField { get; set; }
+    public float _Stamina_k__BackingField { get; set; }
+    public object _SteedSpriteExtraFX_k__BackingField { get; set; }
+    public object _SteedSpriteFX_k__BackingField { get; set; }
+    public object _Steed_k__BackingField { get; set; }
+    public object _TrojanHorse_k__BackingField { get; set; }
+    public float _abilitySpeed { get; set; }
+    public bool _activeSteedSpawn { get; set; }
+    public object _additionalSteedSpriteRenderers { get; set; }
+    public float _advancingSpeed { get; set; }
+    public int _amountToAdd { get; set; }
+    public int _amountToDrop_5__3 { get; set; }
+    public int _animatorSpeedRPCIndex { get; set; }
+    public float _archerAttackSpeedReductionInSeconds { get; set; }
+    public float _attackMoveSpeed { get; set; }
+    public float _attackStaminaCost { get; set; }
+    public float _attackStaminaGain { get; set; }
+    public float _bottomWaveSpeed { get; set; }
+    public float _bowWavesSpeedThreshold { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    public void AddSteed_Public_Void_Steed_0() { }
+    public bool CanAddSteed_Public_Boolean_0(bool flag) { }
+    private void ChangeSpeedAccordingToDayPhase_Private_Void_DayPhase_0() { }
+    private void ChangeSpeedForRedMoon_Private_Void_0() { }
+    private void CheckForSteedlessRuler_Private_Void_0() { }
+    public void ClearSteeds_Public_Void_0() { }
+    private void DelayedCleanupEndPetrifyInternal_Private_Void_Steed_0() { }
+    private int DelayedMount_Private_IEnumerator_Int32_0(int value) { }
+    private void DelayedStartPetrifyInternal_Private_Void_Steed_0() { }
+    public bool Dismount_Public_Void_Boolean_0(bool flag) { }
+    public int ForceSetSpeed_Public_Void_Single_Int32_0(int value, float value) { }
+    public int GetChallengeDefaultSteed_Public_SteedType_Int32_Int32_0(int value) { }
+    private object GetChallengeOverrideSteed_Private_Steed_SteedType_0() { }
+    public int GetCurrencyAmounts_Public_CurrencyMap_1_Int32_0(int value) { }
+    private int GetMaxSteeds_Private_Int32_0(int value) { }
+    public int GetPlayerOverrideSteed_Public_Steed_Int32_CampaignSaveData_0(int value) { }
+    public int GetPlayerSteedType_Public_SteedType_Int32_0(int value) { }
+    public string GetPrefabPath_Public_Static_String_SteedType_0(string text) { }
+    public object GetSteedByType_Public_Steed_SteedType_0() { }
+    private object GetSteedPrefab_Private_GameObject_SteedType_0() { }
+    public object GetSteedStatus_Public_SteedStatus_SteedType_0() { }
+    public bool GetSteedUnlocked_Public_Boolean_SteedType_0(bool flag) { }
+    public float GetWaveSpeedMultiplier_Public_Single_Single_WaveType_Single_0(float value) { }
+    public float GetWaveSpeedMultiplier_Public_Single_Single_WaveType_byref_Single_Single_0(float value) { }
+    private void HandleOnPlayerRides_Private_Void_Steed_0() { }
+    private void HandleSteedChange_Private_Void_Steed_0() { }
+    private bool HasSpeedChangedDynamic_Private_Boolean_Single_Single_0(bool flag, float value) { }
+    private bool HasSpeedChangedKinematic_Private_Boolean_Single_Single_0(bool flag, float value) { }
+    private float IPosSyncSpeedListener_OnSpeedUpdated_Private_Virtual_Final_New_Void_Single_0(float value) { }
+    public void IncrementSteedsRode_Public_Void_SteedType_0() { }
+    private void InitializeSpeed_Private_Void_0() { }
+    public void InitializeSteedTypePairs_Public_Void_0() { }
+    public float ModifyPanSpeed_Public_Void_Single_0(float value) { }
+    private void ModifySpeedRoutine_Private_IEnumerator_0() { }
+    public void Mount_Public_Void_Transform_0() { }
+    private void OnAnimChariotHorseAppear_Private_Void_0() { }
+    private void OnAnimStartStamina_Private_Void_0() { }
+    public void OnAnimSteedSpawned_Public_Void_0() { }
+    public float OnButtonChangePanSpeed_Public_Void_Single_0(float value) { }
+    public void OnButtonConstructTrojanHorse_Public_Void_0() { }
+    public void OnButtonInfiniteStamina_Public_Void_0() { }
+    public void OnButtonRandomizeAppearanceThisMount_Public_Void_0() { }
+    public void OnButtonRemoveSteedAfterSwitch_Public_Void_0() { }
+    public void OnButtonSummonTrojanHorseParts_Public_Void_0() { }
+    private void OnPlayerEnteredTrojanHorseHandler_Private_Void_0() { }
+    private void OnPlayerRidesHandler_Private_Void_Steed_0() { }
+    private void OnPlayerStopRidingHandler_Private_Void_Steed_0() { }
+    public void OnSetSteedMode_Public_Virtual_New_Void_SteedMode_Player_0() { }
+    public void OnSetSteedMode_Public_Virtual_Void_SteedMode_Player_0() { }
+    public float OnSpeedUpdated_Public_Abstract_Virtual_New_Void_Single_0(float value) { }
+}
+
+// ==============================================================================
+// CitizenHouse
+// Found: 162 fields, 409 properties, 308 methods
+// ==============================================================================
+public class CitizenHouse : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private object APDespawn;
+    private object APOnSpawnBegin;
+    private object APOnSpawnComplete;
+    private object APSpawn;
+    private object AthenaFarmhouseBuilt;
+    private bool BoarSpawnDistance;
+    private object CitizenHouse;
+    private object Citizens;
+    private object CurrencySpawnInterval;
+    private object DESPAWN;
+    private bool DebugDisableSpawns;
+    private object ENEMY;
+    private object EnemySpawn;
+    private object Farmhouse;
+    private object GoToSpawner;
+    private object GreedWaveSpawned;
+    private bool HasSpawned;
+    private bool IsSpawned;
+    private object KINGDOM;
+    private object LastDayLootWasSpawned;
+    private object Lighthouse;
+    private object LootTrollSpawnAttempts;
+    private bool MISC;
+    private object OnAthenaFarmhouseBuilt;
+    private object OnDespawn;
+    private object OnEnemiesSpawned;
+    private object RewardSpawned;
+    private object ShouldSpawn;
+    private float SpawnDuration;
+    private object SpawnStartDay;
+    private object SpawnedLootTrolls;
+    private object Spawning;
+    private object WORLD;
+    private float activateSpawnWaitTime;
+    private object basePooledPrefabToSpawn;
+    private object berryRespawnInterval;
+    private object boarSpawnGroup;
+    private object boarSpawnGroupPrefab;
+    private object boatSpawnOffset;
+    private object catSpawnChance;
+    private object catSpawnCheckInterval;
+    private object catSpawnCooldown;
+    private float caveEscapeTimer;
+    private object citizenCache;
+    private int citizenCount;
+    private object citizenPuntXForce;
+    private object citizenPuntYForce;
+    private object citizenPuntsBeforeRoar;
+    private object citizenTags;
+    private object citizens;
+    private object citizensLayer;
+    private int conditionNumInfectedCitizens;
+    private int countdownTimerTextColor;
+    private float crownLostGraceTimer;
+    private object crownstealerSpawnedSound;
+    private object defenseSpawnCooldown;
+    private object defenseSpawnDelay;
+    private object delayGemSpawn;
+    private object delaySpawn;
+    private object despawnInfo;
+    private object despawnObject;
+    private object despawnOnLoad;
+    private int despawnRPCIndex;
+    private float despawnTime;
+    private object destroyLootOnDespawn;
+    private object dogSpawns;
+    private object dustSpawner;
+    private object enemiesSpawnedSound;
+    private object farmHouse;
+    private bool fishSpawnOffset;
+    private float fishSpawnTime;
+    private int formationSpawnerAvoidanceRange;
+    private object fragmentsSpawner;
+    private object gooSpawner;
+    private bool hasSpawned;
+    private bool hasSpawnedBoarThisSeason;
+    private int hideAfterSpawn;
+    private object hintEmpowerYourCitizens;
+    private object hostAuthorativeDespawn;
+    private object iceSpawnSound;
+    private float inGameTimers;
+    private object invertSpawnDirection;
+    private bool isInfectedCitizen;
+    private bool isSpawning;
+    private object leavesSpawner;
+    private object lighthouse;
+    private object lighthouseTech;
+    private object maxHitCitizens;
+    private int maxNumSpawnedTrolls;
+    private object merchantSpawnState;
+    private object netSpawnedCrownstealer;
+    private float nextCatSpawnTime;
+    private Vector3 nextSpawnPostfix;
+    private int numRetaliationWavesSpawned;
+    private int numberOfAvaliableCitizens;
+    private object onSpawnDelegates;
+    private object onlyDespawnOnHost;
+    private object onlySpawnInWalledForest;
+    private float persistentInGameTimers;
+    private float rageTimer;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public object APDespawn { get; set; }
+    public object APOnSpawnBegin { get; set; }
+    public object APOnSpawnComplete { get; set; }
+    public object APSpawn { get; set; }
+    public object AllPartsSpawned { get; set; }
+    public object AllWaveSpawners { get; set; }
+    public object AthenaFarmhouseBuilt { get; set; }
+    public bool BoarSpawnDistance { get; set; }
+    public object CitizenHouse { get; set; }
+    public object Citizens { get; set; }
+    public object CurrencySpawnInterval { get; set; }
+    public object CurrentDayForSpawning { get; set; }
+    public float DESPAWN_TIME { get; set; }
+    public bool DebugDisableSpawns { get; set; }
+    public object DespawnOnLoad { get; set; }
+    public object ENEMY_CROWNSTEALER_SPAWNED { get; set; }
+    public object EnemySpawn { get; set; }
+    public object Farmhouse { get; set; }
+    public object GoToSpawner { get; set; }
+    public object GreedWaveSpawned { get; set; }
+    public bool HasSpawned { get; set; }
+    public bool IsBeggarSpawnAllowed { get; set; }
+    public bool IsDespawning { get; set; }
+    public bool IsInfectedCitizen { get; set; }
+    public bool IsSpawned { get; set; }
+    public bool IsSpawning { get; set; }
+    public bool IsSpawningVolley { get; set; }
+    public object KINGDOM_DESPAWN_PSEUDODYN { get; set; }
+    public object KINGDOM_SPAWNP2 { get; set; }
+    public object KINGDOM_SPAWN_DOG { get; set; }
+    public object KINGDOM_SPAWN_FREESTEED { get; set; }
+    public object KINGDOM_SPAWN_HERMIT { get; set; }
+    public object KINGDOM_SPAWN_SAILINBOAT { get; set; }
+    public object LastDayLootWasSpawned { get; set; }
+    public object Lighthouse { get; set; }
+    public object LootTrollSpawnAttempts { get; set; }
+    public bool MISC_DEBUG_SPAWN { get; set; }
+    public object NextSpawner { get; set; }
+    public object OnAthenaFarmhouseBuilt { get; set; }
+    public object OnDespawn { get; set; }
+    public object OnEnemiesSpawned { get; set; }
+    public int PlayerThatSpawnBombId { get; set; }
+    public object RewardSpawned { get; set; }
+    public object ShouldSpawn { get; set; }
+    public float SpawnDuration { get; set; }
+    public bool SpawnOnDisembark { get; set; }
+    public object SpawnPositionY { get; set; }
+    public object SpawnStartDay { get; set; }
+    public object SpawnedFormation { get; set; }
+    public object SpawnedLootTrolls { get; set; }
+    public object Spawner { get; set; }
+    public object Spawning { get; set; }
+    public object SpawningBlocked { get; set; }
+    public bool SpawningEnabled { get; set; }
+    public object WORLD_POOL_DESPAWN { get; set; }
+    public object WORLD_POOL_SPAWN { get; set; }
+    public object WORLD_REQUEST_SPAWN_WINTER_BOAR { get; set; }
+    public object WORLD_SPAWN_WINTER_BOAR { get; set; }
+    public float WellFedTimer { get; set; }
+    public object _DespawnOnLoad_k__BackingField { get; set; }
+    public int _PlayerThatSpawnBombId_k__BackingField { get; set; }
+    public object _SpawnedFormation_k__BackingField { get; set; }
+    public object _Spawner_k__BackingField { get; set; }
+    public object _SpawningBlocked_k__BackingField { get; set; }
+    public float _WellFedTimer_k__BackingField { get; set; }
+    public int __numberOfAvailableCitizens_k__BackingField { get; set; }
+    public float __timePassedSinceLastSpawn_k__BackingField { get; set; }
+    public bool _activeSteedSpawn { get; set; }
+    public object _actuallyDespawnShop { get; set; }
+    public object _adjustedVFXSpawnPos { get; set; }
+    public object _animationSpawnDelay { get; set; }
+    public object _archersToSpawn { get; set; }
+    public object _attackRockSpawnHeight { get; set; }
+    public float _attackTimer { get; set; }
+    public object _berryBushSpawnSeconds { get; set; }
+    public bool _boarClosestSpawnDistanceFromCampfire { get; set; }
+    public object _boarSpawnOffset { get; set; }
+    public object _bossEnemySpawn { get; set; }
+    public float _busyTimerRunning { get; set; }
+    public object _citizenLayer { get; set; }
+    public bool _citizenScanner { get; set; }
+    public object _citizensFilter { get; set; }
+    public int _clientsideHasSpawned { get; set; }
+    public object _closeAfterSpawn { get; set; }
+    public object _closestContentLayerSpawn { get; set; }
+    public object _cooldownOfSpawning { get; set; }
+    public object _currencyBagSpawnForceXRange { get; set; }
+    public object _currencyBagSpawnForceYRange { get; set; }
+    public object _currencySpawnForceXRange { get; set; }
+    public object _currencySpawnForceYRange { get; set; }
+    public object _currentFarmhouse { get; set; }
+    public object _currentSpawned_5__3 { get; set; }
+    public float _cursedCrownPortalsTimer { get; set; }
+    public object _damagingAreasSpawned_5__4 { get; set; }
+    public object _dayStartedSpawning { get; set; }
+    public object _delayAfterWaveSpawning { get; set; }
+    public object _delayBeforeWaveSpawning { get; set; }
+    public object _despawnDelay { get; set; }
+    public float _despawnDuration { get; set; }
+    public float _despawnDurationSeconds { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    public void AddEnemyWaveSpawner_Public_Void_EnemyWaveSpawner_0() { }
+    public void AddFarmhouse_Public_Void_Farmhouse_0() { }
+    private int AddSpawninfoToText_Private_Static_Void_Int32_Int32_Int32_byref_String_0(int value, string text) { }
+    private bool AllSpawnersComplete_Private_Boolean_0(bool flag) { }
+    private bool ApplyBoat_Private_Void_Lighthouse_byref_Boat_WreckPlaceholder_Wharf_BoatSailPosition_Boolean_Boolean_SailAwayGroup_0(bool flag) { }
+    public void AssignToStable_Public_Void_Farmhouse_0() { }
+    private bool AttemptSpawnSync_Private_CRPCHeader_GameObject_Int16_Boolean_Boolean_0(bool flag) { }
+    public void BecomeChild_Public_Void_Farmhouse_Farmland_Side_0() { }
+    public int BeginInvoke_Public_Virtual_New_IAsyncResult_Int32_IAssembledBuildProjectSpawner_AsyncCallback_Object_0(int value) { }
+    private void BossSpawnRoutine_Private_IEnumerator_1_Yield_0() { }
+    private float BuffCitizensRoutine_Private_IEnumerator_Single_0(float value) { }
+    public float BuffCitizens_Public_Void_Single_0(float value) { }
+    private bool CanSpawnBerryBush_Private_Boolean_Single_0(bool flag, float value) { }
+    public bool CanSpawnNewFarmland_Public_Boolean_0(bool flag) { }
+    public bool CanSpawnThicket_Public_Boolean_Grass_0(bool flag) { }
+    private bool CanSpawnWinterCritters_Private_Boolean_0(bool flag) { }
+    public bool CanSpawn_Public_Static_Boolean_Int32_0(int value, bool flag) { }
+    private void CatchupPoolSpawns_Private_IEnumerator_0() { }
+    public bool CaveSpawnerCountCheck_Public_Boolean_0(bool flag) { }
+    public void CheckShouldSpawnShieldWall_Public_Void_Wall_0() { }
+    public void ClearSpawnQueue_Public_Void_0() { }
+    private void ClearSpawnedObjects_Private_Void_0() { }
+    public void ClosestSpawnerOnSameSideOfCampfire_Public_Portal_Transform_0() { }
+    public bool ClosestSpawner_Public_Portal_Side_Boolean_0(bool flag) { }
+    public bool CreateInGameTimer_Public_Static_Void_Single_Int32_Boolean_0(int value, bool flag, float value) { }
+    private void DeSpawnPeasants_Private_Void_0() { }
+    public void DebugSpawnFinishedObject_Public_Void_0() { }
+    private void DebugSpawn_Private_Void_GameObject_0() { }
+    private void DelayDespawn_Private_IEnumerator_0() { }
+    private void DelayGemSpawn_Private_IEnumerator_1_Yield_0() { }
+    private void DelayShopSpawn_Private_IEnumerator_ShopType_0() { }
+    private void DespawnAfterSeconds_Private_IEnumerator_0() { }
+    private float DespawnAfterSeconds_Private_IEnumerator_Single_0(float value) { }
+    private void DespawnAllManualAttackObjects_Private_Void_0() { }
+    private void DespawnBarrier_Private_Void_0() { }
+    private void DespawnBuildingRoutine_Private_IEnumerator_1_Yield_GameObject_0() { }
+    public void DespawnCurrency_Public_Void_BagCurrency_0() { }
+    public void DespawnImmediately_Public_Void_0() { }
+    public void DespawnObjectFromNetwork_Public_Void_PoolDespawn_0() { }
+    private void DespawnOnLoadRoutine_Private_IEnumerator_0() { }
+    public void DespawnOrDestroyImmediate_Public_Static_Void_GameObject_0() { }
+    public float DespawnOrDestroy_Public_Static_Void_GameObject_Single_0(float value) { }
+    private void DespawnRoutine_Private_IEnumerator_0() { }
+    protected bool DespawnRoutine_Protected_Abstract_Virtual_New_IEnumerator_Portal_Single_Boolean_0(bool flag, float value) { }
+    protected bool DespawnRoutine_Protected_Virtual_IEnumerator_Portal_Single_Boolean_0(bool flag, float value) { }
+    private void DespawnShop_Private_IEnumerator_1_Yield_ShopType_0() { }
+    private int DespawnSpitOverMax_Private_Void_Int32_0(int value) { }
+    private void DespawnTimer_Private_IEnumerator_0() { }
+    public void DespawnUnits_Public_Abstract_Virtual_New_Void_0() { }
+    public void DespawnUnits_Public_Virtual_Final_New_Void_0() { }
+}
+
+// ==============================================================================
+// Building
+// Found: 25 fields, 49 properties, 71 methods
+// ==============================================================================
+public class Building : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private object Building;
+    private object CageInConstruction;
+    private object Constructing;
+    private object FleetBoatInConstruction;
+    private object OnConstructionComplete;
+    private object OnManualConstructionStarted;
+    private object OnPayableUpgraded;
+    private object autoReconstruct;
+    private object blockPaymentUpgrade;
+    private object boatConstructed;
+    private object buildingDustPrefab;
+    private object buildingSound;
+    private object deactivateAfterUpgrade;
+    private object extraExternalConstructor;
+    private object hintUpgradeCastle1;
+    private object hintUpgradeCastle2;
+    private object hintUpgradeCastle3;
+    private object hintWaitWhileBuilding;
+    private bool isHornUpgrade;
+    private object passengerUpgrades;
+    private object stoneBuildingUnlocked;
+    private object technologyUpgrade;
+    private object upgradeSpriteAsset;
+    private object upgradeTier;
+    private object usesConstructionBuildingComponent;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public object Building { get; set; }
+    public object CageInConstruction { get; set; }
+    public object Constructing { get; set; }
+    public object FleetBoatInConstruction { get; set; }
+    public object IronBuildingUnlocked { get; set; }
+    public object OnConstructionComplete { get; set; }
+    public object OnManualConstructionStarted { get; set; }
+    public object OnPayableUpgraded { get; set; }
+    public object StoneBuildingUnlocked { get; set; }
+    public object UnderConstruction { get; set; }
+    public object _Building_k__BackingField { get; set; }
+    public object _buildingCompleteAddSound { get; set; }
+    public object _buildingCompleteSound { get; set; }
+    public object _buildingSound { get; set; }
+    public object _buildingStartedSound { get; set; }
+    public object _castleConstructing_k__BackingField { get; set; }
+    public object _constructionBuilding { get; set; }
+    public object _constructionBuildingComponent { get; set; }
+    public object _constructionPosition { get; set; }
+    public object _currentUpgradeTier { get; set; }
+    public object _debugUpgradeNow { get; set; }
+    public int _dividerUpgradeTime { get; set; }
+    public bool _isUpgrade { get; set; }
+    public object _payableUpgrade { get; set; }
+    public object _rebuildingChunk { get; set; }
+    public object _upgrade { get; set; }
+    public object _upgradeVFX { get; set; }
+    public object _upgradeable_5__5 { get; set; }
+    public object _workableBuilding { get; set; }
+    public object autoReconstruct { get; set; }
+    public object blockPaymentUpgrade { get; set; }
+    public object boatConstructed { get; set; }
+    public object buildingDustPrefab { get; set; }
+    public object buildingSound { get; set; }
+    public object castleConstructing { get; set; }
+    public object deactivateAfterUpgrade { get; set; }
+    public object extraExternalConstructor { get; set; }
+    public object hintUpgradeCastle1 { get; set; }
+    public object hintUpgradeCastle2 { get; set; }
+    public object hintUpgradeCastle3 { get; set; }
+    public object hintWaitWhileBuilding { get; set; }
+    public bool isHornUpgrade { get; set; }
+    public object passengerUpgrades { get; set; }
+    public object stoneBuildingUnlocked { get; set; }
+    public object technologyUpgrade { get; set; }
+    public object unconstructed { get; set; }
+    public object upgradeSpriteAsset { get; set; }
+    public object upgradeTier { get; set; }
+    public object usesConstructionBuildingComponent { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    public void AddExternalConstructor_Public_Static_Void_IExternalConstructor_0() { }
+    public void ApplyUpgradeData_Public_Abstract_Virtual_New_Void_GameObject_0() { }
+    public void ApplyUpgradeData_Public_Virtual_Final_New_Void_GameObject_0() { }
+    private void Building_Private_IEnumerator_0() { }
+    private bool CanUpgradeToRank_Private_Boolean_Int32_Stat_Int32_Boolean_0(int value, bool flag) { }
+    public void CompleteConstruction_Public_Void_0() { }
+    private void ConstructionComplete_Private_Void_0() { }
+    private bool ConstructionComplete_Private_Void_Boolean_0(bool flag) { }
+    private int DeconstructFieldProperties_Private_Static_Void_FieldProperties_Int32_byref_Value_0(int value) { }
+    private int DeconstructFields_Private_Static_Void_Int32_Int32_0(int value) { }
+    private int DeconstructIndexedFieldProperties_Private_Static_Void_FieldProperties_Int32_Int32_byref_Value_0(int value) { }
+    private int DeconstructObjectMember_Private_Static_Void_Object_Int32_byref_Value_0(int value) { }
+    private int DeconstructPrimitiveMember_Private_Static_Void_primitive_TypeCode_Int32_byref_Value_0(int value) { }
+    private int Deconstruct_Private_Static_Int32_Object_Int32_0(int value) { }
+    public void Deconstruct_Public_Abstract_Virtual_New_Void_BinaryWriter_0() { }
+    public void Deconstruct_Public_Abstract_Virtual_New_Void_Object_Type_BinaryWriter_0() { }
+    public void Deconstruct_Public_Virtual_Final_New_Void_Object_Type_BinaryWriter_0() { }
+    private void DespawnBuildingRoutine_Private_IEnumerator_1_Yield_GameObject_0() { }
+    private bool GetUpgradePrefab_Private_GameObject_Boolean_0(bool flag) { }
+    public object GetUpgradeableType_Public_Abstract_Virtual_New_Type_0() { }
+    public object GetUpgradeableType_Public_Virtual_Final_New_Type_0() { }
+    private void HandleOnConstructionComplete_Private_Void_0() { }
+    private void HandleOnKeepConstructionComplete_Private_Void_0() { }
+    public void HandleOnPayableUpgrade_Public_Void_GameObject_0() { }
+    private void HandleOnPayableUpgraded_Private_Void_GameObject_0() { }
+    private void HandleOnUpgraded_Private_Void_GameObject_0() { }
+    public bool HasUpgrade_Public_Boolean_0(bool flag) { }
+    private void InternalReconstruct_Private_Void_0() { }
+    private void InternalUpgradeDivider_Private_IEnumerator_0() { }
+    public bool IsConstructing_Public_Static_Boolean_Int32_0(int value, bool flag) { }
+    private void LogDeconstructionStart_Private_Static_Void_0() { }
+    private int LogFailedReconstruction_Private_Static_Void_Type_Int32_0(int value) { }
+    private int LogObjectDeconstruct_Private_Static_Void_Int32_Int32_Int32_0(int value) { }
+    public void OnButtonConstructTrojanHorse_Public_Void_0() { }
+    private void OnCollectionBuildingBuiltHandler_Private_Void_0() { }
+    private void OnConstructionCompleteHandler_Private_Void_0() { }
+    private void OnConstructionCompletedHandler_Private_Void_0() { }
+    public void OnUpgradeFrom_Public_Void_TeleporterRift_0() { }
+    public void OnUpgraded_Public_Abstract_Virtual_New_Void_0() { }
+    public void OnUpgraded_Public_Virtual_Final_New_Void_0() { }
+    private void PlayBuildingSound_Private_Void_0() { }
+    private void PlayConstructionCompleteSound_Private_Void_0() { }
+    public void PlayUpgradeEffect_Public_Void_0() { }
+    private void ReQueueAllBuildings_Private_Void_0() { }
+    private int ReadObject_Private_Static_Void_BinaryReader_byref_DeconstructedObject_Int32_0(int value) { }
+    private bool ReconstructMemberValue_Private_Static_Boolean_Value_byref_Object_0(bool flag) { }
+    private void ReconstructMembers_Private_Static_Void_BinaryReader_byref_DeconstructedObject_0() { }
+    public void Reconstruct_Public_Abstract_Virtual_New_Object_Type_BinaryReader_0() { }
+    public void Reconstruct_Public_Virtual_Final_New_Object_Type_BinaryReader_0() { }
+    public void Reconstruct_Public_Void_0() { }
+}
+
+// ==============================================================================
+// Wallet
+// Found: 83 fields, 121 properties, 32 methods
+// ==============================================================================
+public class Wallet : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private object COIN;
+    private object COST;
+    private object Coins;
+    private object GrabCoin;
+    private object INITIAL;
+    private object MAX;
+    private object MIN;
+    private object OVERFLOW;
+    private object PLAYER;
+    private object PLAYFAB;
+    private object SPLASH;
+    private object TotalCapacity;
+    private object autoDropCoins;
+    private bool canGrabCoins;
+    private object capacity;
+    private object coin;
+    private object coinDropForce;
+    private object coinDropOffset;
+    private object coinDropProbability;
+    private object coinGatherTargetPercentage;
+    private object coinImages;
+    private object coinInWaterChance;
+    private bool coinInWaterPlayerDistance;
+    private object coinLayer;
+    private object coinOffset;
+    private object coinPawnsXOffset;
+    private object coinPickupRange;
+    private object coinPickupSound;
+    private object coinPrice;
+    private bool coinScanRange;
+    private object coinSpotRange;
+    private object coinTouchSound;
+    private bool coinVisibleDistance;
+    private object coinYield;
+    private object coins;
+    private object coins1;
+    private object coins2;
+    private object coinsLeftToGive;
+    private object coinsTopUp;
+    private object defaultInitialWaitCapacity;
+    private object demoteAtCoins;
+    private object dropCoinOffset;
+    private object dropCoinsBeforeDemote;
+    private object dropCoinsChance;
+    private Vector3 gainStartingCoinsPostLoss;
+    private object initialMemberCapacity;
+    private object initialObjectCapacity;
+    private object initialParsedPrefabCapacity;
+    private object killRewardDelayPerCoin;
+    private int knightCoinCounts;
+    private object limit;
+    private object limitTargetsForWholeAttack;
+    private object logDefaultInitialCapacity;
+    private bool maxCoinPickupDistance;
+    private object mouseCoinOffset;
+    private object mouseCoinXForce;
+    private object mouseCoinYForce;
+    private float nextPlayWithCoinTime;
+    private int numCoins;
+    private int numCoinsDropped;
+    private int numberOfPlaysPerCoin;
+    private object onlyGrabPlayerCoins;
+    private object originalWallet;
+    private object overflowCoinsWaterProbability;
+    private object playCoin;
+    private object playWithCoinCooldown;
+    private object playerMaxCoins;
+    private object playfabOverLimit;
+    private object playingWithCoin;
+    private object showCoinBagButton;
+    private Vector3 singlePlayerCoinPos;
+    private int squireCoinCounts;
+    private object startingCoins;
+    private int startingCoinsContinueOverride;
+    private object stashedCoins;
+    private object statCoinDroppedOnGround;
+    private object statCoinFellOut;
+    private object statCoinsSpent;
+    private float timeBetweenCoins;
+    private float timeBetweenCoinsForTouchSupport;
+    private object versionLengthLimit;
+    private object wallet;
+    private object walletInitialCoins;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public object COIN_BAG_MERGE_HEIGHT { get; set; }
+    public object COIN_BAG_SPLIT_HORI_HEIGHT_BOTTOM { get; set; }
+    public object COIN_BAG_SPLIT_HORI_HEIGHT_TOP { get; set; }
+    public object COST_LIMIT { get; set; }
+    public bool CanGrabCoins { get; set; }
+    public object Coins { get; set; }
+    public object GrabCoin { get; set; }
+    public object INITIAL_RENDERER_CAPACITY { get; set; }
+    public object INITIAL_ROOT_CAPACITY { get; set; }
+    public object INITIAL_SCENE_CAPACITY { get; set; }
+    public object MAX_COIN_PRICE { get; set; }
+    public object MAX_PAYLOAD_CAPACITY { get; set; }
+    public object MAX_PAY_COINS_FORCE { get; set; }
+    public object MIN_COIN_PRICE { get; set; }
+    public object OVERFLOW_LIMIT { get; set; }
+    public float PLAYER_COIN_SPEED_MODIFIER { get; set; }
+    public object PLAYFAB_OVER_LIMIT_ERROR { get; set; }
+    public object SPLASH_SKIP_STARTUP_LIMIT { get; set; }
+    public object TotalCapacity { get; set; }
+    public object Wallet { get; set; }
+    public object _coinDropForce { get; set; }
+    public object _coinDropOffset { get; set; }
+    public object _coinIndicatorsP1 { get; set; }
+    public object _coinIndicatorsP2 { get; set; }
+    public bool _coinScanRange { get; set; }
+    public bool _coinScanner { get; set; }
+    public object _coinYield { get; set; }
+    public object _coins_5__2 { get; set; }
+    public int _currentCoinCount { get; set; }
+    public object _empowerExtraCoins { get; set; }
+    public object _ignoreCoins { get; set; }
+    public int _limitedNumItems { get; set; }
+    public int _numCoinsDropped { get; set; }
+    public int _numCoinsToDrop_5__4 { get; set; }
+    public int _numCoins_5__2 { get; set; }
+    public int _numCoins_5__3 { get; set; }
+    public object _originalWallet { get; set; }
+    public object _pickupCoinSound { get; set; }
+    public object _proximityCoinDropping { get; set; }
+    public object _spawnCoins { get; set; }
+    public object _stashedCoins { get; set; }
+    public object _statueBuffMaxCoins { get; set; }
+    public object _targetCoin { get; set; }
+    public int _updateItemLimitIndex { get; set; }
+    public object _wallet { get; set; }
+    public int _walletCountIndex { get; set; }
+    public object _wallet_k__BackingField { get; set; }
+    public object autoDropCoins { get; set; }
+    public bool canGrabCoins { get; set; }
+    public object capacity { get; set; }
+    public object coin { get; set; }
+    public object coinDropForce { get; set; }
+    public object coinDropOffset { get; set; }
+    public object coinDropProbability { get; set; }
+    public object coinGatherTargetPercentage { get; set; }
+    public object coinImages { get; set; }
+    public object coinInWaterChance { get; set; }
+    public bool coinInWaterPlayerDistance { get; set; }
+    public object coinLayer { get; set; }
+    public object coinOffset { get; set; }
+    public object coinPawnsXOffset { get; set; }
+    public object coinPickupRange { get; set; }
+    public object coinPickupSound { get; set; }
+    public object coinPrice { get; set; }
+    public bool coinScanRange { get; set; }
+    public object coinSpotRange { get; set; }
+    public object coinTouchSound { get; set; }
+    public bool coinVisibleDistance { get; set; }
+    public object coinYield { get; set; }
+    public object coins { get; set; }
+    public object coins1 { get; set; }
+    public object coins2 { get; set; }
+    public object coinsLeftToGive { get; set; }
+    public object coinsTopUp { get; set; }
+    public object defaultInitialWaitCapacity { get; set; }
+    public object demoteAtCoins { get; set; }
+    public object dropCoinOffset { get; set; }
+    public object dropCoinsBeforeDemote { get; set; }
+    public object dropCoinsChance { get; set; }
+    public object gainStartingCoinsPostLoss { get; set; }
+    public object initialMemberCapacity { get; set; }
+    public object initialObjectCapacity { get; set; }
+    public object initialParsedPrefabCapacity { get; set; }
+    public object initialWaitCapacity { get; set; }
+    public object killRewardDelayPerCoin { get; set; }
+    public int knightCoinCounts { get; set; }
+    public object limit { get; set; }
+    public object limitTargetsForWholeAttack { get; set; }
+    public object logDefaultInitialCapacity { get; set; }
+    public object logInitialCapacity { get; set; }
+    public bool maxCoinPickupDistance { get; set; }
+    public object mouseCoinOffset { get; set; }
+    public object mouseCoinXForce { get; set; }
+    public object mouseCoinYForce { get; set; }
+    public float nextPlayWithCoinTime { get; set; }
+    public int numCoins { get; set; }
+    public int numCoinsDropped { get; set; }
+    public int numberOfPlaysPerCoin { get; set; }
+    public object onlyGrabPlayerCoins { get; set; }
+    public object originalWallet { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    private void ApplyCoinRestriction_Private_Void_0() { }
+    private void ClaimCoins_Private_Void_0() { }
+    public void CoinFellFromBag_Public_Void_CurrencyType_0() { }
+    private void DropCoins_Private_IEnumerator_0() { }
+    private int DropCoins_Private_IEnumerator_CurrencyType_Transform_Int32_0(int value) { }
+    private void FindCoin_Private_DroppableCurrency_0() { }
+    public bool FlipCoin_Public_Static_Boolean_0(bool flag) { }
+    public int FloatingCoinPosition_Public_Virtual_New_Vector3_Int32_0(int value) { }
+    public bool GetKnightCoinCount_Public_List_1_Int32_SailAwayGroup_Boolean_0(int value, bool flag) { }
+    private void GrabCoin_Private_IEnumerator_0() { }
+    public int LimitNumberOfItems_Public_Void_Int32_0(int value) { }
+    private void OnAnimPlayWithCoin_Private_Void_0() { }
+    public void OnButtonGiveCoins_Public_Void_0() { }
+    public void OnButtonHideShowCoinbag_Public_Void_0() { }
+    private void OnPlayCoinPickedUp_Private_Void_Droppable_0() { }
+    private void ProximityCoinDropping_Private_IEnumerator_1_Yield_0() { }
+    private void ReceiveSuckCoinRPC_Private_Void_0() { }
+    private void RecvItemLimit_Private_Void_0() { }
+    public void RecvWalletCurrencyCount_Public_Void_0() { }
+    private void ResetPlayCoin_Private_Void_0() { }
+    public int SendHeroStatCoinsSpent_Public_Static_Void_String_byref_Guid_Int32_0(int value, string text) { }
+    private int SendItemLimit_Private_Void_Int32_0(int value) { }
+    public void SendWalletCurrencyCount_Public_Void_CurrencyType_0() { }
+    private bool SetCoinDropRestriction_Private_Static_Void_Boolean_0(bool flag) { }
+    public int SetMinimumResponderCapacity_Public_Void_Int32_0(int value) { }
+    private bool ShouldGrabCoin_Private_Boolean_0(bool flag) { }
+    private void SpawnCoins_Private_IEnumerator_1_Yield_0() { }
+    private void TapOnCoins_Private_IEnumerator_Payable_0() { }
+    private bool TargetCoinPickedUp_Private_Boolean_0(bool flag) { }
+    private void TopUpCoins_Private_Void_0() { }
+    public bool TryPickupCoin_Public_Boolean_GameObject_0(bool flag) { }
+    private void UpdateItemLimit_Private_Void_0() { }
+}
+
+// ==============================================================================
+// CurrencyBag
+// Found: 92 fields, 169 properties, 135 methods
+// ==============================================================================
+public class CurrencyBag : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private object AllCurrencyTypes;
+    private object BagPrefab;
+    private object COIN;
+    private object Coins;
+    private object Currency;
+    private object CurrencyBag;
+    private object CurrencyMask;
+    private object CurrencySpawnInterval;
+    private object CurrencyType;
+    private object GoesIntoBag;
+    private object GrabCoin;
+    private object MAX;
+    private object MIN;
+    private bool MISC;
+    private object OnPickupCurrency;
+    private object PLAYER;
+    private object ShouldShowCurrencyBag;
+    private object autoDropCoins;
+    private bool canGrabCoins;
+    private object coin;
+    private object coinDropForce;
+    private object coinDropOffset;
+    private object coinDropProbability;
+    private object coinGatherTargetPercentage;
+    private object coinImages;
+    private object coinInWaterChance;
+    private bool coinInWaterPlayerDistance;
+    private object coinLayer;
+    private object coinOffset;
+    private object coinPawnsXOffset;
+    private object coinPickupRange;
+    private object coinPickupSound;
+    private object coinPrice;
+    private bool coinScanRange;
+    private object coinSpotRange;
+    private object coinTouchSound;
+    private bool coinVisibleDistance;
+    private object coinYield;
+    private object coins;
+    private object coins1;
+    private object coins2;
+    private object coinsLeftToGive;
+    private object coinsTopUp;
+    private object currency;
+    private int currencyAmount;
+    private object currencyDropSound;
+    private object currencyLaunchSound;
+    private object currencyP1;
+    private object currencyP2;
+    private object currencyPickupSound;
+    private object currencyType;
+    private object demoteAtCoins;
+    private object dropCoinOffset;
+    private object dropCoinsBeforeDemote;
+    private object dropCoinsChance;
+    private object dropCurrencySound;
+    private Vector3 gainStartingCoinsPostLoss;
+    private object killRewardDelayPerCoin;
+    private int knightCoinCounts;
+    private bool maxCoinPickupDistance;
+    private object mouseCoinOffset;
+    private object mouseCoinXForce;
+    private object mouseCoinYForce;
+    private float nextPlayWithCoinTime;
+    private int numCoins;
+    private int numCoinsDropped;
+    private int numberOfPlaysPerCoin;
+    private object onlyGrabPlayerCoins;
+    private object overflowCoinsWaterProbability;
+    private object playCoin;
+    private object playWithCoinCooldown;
+    private object playerMaxCoins;
+    private object playingWithCoin;
+    private object rewardCurrencyRemaining;
+    private object rewardCurrencyType;
+    private object showCoinBagButton;
+    private object showCurrencyBag;
+    private Vector3 singlePlayerCoinPos;
+    private int squireCoinCounts;
+    private object startingCoins;
+    private int startingCoinsContinueOverride;
+    private object stashedCoins;
+    private object statCoinDroppedOnGround;
+    private object statCoinFellOut;
+    private object statCoinsSpent;
+    private int suckCurrencyRPCIndex;
+    private float timeBetweenCoins;
+    private float timeBetweenCoinsForTouchSupport;
+    private object unlockedCurrencyBagType;
+    private object usesCurrencySystem;
+    private object walletInitialCoins;
+    private object yieldCurrencyType;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public object AllCurrencyTypes { get; set; }
+    public object BagPrefab { get; set; }
+    public object COIN_BAG_MERGE_HEIGHT { get; set; }
+    public object COIN_BAG_SPLIT_HORI_HEIGHT_BOTTOM { get; set; }
+    public object COIN_BAG_SPLIT_HORI_HEIGHT_TOP { get; set; }
+    public bool CanGrabCoins { get; set; }
+    public object Coins { get; set; }
+    public object Currency { get; set; }
+    public object CurrencyBag { get; set; }
+    public object CurrencyMask { get; set; }
+    public object CurrencySpawnInterval { get; set; }
+    public object CurrencyToDrop { get; set; }
+    public object CurrencyType { get; set; }
+    public int DebugHideCurrencyBag { get; set; }
+    public object GoesIntoBag { get; set; }
+    public object GrabCoin { get; set; }
+    public bool HasDroppableCurrency { get; set; }
+    public object MAX_COIN_PRICE { get; set; }
+    public object MAX_PAY_COINS_FORCE { get; set; }
+    public object MIN_COIN_PRICE { get; set; }
+    public bool MISC_UPDATE_CURRENCY_BAG { get; set; }
+    public object OnPickupCurrency { get; set; }
+    public float PLAYER_COIN_SPEED_MODIFIER { get; set; }
+    public object ShouldShowCurrencyBag { get; set; }
+    public object TotalCurrency { get; set; }
+    public object UnlocksCurrencyBagType { get; set; }
+    public int _DebugHideCurrencyBag_k__BackingField { get; set; }
+    public object _bag { get; set; }
+    public object _cachedIndicatorCurrencyType { get; set; }
+    public object _charonArrivalCurrency { get; set; }
+    public object _charonDepartureCurrency { get; set; }
+    public object _coinDropForce { get; set; }
+    public object _coinDropOffset { get; set; }
+    public object _coinIndicatorsP1 { get; set; }
+    public object _coinIndicatorsP2 { get; set; }
+    public bool _coinScanRange { get; set; }
+    public bool _coinScanner { get; set; }
+    public object _coinYield { get; set; }
+    public object _coins_5__2 { get; set; }
+    public object _currency { get; set; }
+    public int _currencyAmount { get; set; }
+    public object _currencyAnchorZOffset { get; set; }
+    public object _currencyBag { get; set; }
+    public object _currencyBagPrefab { get; set; }
+    public object _currencyBagSpawnForceXRange { get; set; }
+    public object _currencyBagSpawnForceYRange { get; set; }
+    public object _currencyConfig { get; set; }
+    public int _currencyDroppedFromDamageIndex { get; set; }
+    public bool _currencyDroppingEnabled_k__BackingField { get; set; }
+    public object _currencyIndicatorContainer { get; set; }
+    public object _currencyIndicatorHeight { get; set; }
+    public object _currencyLTR_5__2 { get; set; }
+    public object _currencyMapping { get; set; }
+    public object _currencyMappingCache { get; set; }
+    public object _currencyObjects { get; set; }
+    public object _currencyReward { get; set; }
+    public bool _currencyScanner { get; set; }
+    public object _currencySpawnForceXRange { get; set; }
+    public object _currencySpawnForceYRange { get; set; }
+    public object _currencyToAdd { get; set; }
+    public object _currencyToDrop { get; set; }
+    public object _currencyType { get; set; }
+    public object _currencyType_5__2 { get; set; }
+    public int _currentCoinCount { get; set; }
+    public object _currentCurrency { get; set; }
+    public object _currentPlayerBags { get; set; }
+    public object _currrencyBagHandler { get; set; }
+    public object _dripCurrency { get; set; }
+    public object _droppableCurrency { get; set; }
+    public object _empowerExtraCoins { get; set; }
+    public object _floatingCurrency { get; set; }
+    public object _hermesBags { get; set; }
+    public object _ignoreCoins { get; set; }
+    public int _numCoinsDropped { get; set; }
+    public int _numCoinsToDrop_5__4 { get; set; }
+    public int _numCoins_5__2 { get; set; }
+    public int _numCoins_5__3 { get; set; }
+    public object _pickupCoinSound { get; set; }
+    public object _proximityCoinDropping { get; set; }
+    public object _regularBags { get; set; }
+    public object _showingCurrency { get; set; }
+    public object _spawnCoins { get; set; }
+    public int _spawnCurrencyBagRPCIndex { get; set; }
+    public object _stashedCoins { get; set; }
+    public object _statueBuffMaxCoins { get; set; }
+    public int _stopPhysicsIndex { get; set; }
+    public object _targetCoin { get; set; }
+    public object _unlocksCurrencyBagType { get; set; }
+    public object _yieldCurrencyType { get; set; }
+    public object autoDropCoins { get; set; }
+    public object bag { get; set; }
+    public bool canGrabCoins { get; set; }
+    public object coin { get; set; }
+    public object coinDropForce { get; set; }
+    public object coinDropOffset { get; set; }
+    public object coinDropProbability { get; set; }
+    public object coinGatherTargetPercentage { get; set; }
+    public object coinImages { get; set; }
+    public object coinInWaterChance { get; set; }
+    public bool coinInWaterPlayerDistance { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    private void AddCurrencyIndicators_Private_Void_Player_0() { }
+    public void AddCurrencyToSelectedPayable_Public_Void_0() { }
+    private int AddCurrency_Private_Void_CurrencyType_Int32_0(int value) { }
+    public int AddCurrency_Public_Void_CurrencyType_Int32_0(int value) { }
+    public void AllowGrabCurrency_Public_Void_0() { }
+    private void ApplyCarryForwardCurrency_Private_Void_Player_Player_0() { }
+    private void ApplyCoinRestriction_Private_Void_0() { }
+    public bool CanBeDropped_Public_Static_Boolean_CurrencyType_0(bool flag) { }
+    private bool CanDropCurrency_Private_Boolean_CurrencyType_0(bool flag) { }
+    public bool CanDropInWater_Public_Static_Boolean_CurrencyType_0(bool flag) { }
+    public bool CanGrabCurrency_Public_Boolean_CurrencyType_0(bool flag) { }
+    public int ChangeCurrencyBag_Public_Void_CurrencyBagType_Int32_0(int value) { }
+    private void ClaimCoins_Private_Void_0() { }
+    public void Clone_Public_CurrencyMap_1_T_0() { }
+    public void CoinFellFromBag_Public_Void_CurrencyType_0() { }
+    public bool Contains_Public_Boolean_CurrencyType_0(bool flag) { }
+    public void CurrencyFell_Public_Void_BagCurrency_0() { }
+    public void CustomCurrencyPaymentFailed_Public_Void_CurrencyType_0() { }
+    private void CustomCurrencyPaymentMethod_Private_IPayableCurrency_CurrencyType_Transform_Vector3_0() { }
+    public void CustomCurrencyPaymentSuccessful_Public_Void_CurrencyType_0() { }
+    public void DespawnCurrency_Public_Void_BagCurrency_0() { }
+    private bool DetermineBagLayer_Private_Boolean_CurrencyType_0(bool flag) { }
+    public void DisallowGrabCurrency_Public_Void_0() { }
+    private void DripCurrency_Private_IEnumerator_1_Yield_0() { }
+    private void DropCoins_Private_IEnumerator_0() { }
+    private int DropCoins_Private_IEnumerator_CurrencyType_Transform_Int32_0(int value) { }
+    private void DropCurrency_Private_Void_0() { }
+    private int DropCurrency_Private_Void_CurrencyType_Int32_Nullable_1_Vector2_0(int value) { }
+    public bool DropCurrency_Public_DroppableCurrency_CurrencyType_PickUpPolicy_Boolean_0(bool flag) { }
+    public bool DropCurrency_Public_DroppableCurrency_CurrencyType_Vector2_PickUpPolicy_GameObject_Boolean_Boolean_Boolean_0(bool flag) { }
+    public float DropFloatingCurrency_Public_Void_0() { }
+    public int FastSetCurrency_Public_Void_CurrencyType_Int32_0(int value) { }
+    private void FillCurrencyTypes_Private_Void_0() { }
+    private void FindCoin_Private_DroppableCurrency_0() { }
+    public void FirstAvailableDroppableCurrency_Public_CurrencyType_0() { }
+    public bool FlipCoin_Public_Static_Boolean_0(bool flag) { }
+    public int FloatingCoinPosition_Public_Virtual_New_Vector3_Int32_0(int value) { }
+    private int FloatingCurrencyInRow_Private_Vector3_Int32_Int32_0(int value) { }
+    public int GetCurrencyAmounts_Public_CurrencyMap_1_Int32_0(int value) { }
+    private int GetCurrencyBagByType_Private_CurrencyBag_CurrencyBagType_Int32_0(int value) { }
+    public object GetCurrencyBagStatus_Public_CurrencyBagType_0() { }
+    public object GetCurrencyBag_Public_CurrencyBag_0() { }
+    public float GetCurrencyIndicatorHeight_Public_Single_Player_0(float value) { }
+    public int GetCurrencyIndicatorOffset_Public_Vector3_Int32_0(int value) { }
+    public object GetCurrencyIndicatorPosition_Public_Vector2_0() { }
+    public object GetCurrencyOnClientDisconnectHandling_Public_Static_CurrencyOnClientDisconnectHandling_CurrencyType_0() { }
+    public object GetCurrencyOnGameLossHandling_Public_Static_CurrencyOnGameLossHandling_CurrencyType_0() { }
+    public object GetCurrencyOnGameLossPrefab_Public_Static_GameObject_CurrencyType_0() { }
+    public object GetCurrencyOnSailAwayHandling_Public_Static_CurrencyOnSailAwayHandling_CurrencyType_0() { }
+    public object GetCurrencyTypeIndicator_Public_CurrencyIndicator_CurrencyType_0() { }
+}
+
+// ==============================================================================
+// Damageable
+// Found: 61 fields, 125 properties, 115 methods
+// ==============================================================================
+public class Damageable : MonoBehaviour
+{
+    // ===== PRIVATE FIELDS (from NativeFieldInfoPtr) =====
+    private float APHealth;
+    private object AttackDamage;
+    private int CollideWithPlayerObstacles;
+    private object DamageRange;
+    private object OnDelayDamageEnd;
+    private object OnPreReceiveDamage;
+    private object OnReceiveDamage;
+    private object OnReceiveDelayedDamage;
+    private object OnReceiveRemoteDamage;
+    private object PickupCooldownOnDamage;
+    private object RemainingHP;
+    private bool activeContinualDamageRoutines;
+    private object attackDamage;
+    private object attackDamageForce;
+    private object berryHP;
+    private object breathPuff;
+    private object catapultHighPrio;
+    private object damage;
+    private int damageAmount;
+    private object damageDelayOffset;
+    private float damageDelayTime;
+    private object damagePerTick;
+    private object damageSource;
+    private object damageTicks;
+    private object damageable;
+    private object damagedBy;
+    private object damagedByGreed;
+    private object damager;
+    private object doesDamage;
+    private bool endActiveDamageOnEnd;
+    private bool fishPrefab;
+    private object glyphPlacement;
+    private object hitDamage;
+    private object hp;
+    private object hpRange;
+    private object leapDamage;
+    private object leapDamageForce;
+    private float maskedTrollHealthAddition;
+    private object matchParent;
+    private object maxDamagedTargets;
+    private object maxShieldHp;
+    private float nextShieldHpRegenTime;
+    private object perfectDamageMultiplier;
+    private float portalHealthAddition;
+    private Vector3 pushPositions;
+    private object richPresence;
+    private object richPresenceData;
+    private object rootNetConnectUI;
+    private object shieldHp;
+    private object shieldHpRegenCooldown;
+    private object spawnerDamageable;
+    private bool strengthPerDist;
+    private object strengthPerRadian;
+    private object switchPlayerButton;
+    private object syncHP;
+    private object touchPressedThreshold;
+    private object touchpadTransform;
+    private float toughTrollHealth;
+    private object toughTrollWallDamage;
+    private float trollHealth;
+    private object wallHitDamage;
+
+    // ===== PUBLIC PROPERTIES (from get_/set_) =====
+    public float APHealth { get; set; }
+    public object AppleGrowthPercentage { get; set; }
+    public object AttackDamage { get; set; }
+    public int CollideWithPlayerObstacles { get; set; }
+    public object Damage { get; set; }
+    public object DamagePercentage { get; set; }
+    public object DamageRange { get; set; }
+    public float HealthPercentage { get; set; }
+    public object MouthPortal { get; set; }
+    public object OnDelayDamageEnd { get; set; }
+    public object OnPreReceiveDamage { get; set; }
+    public object OnReceiveDamage { get; set; }
+    public object OnReceiveDelayedDamage { get; set; }
+    public object OnReceiveRemoteDamage { get; set; }
+    public object PickupCooldownOnDamage { get; set; }
+    public object RemainingHP { get; set; }
+    public int RichPresenceID { get; set; }
+    public bool UnityInput_IsTouchPressureSupported { get; set; }
+    public object _anglesThatAllowDamage { get; set; }
+    public object _ashParticles { get; set; }
+    public object _attackDamage { get; set; }
+    public object _berryBushPrefab { get; set; }
+    public object _blockDamageThreshold { get; set; }
+    public object _chompDamage { get; set; }
+    public object _chompDamageForce { get; set; }
+    public bool _chompDamageScanner { get; set; }
+    public int _collidingDamageable { get; set; }
+    public object _critDamage { get; set; }
+    public int _currencyDroppedFromDamageIndex { get; set; }
+    public object _damage { get; set; }
+    public int _damageCollider { get; set; }
+    public object _damageDelay { get; set; }
+    public object _damageDelayOffset { get; set; }
+    public float _damageDelayTime { get; set; }
+    public bool _damageDistance { get; set; }
+    public object _damagePerArrow { get; set; }
+    public object _damagePerTick { get; set; }
+    public object _damageRadius { get; set; }
+    public object _damageRange { get; set; }
+    public object _damageReceivedWhenMinedArmorless { get; set; }
+    public object _damageSource { get; set; }
+    public object _damageTargets { get; set; }
+    public object _damageTicks { get; set; }
+    public object _damageToUnits { get; set; }
+    public object _damageToWalls { get; set; }
+    public object _damageable { get; set; }
+    public object _damageableExtenders { get; set; }
+    public object _damageable_k__BackingField { get; set; }
+    public object _damagedBy { get; set; }
+    public object _damagedBy_k__BackingField { get; set; }
+    public object _deathParticle { get; set; }
+    public object _deathPercentage { get; set; }
+    public object _delayDamageRoutine { get; set; }
+    public object _foundHighPriorityEnemy_5__5 { get; set; }
+    public object _hitDamage { get; set; }
+    public int _hpIndex { get; set; }
+    public object _initialGlyphPosition { get; set; }
+    public float _lastBushPlacementTime { get; set; }
+    public object _launchParticles { get; set; }
+    public object _launchPosition { get; set; }
+    public object _lightningStrikeDamage { get; set; }
+    public object _lightningStrikeDamageRange { get; set; }
+    public object _loginWithPlatformButton { get; set; }
+    public object _meleeDamage { get; set; }
+    public object _mouthPortal { get; set; }
+    public object _originalDamageSource { get; set; }
+    public object _portalDamage { get; set; }
+    public object _previousDamage { get; set; }
+    public object _pushPositions { get; set; }
+    public bool _receivedDamageList_5__4 { get; set; }
+    public int _richPresenceID { get; set; }
+    public object _stoneLayerHP { get; set; }
+    public string _textMeshProUGUI { get; set; }
+    public int _totalNumDamaged_5__2 { get; set; }
+    public float _trollHealth { get; set; }
+    public bool activeContinualDamageRoutines { get; set; }
+    public object attackDamage { get; set; }
+    public object attackDamageForce { get; set; }
+    public object berryHP { get; set; }
+    public object breathPuff { get; set; }
+    public object catapultHighPrio { get; set; }
+    public object damage { get; set; }
+    public int damageAmount { get; set; }
+    public object damageDelayOffset { get; set; }
+    public float damageDelayTime { get; set; }
+    public object damagePerTick { get; set; }
+    public object damageSource { get; set; }
+    public object damageTicks { get; set; }
+    public object damageable { get; set; }
+    public object damagedBy { get; set; }
+    public object damagedByGreed { get; set; }
+    public object damager { get; set; }
+    public object doesDamage { get; set; }
+    public bool endActiveDamageOnEnd { get; set; }
+    public bool fishPrefab { get; set; }
+    public object glyphPlacement { get; set; }
+    public object hitDamage { get; set; }
+    public object hp { get; set; }
+    public object hpRange { get; set; }
+    public object leapDamage { get; set; }
+
+    // ===== METHODS (from NativeMethodInfoPtr) =====
+    private void ApplyCollisionDamage_Private_Void_Damageable_0() { }
+    private int ApplyCollisionDamage_Private_Void_Int32_Damageable_0(int value) { }
+    public bool ApplyDelayedDamage_Public_Void_Single_Single_Int32_Int32_GameObject_DamageSource_Boolean_0(int value, bool flag, float value) { }
+    public void BeginInvoke_Public_Virtual_New_IAsyncResult_Damageable_AsyncCallback_Object_0() { }
+    public int BeginInvoke_Public_Virtual_New_IAsyncResult_Int32_GameObject_DamageSource_AsyncCallback_Object_0(int value) { }
+    public int BeginInvoke_Public_Virtual_New_IAsyncResult_byref_Int32_GameObject_DamageSource_AsyncCallback_Object_0(int value) { }
+    private void BumpInto_Private_BumpOutcome_Damageable_0() { }
+    private void CreateP2PConnectionWithPeer_Private_Void_CSteamID_0() { }
+    private void DamageAffectedEnemies_Private_Void_GameObject_0() { }
+    private float DamageByPunting_Private_Void_Damageable_Single_0(float value) { }
+    private void DealDamage_Private_Void_0() { }
+    private bool DelayDamageApplication_Private_IEnumerator_Single_Int32_Int32_GameObject_DamageSource_Boolean_0(int value, bool flag, float value) { }
+    public void DeregisterLowPriorityTarget_Public_Void_Damageable_0() { }
+    public void DeregisterPriorityTarget_Public_Void_Damageable_0() { }
+    public void DisableDamagedBy_Public_Void_DamageSource_0() { }
+    private int DoDamageArea_Private_Void_Rect_Int32_Vector2_0(int value) { }
+    private float DynamicTargetChomp_Private_Void_Scanner_DamageSource_Single_0(float value) { }
+    public void EnableDamagedBy_Public_Void_DamageSource_0() { }
+    public void EndContinualDamage_Public_Void_GameObject_0() { }
+    public void EndDelayedDamage_Public_Void_0() { }
+    public int GetActualHp_Public_Int32_0(int value) { }
+    private object GetAttackTarget_Private_Damageable_0() { }
+    public int GetCharacterExtraHp_Public_Int32_0(int value) { }
+    public float GetClosestLowPriorityTargetWithinRange_Public_Damageable_Single_Single_SearchConditionDelegate_0(float value) { }
+    public float GetClosestPriorityTargetWithinRange_Public_Damageable_Single_Single_SearchConditionDelegate_SearchConditionDelegate_0(float value) { }
+    public int GetDamageForTarget_Public_Int32_String_0(int value, string text) { }
+    private int GetLaunchPosition_Private_Vector2_GameObject_Int32_0(int value) { }
+    public int GetLowPriorityTargetInRange_Public_Void_Single_Single_Il2CppReferenceArray_1_Damageable_byref_Int32_SearchConditionDelegate_0(int value, float value) { }
+    public int GetPriorityTargetInRange_Public_Void_Single_Single_Il2CppReferenceArray_1_Damageable_byref_Int32_SearchConditionDelegate_0(int value, float value) { }
+    public int GetShieldHp_Public_Int32_0(int value) { }
+    protected bool GetTouchPointerEventData_Protected_PlayerPointerEventData_Int32_Int32_Touch_byref_Boolean_byref_Boolean_0(int value, bool flag) { }
+    public void HandleCrownLoss_Public_Void_Damageable_Crown_IUnitController_0() { }
+    private int HandleDamage_Private_Void_Int32_GameObject_DamageSource_0(int value) { }
+    private int HandleOnReceiveDamage_Private_Void_Int32_GameObject_DamageSource_0(int value) { }
+    private int HandleOnReceiveHit_Private_Void_Int32_GameObject_DamageSource_0(int value) { }
+    private void HandleTouchpad_Private_Void_IDualShock4Extension_0() { }
+    public int Init_Public_Void_Damageable_Int32_Single_0(int value, float value) { }
+    public void Init_Public_Void_IPetrifiable_Damageable_0() { }
+    public bool Invoke_Public_Virtual_New_Boolean_Damageable_0(bool flag) { }
+    public int Invoke_Public_Virtual_New_Void_Int32_GameObject_DamageSource_0(int value) { }
+    public int Invoke_Public_Virtual_New_Void_byref_Int32_GameObject_DamageSource_0(int value) { }
+    public bool IsDamagedBy_Public_Boolean_DamageSource_0(bool flag) { }
+    private bool IsGroundUnit_Private_Boolean_DamageSource_0(bool flag) { }
+    private bool IsTargetValid_Private_Static_Boolean_Damageable_Transform_Single_0(bool flag, float value) { }
+    public void LoginWithPs4Account_Public_Void_Action_1_LoginResult_Action_1_PlayFabError_0() { }
+    public bool NeedsSwitchPlayerButton_Public_Abstract_Virtual_New_Boolean_0(bool flag) { }
+    public bool NeedsSwitchPlayerButton_Public_Virtual_Final_New_Boolean_0(bool flag) { }
+    private int OnActuallyDamaged_Private_Void_Int32_GameObject_DamageSource_0(int value) { }
+    private void OnAnimDamageAffectedEnemies_Private_Void_0() { }
+    public void OnButtonSearchProximity_Public_Void_0() { }
+}
