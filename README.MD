@@ -76,8 +76,47 @@ This mod requires **IL2CPP BepInEx**.
      ```
      \Steam\steamapps\common\Kingdom Two Crowns\
      ```
-   - Run the game **once**
-   - ⚠️ First launch may take several minutes while *Interop Assemblies* generate
+
+        
+        ### 🔧 Additional IL2CPP Tools (Required)
+
+        Due to incompatibilities introduced by recent game updates, **IL2CPP mods require additional patch tools** to function correctly.
+
+        For **IL2CPP BepInEx**, you must also install:
+
+        * **Cpp2IL.Patch**
+        * **Il2CppInterop.Patch**
+
+        > ⚠️ These tools are **already included** in the **AIO zip**.
+        > You only need this step if you downloaded files manually.
+
+        #### Installation
+
+        1. Download the patches from Abevol’s KingdomMod repository:
+
+        * [https://github.com/abevol/KingdomMod](https://github.com/abevol/KingdomMod)
+
+        2. Extract the patch contents into your **game root directory**:
+
+        ```
+        \Steam\steamapps\common\Kingdom Two Crowns\
+        ```
+
+        3. When prompted, **overwrite existing files** in the **BepInEx** folder.
+
+        4. Launch the game once and allow BepInEx to finish initialization.
+
+        ---
+
+        ### 📝 Notes
+
+        * These patches fix **IL2CPP incompatibilities** caused by recent engine updates.
+        * Without them, mods may **fail to load**, **crash**, or silently do nothing.
+        * Mono users **do not need** these patches.
+
+        
+    - Run the game **once**
+    - ⚠️ First launch may take several minutes while *Interop Assemblies* generate
 
 3. **Install the Mod**
    - Download `KingdomEnhanced.dll` from the  
