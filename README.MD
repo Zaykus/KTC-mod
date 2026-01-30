@@ -185,6 +185,9 @@ If something doesn’t work (e.g. Treasury shows `0`):
    [Issues Page](https://github.com/Zaykus/KTC-mod/issues)
 
 ---
-
 *Disclaimer: This mod is for single-player fun.  
 Please support Raw Fury by purchasing the game and DLCs.*
+
+---
+## 📄 License
+This project is licensed under the **MIT License**.
