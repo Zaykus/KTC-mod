@@ -7,15 +7,32 @@ namespace KingdomEnhanced.Features
     {
         private float _campTimer = 0f;
 
+        private float _builderTimer = 0f;
+
         void Update()
         {
             if (ModMenu.LargerCamps) {
                 _campTimer += Time.deltaTime;
                 if (_campTimer >= 5f) { _campTimer = 0f; BoostCamps(); }
             }
+            
+            // OPTIMIZED: Only scan for workers once per second, not every frame
             if (ModMenu.HyperBuilders) {
-                var workers = FindObjectsOfType<Worker>();
-                foreach (var w in workers) { w.runSpeed = 8.0f; w.workTime = 0.001f; }
+                _builderTimer += Time.deltaTime;
+                if (_builderTimer >= 1f) {
+                    _builderTimer = 0f;
+                    ApplyBuilderBuffs();
+                }
+            }
+        }
+
+        private void ApplyBuilderBuffs() {
+            var workers = FindObjectsOfType<Worker>();
+            foreach (var w in workers) { 
+                if (w != null) {
+                    w.runSpeed = 8.0f; 
+                    w.workTime = 0.001f; 
+                }
             }
         }
 

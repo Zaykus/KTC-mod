@@ -24,18 +24,41 @@ namespace KingdomEnhanced.Features
             if (Input.GetKeyDown(KeyCode.F10)) ReportCompanions();
 
             // Hover Object Reporting
+            // Hover Object Reporting
             var current = _player.selectedPayable;
-            if (current != _lastPayable)
+            
+            // Fix Spam: Check if object actually changed significantly (Name or Price), not just Unity Instance
+            if (current != null)
             {
-                if (current != null)
+                string rawName = current.name.Replace("(Clone)", "").Replace("_", " ").Trim();
+                int price = 0; try { price = current.Price; } catch { }
+                
+                // Only speak if the target changed or we haven't spoken in a while
+                if (current != _lastPayable || _spamTimer <= 0f)
                 {
-                    string rawName = current.name.Replace("(Clone)", "").Replace("_", " ").Trim();
-                    int price = 0; try { price = current.Price; } catch { }
-                    ModMenu.Speak($"Target: {rawName}. Cost: {price} coins.");
+                    // Extra check: Don't repeat the EXACT same message within 2 seconds
+                    string message = $"{rawName}, {price} coins.";
+                    if (message != _lastSpokenMsg || _spamTimer <= -2f) 
+                    {
+                        ModMenu.Speak(message);
+                        _lastSpokenMsg = message;
+                        _spamTimer = 1.0f; // 1 second cooldown
+                    }
                 }
                 _lastPayable = current;
             }
+            else
+            {
+                 _lastPayable = null;
+                 // Reset message if we look away, so we can look back and hear it again
+                 if (_spamTimer <= -1f) _lastSpokenMsg = ""; 
+            }
+            
+            _spamTimer -= Time.deltaTime;
         }
+
+        private float _spamTimer = 0f;
+        private string _lastSpokenMsg = "";
 
         // --- RADAR LOGIC ---
         void PulseRadar()
@@ -78,34 +101,35 @@ namespace KingdomEnhanced.Features
             foreach (var kvp in closestLeft) results.Add($"{kvp.Key} {Mathf.RoundToInt(kvp.Value)}m Left");
             foreach (var kvp in closestRight) results.Add($"{kvp.Key} {Mathf.RoundToInt(kvp.Value)}m Right");
 
-            ModMenu.Speak(results.Count > 0 ? "Radar: " + string.Join(", ", results) : "Radar: Area clear.");
+            ModMenu.Speak(results.Count > 0 ? string.Join(", ", results) : "Clear");
         }
 
         void CheckCompassAndSafety()
         {
-            string dir = (_player.mover.GetDirection() == Side.Left) ? "Facing Left." : "Facing Right.";
-            ModMenu.Speak($"{dir} Position: {Mathf.RoundToInt(_player.transform.position.x)}");
+            string dir = (_player.mover.GetDirection() == Side.Left) ? "Left" : "Right";
+            ModMenu.Speak($"{dir}, {Mathf.RoundToInt(_player.transform.position.x)}");
         }
 
         void ReportWallet()
         {
             int coins = _player.wallet.GetCurrency(CurrencyType.Coins);
             int gems = _player.wallet.GetCurrency(CurrencyType.Gems);
-            ModMenu.Speak($"Wallet: {coins} coins, {gems} gems.");
+            // Concise: "35 Gold, 5 Gems"
+            ModMenu.Speak($"{coins} Gold, {gems} Gems");
         }
 
         void ReportWorld()
         {
             var d = Managers.Inst.director;
-            string time = d.IsDaytime ? "Daytime" : "Nighttime";
-            ModMenu.Speak($"Day {d.CurrentIslandDays}. {time}.");
+            string time = d.IsDaytime ? "Day" : "Night";
+            ModMenu.Speak($"Day {d.CurrentIslandDays}, {time}");
         }
 
         void ReportMount()
         {
             string n = _player.steed.name.Replace("(Clone)", "").Trim();
-            string status = _player.steed.IsTired ? "Exhausted" : "Ready";
-            ModMenu.Speak($"Mount: {n}. {status}");
+            string status = _player.steed.IsTired ? "Tired" : "Ready";
+            ModMenu.Speak($"{n}, {status}");
         }
 
         void ReportCompanions()

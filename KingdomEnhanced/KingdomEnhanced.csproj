@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net6.0-windows</TargetFramework>
 		<AssemblyName>KingdomEnhanced</AssemblyName>
 		<Description>Enhanced Kingdom Two Crowns Mod</Description>
 		<Version>1.0.0</Version>
@@ -70,6 +70,10 @@
 			<HintPath>$(InteropDir)\Il2CppSystem.Core.dll</HintPath>
 		</Reference>
 
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="System.Speech" Version="10.0.2" />
 	</ItemGroup>
 
 	<!-- Auto-Copy Build Artifacts -->

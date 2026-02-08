@@ -129,6 +129,7 @@ namespace KingdomEnhanced.UI
         {
             InitializeResources();
             LoadFromSettings();
+            TTSManager.Initialize(); // Init TTS
             Speak("Kingdom Enhanced initialized");
         }
 
@@ -302,6 +303,13 @@ namespace KingdomEnhanced.UI
 
             LastAccessMessage = message;
             MessageTimer = 5.0f;
+            
+            // TTS Integration
+            if (EnableAccessibility)
+            {
+                TTSManager.Speak(message);
+            }
+
             // Debug.Log is kept for external log files
             Debug.Log($"[ModMenu] {message}");
         }

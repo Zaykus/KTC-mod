@@ -25,3 +25,6 @@ MemoryCaptures/
 /[Bb]uild/
 /[Bb]uilds/
 
+build_log_retry2.txt
+build_log.txt
+logOutbut.og
