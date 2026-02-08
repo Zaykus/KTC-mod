@@ -30,7 +30,7 @@ namespace KingdomEnhanced.Features
             // Fix Spam: Check if object actually changed significantly (Name or Price), not just Unity Instance
             if (current != null)
             {
-                string rawName = current.name.Replace("(Clone)", "").Replace("_", " ").Trim();
+                string rawName = CleanName(current.name);
                 int price = 0; try { price = current.Price; } catch { }
                 
                 // Only speak if the target changed or we haven't spoken in a while
@@ -127,7 +127,7 @@ namespace KingdomEnhanced.Features
 
         void ReportMount()
         {
-            string n = _player.steed.name.Replace("(Clone)", "").Trim();
+            string n = CleanName(_player.steed.name);
             string status = _player.steed.IsTired ? "Tired" : "Ready";
             ModMenu.Speak($"{n}, {status}");
         }
@@ -135,6 +135,25 @@ namespace KingdomEnhanced.Features
         void ReportCompanions()
         {
             ModMenu.Speak("Companions check not implemented in simplified mode.");
+        }
+        string CleanName(string original)
+        {
+            if (string.IsNullOrEmpty(original)) return "";
+
+            // 1. Basic Unity Cleanup
+            string s = original.Replace("(Clone)", "").Replace("_", " ");
+
+            // 2. Remove Internal IDs/Numbers (e.g. "Wall0" -> "Wall", "Tower0B" -> "TowerB", "-4")
+            // Regex to remove digits and hyphens
+            s = System.Text.RegularExpressions.Regex.Replace(s, @"[\d-]", "");
+
+            // 3. Improve "TowerB", "WallA" etc by separating or removing single trailing letters if they follow string
+            // For now, simple split is better than over-engineering
+            
+            // 4. Split CamelCase (e.g. "FarmerHouse" -> "Farmer House")
+            s = System.Text.RegularExpressions.Regex.Replace(s, "([a-z])([A-Z])", "$1 $2");
+
+            return s.Trim();
         }
     }
 }
