@@ -16,6 +16,8 @@ namespace KingdomEnhanced.UI
         // Core Features
         public static bool ShowStaminaBar;
         public static bool EnableAccessibility;
+        public static bool SimplifyNames = true;
+        public static bool EnableCastleAnnouncer = false; // "Disabled by default"
         public static bool DisplayTimes;
         
         // Cheats
@@ -115,7 +117,7 @@ namespace KingdomEnhanced.UI
         #endregion
 
         #region Constants
-        private const string MOD_VERSION = "v1.0.0";
+        private const string MOD_VERSION = "v1.2";
         private const string CREATOR_CREDIT = "Created by Zaykus | Thanks to Abevol";
         private const KeyCode MENU_TOGGLE_KEY = KeyCode.F1;
         
@@ -142,7 +144,17 @@ namespace KingdomEnhanced.UI
                 
                 // Enforce cursor state on toggle
                 Cursor.visible = _isVisible;
-                Cursor.lockState = _isVisible ? CursorLockMode.None : CursorLockMode.Locked;
+                if (_isVisible)
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                }
+                else
+                {
+                    // Fix Menu Freeze: When closing mod menu, ensure we don't force-lock the cursor to the center
+                    // The game might be trying to move it, and we were locking it to Locked (center).
+                    // Setting it to None or Confined is safer, or just letting the game take over.
+                    Cursor.lockState = CursorLockMode.None; 
+                }
                 
                 Speak(_isVisible ? "Menu Visible" : "Menu Hidden"); 
             }
@@ -450,6 +462,11 @@ namespace KingdomEnhanced.UI
             }
             
             EnableAccessibility = GUILayout.Toggle(EnableAccessibility, " Vocal Feedback (F5-F10)");
+            if (EnableAccessibility)
+            {
+                SimplifyNames = GUILayout.Toggle(SimplifyNames, "  - Simplify Names (No 'Bamboo'/'Dead' etc)");
+                EnableCastleAnnouncer = GUILayout.Toggle(EnableCastleAnnouncer, "  - Castle Announcer (Enter/Exit Castle)");
+            }
             GUILayout.Space(5);
 
             return true;
@@ -721,6 +738,8 @@ namespace KingdomEnhanced.UI
             {
                 ShowStaminaBar = Settings.ShowStaminaBar.Value;
                 EnableAccessibility = Settings.EnableAccessibility.Value;
+                SimplifyNames = Settings.Config.Bind("Settings", "SimplifyNames", true, "Simplifies object names for TTS").Value;
+                EnableCastleAnnouncer = Settings.Config.Bind("Settings", "CastleAnnouncer", false, "Announce entering/leaving castle").Value;
                 CheatsUnlocked = Settings.CheatsUnlocked.Value;
                 SpeedMultiplier = Settings.SpeedMultiplier.Value;
                 InfiniteStamina = Settings.InfiniteStamina.Value;
@@ -745,6 +764,8 @@ namespace KingdomEnhanced.UI
             {
                 Settings.ShowStaminaBar.Value = ShowStaminaBar;
                 Settings.EnableAccessibility.Value = EnableAccessibility;
+                Settings.Config.Bind("Settings", "SimplifyNames", true).Value = SimplifyNames;
+                Settings.Config.Bind("Settings", "CastleAnnouncer", false).Value = EnableCastleAnnouncer;
                 Settings.CheatsUnlocked.Value = CheatsUnlocked;
                 Settings.SpeedMultiplier.Value = SpeedMultiplier;
                 Settings.InfiniteStamina.Value = InfiniteStamina;

@@ -11,6 +11,16 @@ namespace KingdomEnhanced.Features
 
         void Start() => _player = GetComponent<Player>();
 
+        // v1.5: Castle Proximity Logic
+        private bool _wasInCastle = false;
+        private float _castleCheckTimer = 0f;
+        
+        // v1.5: Restoring missing fields
+        private float _spamTimer = 0f;
+        private string _lastSpokenMsg = "";
+        private string _lastName = "";
+        private int _lastPrice = -1;
+
         void Update()
         {
             if (!ModMenu.EnableAccessibility || _player == null) return;
@@ -23,42 +33,98 @@ namespace KingdomEnhanced.Features
             if (Input.GetKeyDown(KeyCode.F9)) ReportMount();
             if (Input.GetKeyDown(KeyCode.F10)) ReportCompanions();
 
-            // Hover Object Reporting
-            // Hover Object Reporting
+            HandleHover();
+            HandleCastleProximity();
+        }
+
+        void HandleHover()
+        {
             var current = _player.selectedPayable;
             
-            // Fix Spam: Check if object actually changed significantly (Name or Price), not just Unity Instance
             if (current != null)
             {
                 string rawName = CleanName(current.name);
                 int price = 0; try { price = current.Price; } catch { }
                 
-                // Only speak if the target changed or we haven't spoken in a while
-                if (current != _lastPayable || _spamTimer <= 0f)
+                if (current != _lastPayable || rawName != _lastName || price != _lastPrice)
                 {
-                    // Extra check: Don't repeat the EXACT same message within 2 seconds
-                    string message = $"{rawName}, {price} coins.";
-                    if (message != _lastSpokenMsg || _spamTimer <= -2f) 
+                    string action = "Build";
+                    string currency = "coins"; // Default currency
+                    
+                    // 1. Custom Actions (Bank, Boat, etc.)
+                    if (current.name.Contains("Bank") || current.name.Contains("Chest")) action = "Deposit";
+                    else if (current.name.Contains("Boat") || current.name.Contains("Ship") || current.name.Contains("Portal")) action = "Pay";
+                    else if (current.name.Contains("Beggar") || current.name.Contains("Citizen")) action = "Hire";
+                    else if (current.name.Contains("Wreck") || current.name.Contains("Ruin")) action = "Repair";
+                    
+                    // 2. Smart Heuristic v2 (Only if still "Build")
+                    // Check Raw Name for "Level", "Tier", or trailing numbers/letters (e.g. "Tower2", "TowerA")
+                    // If found, it's definitely an Upgrade.
+                    if (action == "Build" && (System.Text.RegularExpressions.Regex.IsMatch(current.name, @"\d$") || 
+                        System.Text.RegularExpressions.Regex.IsMatch(current.name, @"[A-Z]$")))
                     {
-                        ModMenu.Speak(message);
-                        _lastSpokenMsg = message;
-                        _spamTimer = 1.0f; // 1 second cooldown
+                        action = "Upgrade";
                     }
+                    
+                    // 3. Specific Known Upgrades
+                    if (action == "Build" && current.name.Contains("Farm") && price >= 3) action = "Upgrade"; 
+                    
+                    // 4. Wall Logic: Level 1 is Build, Level 2+ is Upgrade
+                    if (current.name.Contains("Wall"))
+                    {
+                        if (price < 2) action = "Build";
+                        else action = "Upgrade";
+                    }
+
+                    // 4. Format: Name, Price, Action
+                    string message = $"{rawName}, {price} {currency}, {action}";
+                    
+                    ModMenu.Speak(message);
+                    
+                    _lastPayable = current;
+                    _lastName = rawName;
+                    _lastPrice = price;
                 }
-                _lastPayable = current;
             }
             else
             {
                  _lastPayable = null;
-                 // Reset message if we look away, so we can look back and hear it again
                  if (_spamTimer <= -1f) _lastSpokenMsg = ""; 
             }
             
             _spamTimer -= Time.deltaTime;
         }
 
-        private float _spamTimer = 0f;
-        private string _lastSpokenMsg = "";
+        void HandleCastleProximity()
+        {
+            if (!ModMenu.EnableCastleAnnouncer) return;
+
+            _castleCheckTimer -= Time.deltaTime;
+            if (_castleCheckTimer > 0) return;
+            _castleCheckTimer = 1.0f; // Check every second
+
+            var kingdom = Managers.Inst?.kingdom;
+            if (kingdom != null)
+            {
+                // Kingdom object is usually the anchor for the town center
+                float center = kingdom.transform.position.x;
+                float playerX = _player.transform.position.x;
+                float dist = playerX - center;
+                bool inside = Mathf.Abs(dist) < 25.0f; // Approximate castle width
+
+                if (inside && !_wasInCastle)
+                {
+                    ModMenu.Speak("Inside Castle");
+                    _wasInCastle = true;
+                }
+                else if (!inside && _wasInCastle)
+                {
+                     string dir = dist < 0 ? "Left" : "Right";
+                     ModMenu.Speak($"Leaving Castle {dir}");
+                     _wasInCastle = false;
+                }
+            }
+        }
 
         // --- RADAR LOGIC ---
         void PulseRadar()
@@ -136,6 +202,7 @@ namespace KingdomEnhanced.Features
         {
             ModMenu.Speak("Companions check not implemented in simplified mode.");
         }
+
         string CleanName(string original)
         {
             if (string.IsNullOrEmpty(original)) return "";
@@ -143,15 +210,25 @@ namespace KingdomEnhanced.Features
             // 1. Basic Unity Cleanup
             string s = original.Replace("(Clone)", "").Replace("_", " ");
 
-            // 2. Remove Internal IDs/Numbers (e.g. "Wall0" -> "Wall", "Tower0B" -> "TowerB", "-4")
-            // Regex to remove digits and hyphens
+            // 2. Remove Internal IDs/Numbers
             s = System.Text.RegularExpressions.Regex.Replace(s, @"[\d-]", "");
 
-            // 3. Improve "TowerB", "WallA" etc by separating or removing single trailing letters if they follow string
-            // For now, simple split is better than over-engineering
-            
-            // 4. Split CamelCase (e.g. "FarmerHouse" -> "Farmer House")
+            // 3. Strict Mode: Remove single trailing letters
+            s = System.Text.RegularExpressions.Regex.Replace(s, @"\s?[A-Z]$", "");
+
+            // 4. Split CamelCase
             s = System.Text.RegularExpressions.Regex.Replace(s, "([a-z])([A-Z])", "$1 $2");
+
+            // v1.5: Simplify Names Toggle
+            if (ModMenu.SimplifyNames)
+            {
+                // Regex for case-insensitive removal of biome terms
+                // (?i) enables case insensitivity
+                s = System.Text.RegularExpressions.Regex.Replace(s, @"(?i)(bamboo|iron|stone|dead|lands|scaffold|wreck|grove)", "");
+
+                // Fix double spaces created by removal
+                s = System.Text.RegularExpressions.Regex.Replace(s, @"\s+", " ");
+            }
 
             return s.Trim();
         }
