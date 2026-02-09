@@ -1,6 +1,6 @@
-# 👑 Kingdom Enhanced (v1.0.0)
+# 👑 Kingdom Enhanced (v1.2)
 
-![Mod Version](https://img.shields.io/badge/version-1.0.0-green)
+![Mod Version](https://img.shields.io/badge/version-1.2-green)
 ![Game Version](https://img.shields.io/badge/Kingdom%20Two%20Crowns-2.3.x-blue)
 ![Loader](https://img.shields.io/badge/BepInEx-IL2CPP_6.0+-orange)
 
@@ -8,7 +8,7 @@
 It grants you full control over your army and economy while providing vital information hidden by the game, all wrapped in a native-style interface.
 
 > **Tested On:** Norse Lands, Call of Olympus, Shogun, and European Biomes  
-> **Compatible Versions:** 2.3.0, 2.3.1, 2.3.2 (Unity 6 Update)
+> **Compatible Versions:** 2.3.0+ (Unity 6 Update)
 
 ![Mod Preview](modpic.png?raw=true)  
 *(A clean, non-intrusive HUD replacing the standard UI)*
@@ -17,177 +17,95 @@ It grants you full control over your army and economy while providing vital info
 
 ## ✨ Features
 
-### 🏰 Royal HUD (Heads-Up Display)
-Stop guessing how much gold you have or when night will fall. The new HUD displays at the top-center:
+### 👁️ Advanced Accessibility (New in v1.2)
+A complete screen-reader / TTS experience for blind or visually impaired players.
+*   **Smart Interactions:** The mod speaks intelligent action labels:
+    *   *"Deposit"* (Bank/Chest), *"Pay"* (Merchant/Boat), *"Hire"* (Beggar), *"Repair"* (Ruin).
+    *   *"Build Wall"* vs *"Upgrade Wall"* (Tier detection).
+*   **Castle Announcer:** Alerts you when entering/leaving the safety of your castle.
+*   **Simplify Names:** "Bamboo Wall" -> *"Wall"* (Toggleable).
+*   **Full Reporting (F5-F10):**
+    *   **F5 (Radar):** Targeted scan for Portals, Chests, and Vagrants.
+    *   **F6 (Compass):** Exact coordinates and facing.
+    *   **F7 (Wallet):** "35 Gold, 5 Gems".
+    *   **F8 (Time):** "Day 12, Night".
 
-- **Precise Clock:** Digital 24-hour format (e.g., `18:45`)
-- **Treasury Counter:** Reads internal Castle/Banker memory to show **exact gold stashed**  
-  *(Beta feature)*
-- **Day Counter:** Displays the current day number clearly
-
----
+### 🏰 Royal HUD
+*   **Precise Clock:** Digital 24-hour format (e.g., `18:45`).
+*   **Day Counter:** Displays current day number.
+*   **Coin Counter:** Shows inventory count + Stashed gold (Beta).
 
 ### ⚔️ Army & Management
-- **Global Recruit:** Instantly converts **ALL** Vagrants on the entire island into Peasants
-- **Supply Drop:** Instantly spawn **Bows** or **Hammers** at your feet
-- **Hyper Builders:** *(Toggle)* Workers build and repair walls instantly
-- **Larger Camps:** *(Toggle)* Vagrant camps hold more population and regenerate faster
+*   **Global Recruit:** Instantly converts **ALL** Vagrants on the island.
+*   **Supply Drop:** Spawn Bows or Hammers at your feet.
+*   **Hyper Builders:** Workers build and repair instantly.
+*   **Larger Camps:** Vagrant camps hold more population.
+
+### 💰 Economy & Cheats
+*   **Instant Wealth:** Add +10 Coins / +5 Gems.
+*   **Physical Overflow:** Coins drop physically if wallet is full.
+*   **Infinite Stamina:** Mount never tires.
+*   **Invincibility:** (Optional) God mode.
 
 ---
 
-### 💰 Economy
-- **Instant Wealth:** Add **+10 Coins** or **+5 Gems** with one click
-- **Physical Overflow:** Coins drop physically into the world
-- **Infinite Stamina:** Your mount never tires
+## 📥 Installation
+
+### Method 1: All-In-One (Recommended)
+The easiest way to get started.
+1.  Download **`KTC-mod-AIOv1.2.0.zip`** from [Releases](https://github.com/Zaykus/KTC-mod/releases).
+2.  Extract the **contents** directly into your game folder:
+    *   `\Steam\steamapps\common\Kingdom Two Crowns\`
+3.  Run the game! Press **F1** to open the menu.
+
+### Method 2: Manual / Mod Only
+Use this if you already have BepInEx set up.
+1.  Download **`KTC-mod-1.2.0 (Mod Only).zip`**.
+2.  Place `KingdomEnhanced.dll` in `BepInEx/plugins`.
+3.  *(Optional)* For TTS, you must have `System.Speech.dll` in your game folder or plugins folder.
 
 ---
 
-### 👁️ Accessibility & Blind Support
-A core pillar of this mod is accessibility. It includes a **Screen Reader / Log System** that outputs game state as text.
-
-- **Radar (F5):** Reports distance to Portals, Chests, and Vagrants
-- **Compass (F6):** Reports exact X-coordinate and facing direction
-- **Wallet Check (F7):** Reports exact Coin/Gem count
-- **Time Check (F8):** Reports Day and Time (Morning/Night)
-- **Status Logs:** All actions are printed to the on-screen log
-
----
-
-## 📥 Installation (Important!)
-
-> **TL;DR:**  
-> Download **KTC-mod-AIO-v1.0.0.zip**, extract its contents directly into your game folder:  
-> `\Steam\steamapps\common\Kingdom Two Crowns\`  
-> That’s it — no extra steps needed.
-
-This mod requires **IL2CPP BepInEx**.  
-❌ Do **NOT** use the Mono version.
-
----
-
-### Manual Installation (Advanced / Dev)
-
-1. **Download BepInEx 6 (IL2CPP)**
-   - Go to the [BepInEx Releases](https://github.com/BepInEx/BepInEx/releases)
-   - Download **`BepInEx_UnityIL2CPP_x64_*.zip`**
-
-2. **Install BepInEx**
-   - Extract into:
-     ```
-     \Steam\steamapps\common\Kingdom Two Crowns\
-     ```
-
-        
-        ### 🔧 Additional IL2CPP Tools (Required)
-
-        Due to incompatibilities introduced by recent game updates, **IL2CPP mods require additional patch tools** to function correctly.
-
-        For **IL2CPP BepInEx**, you must also install:
-
-        * **Cpp2IL.Patch**
-        * **Il2CppInterop.Patch**
-
-        > ⚠️ These tools are **already included** in the **AIO zip**.
-        > You only need this step if you downloaded files manually.
-
-        #### Installation
-
-        1. Download the patches from Abevol’s KingdomMod repository:
-
-        * [https://github.com/abevol/KingdomMod](https://github.com/abevol/KingdomMod)
-
-        2. Extract the patch contents into your **game root directory**:
-
-        ```
-        \Steam\steamapps\common\Kingdom Two Crowns\
-        ```
-
-        3. When prompted, **overwrite existing files** in the **BepInEx** folder.
-
-        4. Launch the game once and allow BepInEx to finish initialization.
-
-        ---
-
-        ### 📝 Notes
-
-        * These patches fix **IL2CPP incompatibilities** caused by recent engine updates.
-        * Without them, mods may **fail to load**, **crash**, or silently do nothing.
-        * Mono users **do not need** these patches.
-
-        
-    - Run the game **once**
-    - ⚠️ First launch may take several minutes while *Interop Assemblies* generate
-
-3. **Install the Mod**
-   - Download `KingdomEnhanced.dll` from the  
-     [Releases Tab](https://github.com/Zaykus/KTC-mod/releases)
-   - Place it in:
-     ```
-     \Kingdom Two Crowns\BepInEx\plugins\
-     ```
-
-4. **Launch the Game**
-   - Press **F1** in-game to open the mod menu
-
----
-
-## 🎮 Controls & Hotkeys
+## 🎮 Controls
 
 | Key | Function | Description |
 |-----|---------|-------------|
-| **F1** | Toggle Menu | Opens the mod menu and unlocks cursor |
-| **Shift** | Sprint | Move 2× faster |
-| **F5** | Radar | Logs nearby POIs |
-| **F6** | Compass | Logs position and direction |
-| **F7** | Wallet | Logs currency |
-| **F8** | Clock | Logs day & time |
-| **F9** | Mount | Logs mount status |
-| **F10** | Followers | Logs companions |
+| **F1** | **Menu Toggle** | Opens Mod Menu & Unlocks Cursor |
+| **Shift** | **Sprint** | Move 2x Faster |
+| **F5** | Radar | Scan for POIs (Portals/Cheats) |
+| **F6** | Compass | Location & Facing |
+| **F7** | Wallet | Coin/Gem Count |
+| **F8** | Time | Day/Night Status |
+| **F9** | Mount | Stamina Status |
+| **F10**| Followers | (Coming Soon) |
 
 ---
 
-## 🏗️ Development & History
+## 🏗️ Version History
 
-**Kingdom Enhanced** was built to solve performance issues of older mods while adding modern Unity 6 support.
+### v1.2 - Accessibility Update
+*   **Smart Actions:** Context-aware labels (Deposit, Pay, Hire).
+*   **Castle Announcer:** Proximity alerts.
+*   **Refined TTS:** Improved formatting and name cleaning.
+*   **Fixes:** Menu freeze, repetitive logs, build crashes.
 
-### v1.0.0 (Current)
-- Refactored into 4 high-performance managers:
-  - `World`, `Army`, `Player`, `Building`
-- **Fixed Lag:** Removed `FindObjectsOfType` loops
-- **Fixed Treasury:** Reflection-based access to obfuscated `stashedCoins`
-- **Fixed Compatibility:** Works with **Call of Olympus** and **Unity 6**
-
-### Upcoming (v1.2+)
-- Atmospheric Controls *(disabled for stability)*
-- Self-Repairing Walls *(in testing)*
+### v1.0 - Initial Release
+*   Core Features: HUD, Cheats, Basic Accessibility.
 
 ---
 
-## 🤝 Credits & Special Thanks
+## 🤝 Credits
 
-- **[Zaykus](https://github.com/Zaykus)** — Lead Developer, Accessibility, UI
-- **[Abevol](https://github.com/abevol)** — `KingdomMod` framework
-  - Uses `GameExtensions` and `TypeExtensions`
-  - Internal list logic adapted from open-source work
-- **BepInEx Team** — IL2CPP tooling
+*   **[Zaykus](https://github.com/Zaykus)** — Lead Developer
+*   **[Abevol](https://github.com/abevol)** — KingdomMod Framework & IL2CPP Tools
+*   **BepInEx Team** — Mod Loader
 
 ---
 
-## 📝 Feedback & Support
+## 📝 Feedback
+Found a bug?
+1. Press **F1** -> **Feedback** Tab.
+2. Click **Copy Report**.
+3. Paste it in [Issues](https://github.com/Zaykus/KTC-mod/issues).
 
-If something doesn’t work (e.g. Treasury shows `0`):
-
-1. Press **F1**
-2. Open **Feedback**
-3. Mark features `[ OK ]` or `[ X ]`
-4. Click **Copy Report**
-5. Paste it on the  
-   [Issues Page](https://github.com/Zaykus/KTC-mod/issues)
-
----
-*Disclaimer: This mod is for single-player fun.  
-Please support Raw Fury by purchasing the game and DLCs.*
-
----
-## 📄 License
-This project is licensed under the **MIT License**.
+*Disclaimer: This mod is for single-player use. Please support Raw Fury!*
