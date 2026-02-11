@@ -51,18 +51,29 @@ A complete screen-reader / TTS experience for blind or visually impaired players
 
 ## 📥 Installation
 
+### Which file should I download?
+
+| File Name | Usage | Description |
+| :--- | :--- | :--- |
+| **`KTC-mod-AIOv1.2.0.zip`** | **✅ Recommended** | **All-In-One**. Contains the Mod, BepInEx loader, and all required DLLs. Best for new users. |
+| **`KTC-mod-1.2.0 (Mod Only).zip`** | **Standard** | Just the plugin DLL. Use this if you already have BepInEx installed and **don't** need TTS. |
+| **`KTC-mod-1.2.0 (Mod + Speech).zip`**| **Accessibility** | Plugin DLL + `System.Speech.dll`. Required if you need **Blind/TTS support** but installed BepInEx manually. |
+
+---
+
 ### Method 1: All-In-One (Recommended)
 The easiest way to get started.
-1.  Download **`KTC-mod-AIOv1.2.0.zip`** from [Releases](https://github.com/Zaykus/KTC-mod/releases).
+1.  Download **`KTC-mod-AIOv1.2.0.zip`**.
 2.  Extract the **contents** directly into your game folder:
     *   `\Steam\steamapps\common\Kingdom Two Crowns\`
 3.  Run the game! Press **F1** to open the menu.
 
-### Method 2: Manual / Mod Only
-Use this if you already have BepInEx set up.
-1.  Download **`KTC-mod-1.2.0 (Mod Only).zip`**.
-2.  Place `KingdomEnhanced.dll` in `BepInEx/plugins`.
-3.  *(Optional)* For TTS, you must have `System.Speech.dll` in your game folder or plugins folder.
+### Method 2: Manual Update
+Use this if you are updating an existing installation.
+1.  Download the **Mod Only** (or **Mod + Speech**) zip.
+2.  Drag `KingdomEnhanced.dll` (and `System.Speech.dll` if needed) into:
+    *   `\Kingdom Two Crowns\BepInEx\plugins\`
+3.  Replace existing files.
 
 ---
 
