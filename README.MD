@@ -56,7 +56,7 @@ A complete screen-reader / TTS experience for blind or visually impaired players
 | File Name | Usage | Description |
 | :--- | :--- | :--- |
 | **`KTC-mod-AIOv1.2.0.zip`** | **✅ Recommended** | **All-In-One**. Contains the Mod, BepInEx loader, and all required DLLs. Best for new users. |
-| **`KTC-mod-1.2.0 (Mod Only).zip`** | **Standard** | Just the plugin DLL. Use this if you already have BepInEx installed and **don't** need TTS. |
+| **`KTC-mod-1.2.0 (Mod Only).zip`** | **Standard** | Just the plugin DLL + BepInEx. Use this **don't** need TTS. |
 | **`KTC-mod-1.2.0 (Mod + Speech).zip`**| **Accessibility** | Plugin DLL + `System.Speech.dll`. Required if you need **Blind/TTS support** but installed BepInEx manually. |
 
 ---
