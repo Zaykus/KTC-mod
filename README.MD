@@ -61,6 +61,16 @@ A complete screen-reader / TTS experience for blind or visually impaired players
 
 ---
 
+### 🐧 Linux / Steam Deck / Wine Support
+This mod **DOES** work on Linux/Steam Deck, but with caveats:
+1.  **Do NOT use the AIO zip**: The included `System.Speech.dll` often crashes Wine/Proton.
+2.  **Download "Mod Only"**: Use `KTC-mod-1.2.0 (Mod Only).zip`.
+3.  **Launch Arguments**: If the mod doesn't load, add this to Steam Launch Options:
+    `--doorstop-enable true --doorstop-target "BepInEx\core\BepInEx.IL2CPP.dll"`
+4.  **No Text-to-Speech**: The accessibility features rely on Windows SAPI and will not work on Linux.
+
+---
+
 ### Method 1: All-In-One (Recommended)
 The easiest way to get started.
 1.  Download **`KTC-mod-AIOv1.2.0.zip`**.
