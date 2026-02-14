@@ -25,13 +25,8 @@ MemoryCaptures/
 /[Bb]uild/
 /[Bb]uilds/
 
-build_log_retry2.txt
-build_log.txt
 logOutbut.og
-build_log_v1.2.txt
 RELEASE_NOTES.md
 *.zip
 Assembly.CSharp
-KingdomEnhanced/build_error.log
 code-review-expert
-KingdomEnhanced/build_log_2.txt

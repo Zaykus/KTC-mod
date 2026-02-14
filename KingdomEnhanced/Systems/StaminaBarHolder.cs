@@ -137,6 +137,32 @@ namespace KingdomEnhanced.Systems
             }
         }
 
+        public string GetStyleName()
+        {
+            switch (visualStyle)
+            {
+                case 0: return "Classic";
+                case 1: return "RPG";
+                case 2: return "Retro";
+                case 3: return "Dual";
+                default: return "Unknown";
+            }
+        }
+
+        public string GetPositionName()
+        {
+            switch (positionMode)
+            {
+                case 0: return "Head (World)";
+                case 1: return "Feet (World)";
+                case 2: return "Bottom (HUD)";
+                case 3: return "Top-Left (HUD)";
+                case 4: return "Top-Right (HUD)";
+                case 5: return "Manual";
+                default: return "Unknown";
+            }
+        }
+
         private void DrawColoredBox(Rect r, Color c) { GUI.color = c; GUI.Box(r, "", _boxStyle); GUI.color = Color.white; }
         private static bool IsPlaying() { return Managers.Inst?.game?.state.ToString().Contains("Playing") ?? false; }
     }

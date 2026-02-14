@@ -16,6 +16,8 @@ namespace KingdomEnhanced.UI
         // Core Features
         public static bool ShowStaminaBar;
         public static bool EnableAccessibility;
+        public static bool EnableTTS = true; // New: Voice Toggle
+        public static bool NarratorQueueMode = false; // New: Interrupt vs Queue (Default: Interrupt/False)
         public static bool SimplifyNames = true;
         public static bool EnableCastleAnnouncer = false; // "Disabled by default"
         public static bool DisplayTimes;
@@ -303,9 +305,10 @@ namespace KingdomEnhanced.UI
             MessageTimer = 5.0f;
             
             // TTS Integration
-            if (EnableAccessibility)
+            if (EnableAccessibility && EnableTTS) // Check EnableTTS
             {
-                TTSManager.Speak(message, interrupt);
+                // Respect Queue Mode (Interrupt = !QueueMode)
+                TTSManager.Speak(message, !NarratorQueueMode);
             }
 
             // Debug.Log is kept for external log files
@@ -469,11 +472,26 @@ namespace KingdomEnhanced.UI
                 });
             }
             
-            EnableAccessibility = GUILayout.Toggle(EnableAccessibility, " Vocal Feedback (F5-F10)");
+            // v3.2: Split Accessibility Logic from TTS
+            EnableAccessibility = GUILayout.Toggle(EnableAccessibility, " Enable Accessibility Features (Logic)");
+            
             if (EnableAccessibility)
             {
-                SimplifyNames = GUILayout.Toggle(SimplifyNames, "  - Simplify Names (No 'Bamboo'/'Dead' etc)");
-                EnableCastleAnnouncer = GUILayout.Toggle(EnableCastleAnnouncer, "  - Castle Announcer (Enter/Exit Castle)");
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(20);
+                GUILayout.BeginVertical();
+                
+                EnableTTS = GUILayout.Toggle(EnableTTS, " Enable Narrator (TTS)");
+                if (EnableTTS)
+                {
+                   NarratorQueueMode = GUILayout.Toggle(NarratorQueueMode, " Narrator Queue Mode (Don't Interrupt)");
+                }
+
+                SimplifyNames = GUILayout.Toggle(SimplifyNames, " Simplify Names");
+                EnableCastleAnnouncer = GUILayout.Toggle(EnableCastleAnnouncer, " Castle Announcer");
+                
+                GUILayout.EndVertical();
+                GUILayout.EndHorizontal();
             }
             GUILayout.Space(5);
 
@@ -485,7 +503,7 @@ namespace KingdomEnhanced.UI
             if (StaminaBarHolder.Instance != null)
             {
                 StaminaBarHolder.Instance.visualStyle = (StaminaBarHolder.Instance.visualStyle + 1) % 4;
-                Speak($"Stamina bar style changed");
+                Speak($"Style: {StaminaBarHolder.Instance.GetStyleName()}"); // Specific Feedback
             }
         }
 
@@ -494,7 +512,7 @@ namespace KingdomEnhanced.UI
             if (StaminaBarHolder.Instance != null)
             {
                 StaminaBarHolder.Instance.positionMode = (StaminaBarHolder.Instance.positionMode + 1) % 6;
-                Speak($"Stamina bar position changed");
+                Speak($"Position: {StaminaBarHolder.Instance.GetPositionName()}"); // Specific Feedback
             }
         }
         #endregion
@@ -741,6 +759,8 @@ namespace KingdomEnhanced.UI
             {
                 ShowStaminaBar = Settings.ShowStaminaBar.Value;
                 EnableAccessibility = Settings.EnableAccessibility.Value;
+                EnableTTS = Settings.Config.Bind("Settings", "EnableTTS", true, "Enable Text-to-Speech output").Value;
+                NarratorQueueMode = Settings.Config.Bind("Settings", "NarratorQueueMode", false, "Queue TTS messages instead of interrupting").Value;
                 SimplifyNames = Settings.Config.Bind("Settings", "SimplifyNames", true, "Simplifies object names for TTS").Value;
                 EnableCastleAnnouncer = Settings.Config.Bind("Settings", "CastleAnnouncer", false, "Announce entering/leaving castle").Value;
                 CheatsUnlocked = Settings.CheatsUnlocked.Value;
@@ -773,6 +793,8 @@ namespace KingdomEnhanced.UI
             {
                 Settings.ShowStaminaBar.Value = ShowStaminaBar;
                 Settings.EnableAccessibility.Value = EnableAccessibility;
+                Settings.Config.Bind("Settings", "EnableTTS", true).Value = EnableTTS;
+                Settings.Config.Bind("Settings", "NarratorQueueMode", false).Value = NarratorQueueMode;
                 Settings.Config.Bind("Settings", "SimplifyNames", true).Value = SimplifyNames;
                 Settings.Config.Bind("Settings", "CastleAnnouncer", false).Value = EnableCastleAnnouncer;
                 Settings.CheatsUnlocked.Value = CheatsUnlocked;
