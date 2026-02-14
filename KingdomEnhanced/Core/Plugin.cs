@@ -9,7 +9,7 @@ using KingdomEnhanced.Hooks;
 
 namespace KingdomEnhanced.Core
 {
-    [BepInPlugin("kingdomenhanced", "Kingdom Enhanced", "2.0.0")] // Bumped version to 2.0
+    [BepInPlugin("kingdomenhanced", "Kingdom Enhanced", ModVersion.FULL)] // Bumped version to 2.0
     public class Plugin : BasePlugin
     {
         public static Plugin Instance;
@@ -17,7 +17,7 @@ namespace KingdomEnhanced.Core
         public override void Load()
         {
             Instance = this;
-            Log.LogInfo("Initializing Kingdom Enhanced 2.0 (Manager Edition)...");
+            Log.LogInfo($"Kingdom Enhanced {ModVersion.DISPLAY} loaded!");
 
             // 1. SETTINGS
             Settings.Init(Config);
@@ -27,19 +27,24 @@ namespace KingdomEnhanced.Core
             ClassInjector.RegisterTypeInIl2Cpp<PlayerManager>();
             ClassInjector.RegisterTypeInIl2Cpp<WorldManager>();
             ClassInjector.RegisterTypeInIl2Cpp<ArmyManager>();
-            ClassInjector.RegisterTypeInIl2Cpp<BuildingManager>();
+            // BuildingManager removed — was empty stub
             
             // Register UI & Systems
             ClassInjector.RegisterTypeInIl2Cpp<ModMenu>();
-            ClassInjector.RegisterTypeInIl2Cpp<StaminaBarHolder>();
-            ClassInjector.RegisterTypeInIl2Cpp<AccessibilityFeature>(); // Keeping this separate is fine
+            // StaminaBarHolder registers itself inside Initialize() below
+            ClassInjector.RegisterTypeInIl2Cpp<AccessibilityFeature>();
+            ClassInjector.RegisterTypeInIl2Cpp<KingdomMonitor>();
+            ClassInjector.RegisterTypeInIl2Cpp<CoinBuoyancy>();
 
             // 3. UI INITIALIZATION
             StaminaBarHolder.Initialize();
 
             // 4. APPLY HARMONY PATCHES
             var harmony = new Harmony("kingdomenhanced.harmony");
-            harmony.PatchAll();
+            harmony.PatchAll(); // Core patches (CurrencyHooks, PlayerSpawnerHook, etc.)
+
+            // 5. APPLY LAB PATCHES (safe — each one wrapped in try-catch)
+            LabPatches.ApplyAll(harmony);
 
             Log.LogInfo("Kingdom Enhanced initialized. Waiting for Player Spawn...");
         }

@@ -1,7 +1,5 @@
 using UnityEngine;
 using KingdomEnhanced.UI;
-using KingdomEnhanced.Core;
-using System.Reflection;
 
 namespace KingdomEnhanced.Features
 {
@@ -66,6 +64,11 @@ namespace KingdomEnhanced.Features
                 ModMenu.Speak("Banker Payout Triggered!");
             }
             else ModMenu.Speak("Banker not found.");
+        }
+
+        void OnDestroy()
+        {
+            _defaultSpeed = -1f;
         }
     }
 }

@@ -4,7 +4,6 @@ using System.Reflection;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using KingdomMod;
 
 namespace KingdomEnhanced.Features
 {

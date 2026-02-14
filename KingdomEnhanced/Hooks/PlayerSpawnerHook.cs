@@ -25,7 +25,11 @@ namespace KingdomEnhanced.Hooks
             SafeAdd<PlayerManager>(go);
             SafeAdd<WorldManager>(go);
             SafeAdd<ArmyManager>(go);
-            SafeAdd<BuildingManager>(go);
+            // BuildingManager removed — was empty stub
+            
+            // 3. Gameplay Enhancements
+            SafeAdd<KingdomMonitor>(go);
+            SafeAdd<CoinBuoyancy>(go);
         }
 
         // Helper to safely add components without crashing

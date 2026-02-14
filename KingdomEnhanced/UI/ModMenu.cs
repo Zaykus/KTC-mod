@@ -117,7 +117,7 @@ namespace KingdomEnhanced.UI
         #endregion
 
         #region Constants
-        private const string MOD_VERSION = "v1.2";
+        private static readonly string MOD_VERSION = ModVersion.DISPLAY;
         private const string CREATOR_CREDIT = "Created by Zaykus | Thanks to Abevol";
         private const KeyCode MENU_TOGGLE_KEY = KeyCode.F1;
         
@@ -151,9 +151,10 @@ namespace KingdomEnhanced.UI
                 else
                 {
                     // Fix Menu Freeze: When closing mod menu, ensure we don't force-lock the cursor to the center
-                    // The game might be trying to move it, and we were locking it to Locked (center).
-                    // Setting it to None or Confined is safer, or just letting the game take over.
                     Cursor.lockState = CursorLockMode.None; 
+                    
+                    // v3.0: Auto-save settings when menu closes
+                    SaveToSettings();
                 }
                 
                 Speak(_isVisible ? "Menu Visible" : "Menu Hidden"); 
@@ -285,24 +286,8 @@ namespace KingdomEnhanced.UI
         }
         #endregion
 
-        #region Input Handling
-        private void HandleInput()
-        {
-            if (Input.GetKeyDown(MENU_TOGGLE_KEY))
-            {
-                _isVisible = !_isVisible;
-                Speak(_isVisible ? "Menu Active" : "Menu Hidden");
-            }
-
-            if (MessageTimer > 0)
-            {
-                MessageTimer -= Time.deltaTime;
-            }
-        }
-        #endregion
-
         #region Notification Management
-        public static void Speak(string message)
+        public static void Speak(string message, bool interrupt = true)
         {
             if (string.IsNullOrEmpty(message)) return;
 
@@ -319,7 +304,7 @@ namespace KingdomEnhanced.UI
             // TTS Integration
             if (EnableAccessibility)
             {
-                TTSManager.Speak(message);
+                TTSManager.Speak(message, interrupt);
             }
 
             // Debug.Log is kept for external log files
@@ -570,34 +555,29 @@ namespace KingdomEnhanced.UI
             DrawSectionHeader("Development Lab");
             
             GUI.color = new Color(0.7f, 0.7f, 0.7f);
-            GUILayout.Label("Testing features for future updates:", new GUIStyle(GUI.skin.label) 
+            GUILayout.Label("Experimental features — use at your own risk:", new GUIStyle(GUI.skin.label) 
             { 
                 fontStyle = FontStyle.Italic,
                 fontSize = 11
             });
             GUILayout.Space(8);
-            
-            GUILayout.Toggle(false, " Self-Repairing Walls");
-            GUILayout.Toggle(false, " Elite Knights - Thor/Hel");
-            GUILayout.Toggle(false, " Lock Summer Season");
-            GUILayout.Toggle(false, " Clear Weather - No Fog/Rain");
-            GUILayout.Toggle(false, " Disable Blood Moons");
-            GUILayout.Toggle(false, " Buoyant Currency - Water Fix");
-            GUILayout.Toggle(false, " Rapid Citizen Housing");
-            GUILayout.Toggle(false, " Advanced Structure Tracking");
-            
             GUI.color = Color.white;
             
-            GUILayout.Space(15);
-            GUILayout.Label("These features are in development and not yet functional.", 
-                new GUIStyle(GUI.skin.label) 
-                { 
-                    fontSize = 10,
-                    fontStyle = FontStyle.Italic,
-                    normal = { textColor = new Color(0.6f, 0.6f, 0.6f) }
-                });
+            // Functional toggles wired to settings
+            InvincibleWalls = GUILayout.Toggle(InvincibleWalls, " Self-Repairing Walls");
+            BetterKnight = GUILayout.Toggle(BetterKnight, " Elite Knights - Thor/Hel");
+            LockSummer = GUILayout.Toggle(LockSummer, " Lock Summer Season");
+            ClearWeather = GUILayout.Toggle(ClearWeather, " Clear Weather - No Fog/Rain");
+            NoBloodMoons = GUILayout.Toggle(NoBloodMoons, " Disable Blood Moons");
+            CoinsStayDry = GUILayout.Toggle(CoinsStayDry, " Buoyant Currency - Water Fix");
+            BetterCitizenHouses = GUILayout.Toggle(BetterCitizenHouses, " Rapid Citizen Housing");
             
-            return false;
+            // Not yet implemented — placeholder
+            GUI.color = new Color(0.5f, 0.5f, 0.5f);
+            GUILayout.Toggle(false, " Advanced Structure Tracking (Coming Soon)");
+            GUI.color = Color.white;
+            
+            return true;
         }
         #endregion
 
@@ -751,6 +731,12 @@ namespace KingdomEnhanced.UI
                 EnableSizeHack = Settings.EnableSizeHack.Value;
                 TargetSize = Settings.TargetSize.Value;
                 DisplayTimes = Settings.DisplayTimes.Value;
+
+                // Lab / World settings
+                LockSummer = Settings.LockSummer.Value;
+                ClearWeather = Settings.ClearWeather.Value;
+                NoBloodMoons = Settings.NoBloodMoons.Value;
+                CoinsStayDry = Settings.CoinsStayDry.Value;
             }
             catch (System.Exception ex)
             {
@@ -777,6 +763,12 @@ namespace KingdomEnhanced.UI
                 Settings.EnableSizeHack.Value = EnableSizeHack;
                 Settings.TargetSize.Value = TargetSize;
                 Settings.DisplayTimes.Value = DisplayTimes;
+
+                // Lab / World settings
+                Settings.LockSummer.Value = LockSummer;
+                Settings.ClearWeather.Value = ClearWeather;
+                Settings.NoBloodMoons.Value = NoBloodMoons;
+                Settings.CoinsStayDry.Value = CoinsStayDry;
                 
                 Settings.Config.Save();
             }
@@ -802,10 +794,8 @@ namespace KingdomEnhanced.UI
                 var currencyType = isGems ? CurrencyType.Gems : CurrencyType.Coins;
                 player.wallet.AddCurrency(currencyType, amount);
                 
-                string color = isGems ? "cyan" : "yellow";
                 string currencyName = isGems ? "Gems" : "Coins";
-                string icon = isGems ? "♦" : "$";
-                Speak($"<color={color}>{icon} +{amount} {currencyName}</color>");
+                Speak($"Added {amount} {currencyName}");
             }
             catch (System.Exception ex)
             {

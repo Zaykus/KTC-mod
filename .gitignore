@@ -31,3 +31,5 @@ logOutbut.og
 build_log_v1.2.txt
 RELEASE_NOTES.md
 *.zip
+Assembly.CSharp
+KingdomEnhanced/build_error.log

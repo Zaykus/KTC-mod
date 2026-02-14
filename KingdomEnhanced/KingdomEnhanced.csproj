@@ -72,14 +72,12 @@
 
 	</ItemGroup>
 
-	<ItemGroup>
-	  <PackageReference Include="System.Speech" Version="10.0.2" />
-	</ItemGroup>
+
 
 	<!-- Auto-Copy Build Artifacts -->
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)\plugins" />
-		<Message Text="Copied mod to game plugins folder!" Importance="High" />
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="F:\vs CODE\mods\BepInEx\plugins" />
+		<Message Text="Copied mod to F:\vs CODE\mods\BepInEx\plugins" Importance="High" />
 	</Target>
 
 </Project>

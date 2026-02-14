@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 using KingdomEnhanced.UI;
 
 namespace KingdomEnhanced.Features
@@ -48,17 +49,41 @@ namespace KingdomEnhanced.Features
 
         public static void RecruitBeggars() {
             var beggars = FindObjectsOfType<Beggar>();
-            GameObject prefab = Resources.Load<GameObject>("Prefabs/Characters/Peasant");
+            
+            // v3.0: Use FindObjectsOfTypeAll instead of broken Resources.Load (IL2CPP fix)
+            GameObject prefab = FindPeasantPrefab();
+            if (prefab == null) {
+                ModMenu.Speak("Error: Peasant prefab not found.");
+                return;
+            }
+            
             int count = 0;
             foreach (var b in beggars) {
                 if (b == null || !b.gameObject.activeInHierarchy) continue;
                 Vector3 pos = b.transform.position; pos.z = 0f;
-                b.gameObject.SetActive(false); Destroy(b.gameObject);
+                b.gameObject.SetActive(false); 
+                Destroy(b.gameObject);
                 Instantiate(prefab, pos, Quaternion.identity);
                 count++;
             }
             if (count > 0) ModMenu.Speak($"<color=lime>Recruited {count} Vagrants.</color>");
             else ModMenu.Speak("No Vagrants nearby.");
+        }
+
+        private static GameObject _peasantPrefabCache;
+        
+        private static GameObject FindPeasantPrefab() {
+            if (_peasantPrefabCache != null) return _peasantPrefabCache;
+            
+            var all = Resources.FindObjectsOfTypeAll<GameObject>();
+            foreach (var go in all) {
+                // Find the prefab (not a scene instance) named "Peasant"
+                if (go.scene.name == null && go.name == "Peasant" && go.GetComponent<Peasant>() != null) {
+                    _peasantPrefabCache = go;
+                    return go;
+                }
+            }
+            return null;
         }
 
         public static void DropTools(string type) {
@@ -78,10 +103,19 @@ namespace KingdomEnhanced.Features
             else ModMenu.Speak("No unemployed Peasants found.");
         }
 
+        private static readonly Dictionary<string, GameObject> _toolCache = new();
+
         private static GameObject FindTool(string name) {
+            if (_toolCache.TryGetValue(name, out var cached) && cached != null)
+                return cached;
+
             var all = Resources.FindObjectsOfTypeAll<GameObject>();
             foreach (var go in all) {
-                if (go.scene.name == null && go.name.Contains(name) && !go.name.Contains("Shop")) return go;
+                if (go.scene.name == null && go.name.Contains(name) && !go.name.Contains("Shop"))
+                {
+                    _toolCache[name] = go;
+                    return go;
+                }
             }
             return null;
         }
