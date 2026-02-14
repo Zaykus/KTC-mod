@@ -61,15 +61,16 @@ A complete screen-reader / TTS experience for blind or visually impaired players
 | File Name | Usage | Description |
 | :--- | :--- | :--- |
 | **`KTC-mod-AIOv1.5.0.zip`** | **✅ Recommended** | **All-In-One**. Contains the Mod, BepInEx loader, and all required DLLs. Best for new users. |
+| **`KTC-mod-without-Speech-v1.5.0.zip`** | **Linux / No-TTS** | AIO pack **without** System.Speech.dll. Best for Linux/Steam Deck or if you don't need TTS. |
 | **`KingdomEnhanced.dll`** | **Update / Expert** | The mod plugin itself. Download this to update your existing version. |
-| **`System.Speech.dll`**| **Optional** | Required **only** if you want Text-to-Speech (TTS) and don't use the AIO zip. |
+| **`System.Speech.dll`**| **Optional** | Required **only** if you need Text-to-Speech (TTS) and aren't using the AIO zip. |
 
 ---
 
 ### 🐧 Linux / Steam Deck / Wine Support
 This mod **DOES** work on Linux/Steam Deck, but with caveats:
 1.  **Do NOT use the AIO zip**: The included `System.Speech.dll` often crashes Wine/Proton.
-2.  **Download "KingdomEnhanced.dll"**: Do not install System.Speech.dll.
+2.  **Download "No Speech" Version**: Use `KTC-mod-without-Speech-v1.5.0.zip`.
 3.  **Launch Arguments**: If the mod doesn't load, add this to Steam Launch Options:
     `--doorstop-enable true --doorstop-target "BepInEx\core\BepInEx.IL2CPP.dll"`
 4.  **No Text-to-Speech**: The accessibility features rely on Windows SAPI and will not work on Linux.
