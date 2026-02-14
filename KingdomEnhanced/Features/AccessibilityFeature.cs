@@ -251,8 +251,9 @@ namespace KingdomEnhanced.Features
                                 message = $"{rawName}, {action}";
                         }
 
-                        // v2.3: Strict Anti-Spam
-                        if (message != _lastSpokenMsg)
+                        // v2.3: Strict Anti-Spam (Modified v1.5.0)
+                        // Speak if message changed OR if we switched to a new object (even if message is same, e.g. multiple trees)
+                        if (message != _lastSpokenMsg || current != _lastPayable)
                         {
                              ModMenu.Speak(message, interrupt: false);
                              _lastSpokenMsg = message;
@@ -287,7 +288,7 @@ namespace KingdomEnhanced.Features
 
             if (Managers.Inst == null || Managers.Inst.payables == null) return null;
             
-            float searchRange = 12.0f; // v2.4: Increased to 12m for running players
+            float searchRange = 18.0f; // v1.5: Increased to 18m to better detect tall trees
             float playerX = _player.transform.position.x;
             
             MonoBehaviour closest = null;

@@ -54,6 +54,9 @@ namespace KingdomEnhanced.Features
 
         void OnGUI()
         {
+            // If Monitor is open, hide this HUD to prevent overlap
+            if (KingdomMonitor.Instance != null && KingdomMonitor.Instance.IsVisible) return;
+
             if (!ModMenu.DisplayTimes || !IsManagersValid()) return;
             InitializeStyles();
             DrawHUD();

@@ -11,12 +11,16 @@ namespace KingdomEnhanced.Features
         private Kingdom _kingdom;
         private EnemyManager _enemyManager;
         
+        public static KingdomMonitor Instance { get; private set; }
+        
         private bool _isVisible = true;
+        public bool IsVisible => _isVisible;
         private Rect _windowRect = new Rect(10, 10, 250, 350);
         private bool _isResizing = false; // New: Resize State
 
         private void Start()
         {
+            Instance = this;
             _kingdom = FindObjectOfType<Kingdom>();
             _enemyManager = FindObjectOfType<EnemyManager>();
             
