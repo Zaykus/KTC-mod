@@ -100,6 +100,7 @@ namespace KingdomEnhanced.UI
         private int _currentTab = 0;
         private Rect _windowRect = new Rect(30, 30, 440, 700);
         private Vector2 _scrollPosition;
+        private bool _isResizing = false;
         #endregion
 
         #region UI Resources
@@ -360,6 +361,28 @@ namespace KingdomEnhanced.UI
             GUILayout.EndScrollView();
             
             DrawCredits();
+
+            // Resize Logic
+            var handleSize = 25f;
+            var resizeRect = new Rect(_windowRect.width - handleSize, _windowRect.height - handleSize, handleSize, handleSize);
+            GUI.Box(resizeRect, "↘", _buttonStyle);
+
+            Event e = Event.current;
+            if (e.type == EventType.MouseDown && resizeRect.Contains(e.mousePosition))
+            {
+                _isResizing = true;
+                e.Use();
+            }
+            else if (e.type == EventType.MouseUp)
+            {
+                _isResizing = false;
+            }
+            
+            if (_isResizing && e.type == EventType.MouseDrag)
+            {
+                _windowRect.width = Mathf.Max(400, _windowRect.width + e.delta.x);
+                _windowRect.height = Mathf.Max(300, _windowRect.height + e.delta.y);
+            }
 
             if (settingsChanged || GUI.changed)
             {

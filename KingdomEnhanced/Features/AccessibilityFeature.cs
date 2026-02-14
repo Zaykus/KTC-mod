@@ -1,8 +1,10 @@
 using UnityEngine;
 using KingdomEnhanced.UI;
 using KingdomEnhanced.Systems;
+using KingdomEnhanced.Utils; // New
+using KingdomEnhanced.Systems.Accessibility; // New
 using System.Collections.Generic;
-using System.Reflection; // For Debug Tool
+using System.Reflection; 
 using System.Text.RegularExpressions;
 
 namespace KingdomEnhanced.Features
@@ -12,71 +14,13 @@ namespace KingdomEnhanced.Features
         private Player _player;
         private MonoBehaviour _lastPayable = null;
 
-        // v1.2.1: Comprehensive Object Mapping
-        private readonly Dictionary<string, string> _nameMapping = new Dictionary<string, string>
-        {
-            { "P1", "Peasant" },
-            { "P2", "Worker" }, 
-            { "Griffin", "Griffin Mount" },
-            { "Stag", "Stag Mount" },
-            { "Warhorse", "Warhorse Mount" },
-            { "Unicorn", "Unicorn Mount" },
-            { "Lizard", "Lizard Mount" },
-            { "Bear", "Bear Mount" },
-            { "Beetle", "Beetle Mount" },
-            { "Scaffold", "Construction" },
-            { "Boat Sail Position", "Boat" },
-            { "Boat Sale Position", "Boat" },
-            { "Border", "Portal" },
-            { "Tower B", "Tower" },
-            { "Tower A", "Tower" },
-            { "Tower C", "Tower" },
-            { "Tree Pin", "Tree" },
-            { "Shop Hammer", "Builder Shop" },
-            { "Shop Bow", "Archer Shop" },
-            { "Hermes Shade", "Hermes Statue" },
-            { "Statue Pike", "Pikeman Statue" },
-            { "Tree Cypress", "Tree" },
-            { "Tree Pine", "Tree" },
-            { "Tree Wild Pear", "Tree" },
-            { "Tree Olive", "Tree" },
-            { "BBB", "Banner" },
-            { "Shop Scythe", "Farmer Shop" },
-            // Units
-            { "Beggar", "Vagrant" },
-            { "Villager", "Citizen" },
-            { "Ronin", "Ronin" },
-            { "Hoplite", "Hoplite" },
-            { "Slinger", "Slinger" },
-            // Mounts
-            { "Gamigin", "Gamigin Mount" },
-            { "Gined", "Gined Mount" },
-            { "Wolf", "Fenrir Mount" },
-            { "Reindeer", "Reindeer Mount" },
-            { "Sleipnir", "Sleipnir Mount" },
-            { "Cat Chariot", "Cat Chariot" },
-            { "Kelpie", "Kelpie Mount" },
-            { "Hippocampus", "Hippocampus Mount" },
-            { "Cerberus", "Cerberus Mount" },
-            { "Pegasus", "Pegasus Mount" },
-            { "Donkey", "Donkey Mount" },
-            // Buildings
-            { "Quarry", "Stone Quarry" },
-            { "Mine", "Iron Mine" },
-            { "Dojo", "Dojo" },
-            { "Ballista", "Ballista Tower" },
-            { "Bakery", "Bakery" },
-            { "Stable", "Stable" },
-            { "Horn", "Horn Wall" },
-            { "Lighthouse", "Lighthouse" },
-            { "Citizen House", "Citizen House" },
-            { "Forge", "Forge" }
-        };
+        private RadarSystem _radarSystem; // New: Decoupled Radar
 
         void Start()
         {
             _player = GetComponent<Player>();
             _baseCampAnnounced = false;
+            _radarSystem = new RadarSystem(_player); // Init Radar
         }
 
         // v1.5: Castle Proximity Logic
@@ -92,20 +36,20 @@ namespace KingdomEnhanced.Features
         private string _lastName = "";
         private int _lastPrice = -1;
 
-        // Cached Regex patterns (compiled once instead of every call)
-        private static readonly Regex _digitDashRegex = new Regex(@"[\d-]", RegexOptions.Compiled);
-        private static readonly Regex _trailingUpperRegex = new Regex(@"\s[A-Z]$", RegexOptions.Compiled);
-        private static readonly Regex _pNumberRegex = new Regex(@"\sP\d+", RegexOptions.Compiled); // NEW: Strips " P25", " P1"
-        private static readonly Regex _camelCaseRegex = new Regex("([a-z])([A-Z])", RegexOptions.Compiled);
-        private static readonly Regex _multiSpaceRegex = new Regex(@"\s+", RegexOptions.Compiled);
-        private static readonly Regex _parenRegex = new Regex(@"\s*\(.*?\)", RegexOptions.Compiled);
-        private static readonly Regex _biomeRegex = new Regex(
-            @"(?i)\b(bamboo|iron|stone|dead|lands|scaffold|wreck|grove|grace|pin|sale|jade|norse|shogun|dire|plague|europe|greece|cypress|pine|olive|wild|pear|p2|olympus|dynasty|viking|challenge)\b", RegexOptions.Compiled);
-        private static readonly Regex _endsWithDigitRegex = new Regex(@"\d$", RegexOptions.Compiled);
-        private static readonly Regex _endsWithUpperRegex = new Regex(@"[A-Z]$", RegexOptions.Compiled);
+        // Optimization: Throttling updates
+        private float _lastPayableCheckTime = 0f;
+        private const float PAYABLE_CHECK_INTERVAL = 0.15f; // Check every ~150ms instead of frame
+
+        // Optimization: Cached Castle lists
+        private Castle[] _cachedCastles;
+        private float _castleCacheTimer = 0f;
+        private const float CASTLE_CACHE_INTERVAL = 2.0f; // Refresh list every 2s
 
         // Cached Price PropertyInfo per type
         private static readonly Dictionary<System.Type, PropertyInfo> _pricePropertyCache = new();
+
+        private static readonly Regex _endsWithDigitRegex = new Regex(@"\d$", RegexOptions.Compiled);
+        private static readonly Regex _endsWithUpperRegex = new Regex(@"[A-Z]$", RegexOptions.Compiled);
 
         void Update()
         {
@@ -117,7 +61,7 @@ namespace KingdomEnhanced.Features
                 if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                     ReportDetailedInfo();
                 else
-                    PulseRadar();
+                    _radarSystem.Pulse(); // New: Use RadarSystem
             }
             if (Input.GetKeyDown(KeyCode.F6)) CheckCompassAndSafety();
             if (Input.GetKeyDown(KeyCode.F7)) ReportWallet();
@@ -160,7 +104,7 @@ namespace KingdomEnhanced.Features
             if (current != null)
             {
                     // v2.2: Improved Cleanup
-                    string rawName = CleanName(current.name);
+                    string rawName = PayableNameResolver.CleanName(current.name);
                     
                     // v2.2: Ignore Player self-hover immediately
                     if (current.GetComponent<Player>() != null) return;
@@ -334,8 +278,13 @@ namespace KingdomEnhanced.Features
         }
 
         // v2.4: Helper to find closest payable if game hasn't selected one
+        // v2.4: Helper to find closest payable if game hasn't selected one
         MonoBehaviour GetClosestPayable()
         {
+            // Optimization: Throttle checks
+            if (Time.time < _lastPayableCheckTime + PAYABLE_CHECK_INTERVAL) return _lastPayable as MonoBehaviour; // Return last known good
+            _lastPayableCheckTime = Time.time;
+
             if (Managers.Inst == null || Managers.Inst.payables == null) return null;
             
             float searchRange = 12.0f; // v2.4: Increased to 12m for running players
@@ -364,16 +313,23 @@ namespace KingdomEnhanced.Features
         }
 
         // v3.0: Find closest castle for upgrade-blocking checks and base camp orientation
+        // v3.0: Find closest castle for upgrade-blocking checks and base camp orientation
         Castle FindClosestCastle()
         {
-            var castles = FindObjectsOfType<Castle>();
-            if (castles == null || castles.Length == 0) return null;
+            // Optimization: Cached Castle Search (P1 Fix)
+            if (_cachedCastles == null || Time.time > _castleCacheTimer + CASTLE_CACHE_INTERVAL) 
+            {
+                _cachedCastles = FindObjectsOfType<Castle>();
+                _castleCacheTimer = Time.time;
+            }
+
+            if (_cachedCastles == null || _cachedCastles.Length == 0) return null;
 
             Castle closest = null;
             float closestDist = float.MaxValue;
             float playerX = _player.transform.position.x;
 
-            foreach (var c in castles)
+            foreach (var c in _cachedCastles)
             {
                 if (c == null) continue;
                 float dist = Mathf.Abs(c.transform.position.x - playerX);
@@ -413,7 +369,7 @@ namespace KingdomEnhanced.Features
                 return;
             }
 
-            string name = CleanName(current.name);
+            string name = PayableNameResolver.CleanName(current.name);
             string currency = GetCurrencyName(current);
             int price = 0;
             
@@ -506,96 +462,6 @@ namespace KingdomEnhanced.Features
             }
         }
 
-        // --- RADAR LOGIC ---
-        void PulseRadar()
-        {
-            float range = 60f;
-            float playerX = _player.transform.position.x;
-
-            Dictionary<string, float> closestLeft = new Dictionary<string, float>();
-            Dictionary<string, float> closestRight = new Dictionary<string, float>();
-
-            // 1. Scan Payables
-            var payables = Managers.Inst?.payables;
-            if (payables != null)
-            {
-                foreach (var p in payables.AllPayables)
-                {
-                    if (p == null) continue;
-                    var mb = p as MonoBehaviour;
-                    if (mb == null || !mb.gameObject.activeInHierarchy) continue;
-
-                    ProcessRadarTarget(mb, playerX, range, closestLeft, closestRight);
-                }
-            }
-
-            // 2. Scan Shops (via ShopTag, since they might not be Payables or we want specific names)
-            // Note: FindObjectsOfType is slow, but Radar is user-triggered, so acceptable.
-            // A better way would be if PayableShop is in AllPayables (it should be).
-            // So ProcessRadarTarget should handle ShopTag logic.
-            
-            List<string> results = new List<string>();
-            foreach (var kvp in closestLeft) results.Add($"{kvp.Key} {Mathf.RoundToInt(kvp.Value)}m Left");
-            foreach (var kvp in closestRight) results.Add($"{kvp.Key} {Mathf.RoundToInt(kvp.Value)}m Right");
-
-            ModMenu.Speak(results.Count > 0 ? string.Join(", ", results) : "No targets found");
-        }
-
-        void ProcessRadarTarget(MonoBehaviour mb, float playerX, float range, Dictionary<string, float> left, Dictionary<string, float> right)
-        {
-            float dist = mb.transform.position.x - playerX;
-            if (Mathf.Abs(dist) > range || Mathf.Abs(dist) < 3) return;
-
-            string n = mb.name.ToLower();
-            string type = "";
-
-            // v2.4: ShopTag Support
-            var shopTag = mb.GetComponent<ShopTag>();
-            if (shopTag != null)
-            {
-                type = GetShopTypeName(shopTag.type);
-            }
-            else
-            {
-                // Fallback to name parsing
-                if (n.Contains("beggar")) type = "Beggar";
-                else if (n.Contains("chest")) type = "Chest";
-                else if (n.Contains("portal")) type = "Portal";
-                else if (n.Contains("merchant")) type = "Merchant";
-                else if (n.Contains("statue")) type = "Statue";
-                else if (n.Contains("dog")) type = "Dog";
-                else if (n.Contains("hermit")) type = "Hermit";
-            }
-
-            if (type == "") return;
-
-            float absDist = Mathf.Abs(dist);
-            var dict = dist > 0 ? right : left;
-            
-            if (!dict.ContainsKey(type) || absDist < dict[type]) 
-                dict[type] = absDist;
-        }
-
-        string GetShopTypeName(PayableShop.ShopType type)
-        {
-            // Map enum to clean names
-            switch(type)
-            {
-                case PayableShop.ShopType.Bow: return "Archer Shop";
-                case PayableShop.ShopType.Hammer: return "Builder Shop";
-                case PayableShop.ShopType.Scythe: return "Farmer Shop";
-                case PayableShop.ShopType.PikeLeft: 
-                case PayableShop.ShopType.PikeRight: return "Pikeman Shop";
-                case PayableShop.ShopType.ShieldShopLeft:
-                case PayableShop.ShopType.ShieldShopRight: return "Shield Shop";
-                case PayableShop.ShopType.Forge: return "Forge";
-                case PayableShop.ShopType.NinjaLeft:
-                case PayableShop.ShopType.NinjaRight: return "Ninja House";
-                case PayableShop.ShopType.WorkshopLeft:
-                case PayableShop.ShopType.WorkshopRight: return "Catapult Workshop";
-                default: return "";
-            }
-        }
 
         void CheckCompassAndSafety()
         {
@@ -650,7 +516,7 @@ namespace KingdomEnhanced.Features
         void ReportMount()
         {
             if (_player.steed == null) return;
-            string n = CleanName(_player.steed.name);
+            string n = PayableNameResolver.CleanName(_player.steed.name);
             string status = _player.steed.IsTired ? "Tired" : "Ready";
             ModMenu.Speak($"{n}, {status}");
         }
@@ -671,45 +537,6 @@ namespace KingdomEnhanced.Features
             _pricePropertyCache.Clear();
         }
 
-        string CleanName(string original)
-        {
-            if (string.IsNullOrEmpty(original)) return "";
-
-            // 0. Pre-Trim
-            string s = original.Trim();
-
-            // 1. Basic Unity Cleanup
-            s = s.Replace("(Clone)", "").Replace("_", " ");
-
-            // 1.5: Remove parenthesized content (e.g., "Tower B (3)" → "Tower B")
-            s = _parenRegex.Replace(s, "");
-            
-            // 1.6: Remove P-Numbers (e.g. "Worker P25" -> "Worker")
-            s = _pNumberRegex.Replace(s, "");
-
-            // 2. Remove Internal IDs/Numbers
-            s = _digitDashRegex.Replace(s, "");
-
-            // 3. Strict Mode: Remove single trailing Uppercase letters (e.g. "Tower B" -> "Tower")
-            s = _trailingUpperRegex.Replace(s, "");
-
-            // 4. Split CamelCase
-            s = _camelCaseRegex.Replace(s, "$1 $2");
-
-            // v1.2.1: Check explicit mapping first
-            s = _multiSpaceRegex.Replace(s, " ").Trim();
-            
-            if (_nameMapping.ContainsKey(s)) return _nameMapping[s];
-
-            // v1.5: Simplify Names Toggle
-            if (ModMenu.SimplifyNames)
-            {
-                s = _biomeRegex.Replace(s, "");
-                s = _multiSpaceRegex.Replace(s, " ");
-            }
-
-            return s.Trim();
-        }
 
         // v1.2.1: Reflection-based Currency Detection
         string GetCurrencyName(MonoBehaviour target)

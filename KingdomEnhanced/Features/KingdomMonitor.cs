@@ -13,6 +13,7 @@ namespace KingdomEnhanced.Features
         
         private bool _isVisible = true;
         private Rect _windowRect = new Rect(10, 10, 250, 350);
+        private bool _isResizing = false; // New: Resize State
 
         private void Start()
         {
@@ -21,6 +22,9 @@ namespace KingdomEnhanced.Features
             
             if (_kingdom == null) Plugin.Instance.Log.LogWarning("KingdomMonitor: Kingdom not found.");
             if (_enemyManager == null) Plugin.Instance.Log.LogWarning("KingdomMonitor: EnemyManager not found.");
+            
+            if (_kingdom != null && _kingdom.playerOne != null)
+                _isVisible = false; // Default to hidden once loaded
         }
 
 
@@ -81,7 +85,30 @@ namespace KingdomEnhanced.Features
             GUILayout.Label($"Peasants: {_peasantCount}");
 
             GUILayout.EndVertical();
-            GUI.DragWindow();
+
+            // Resize Logic
+            var handleSize = 20f;
+            var resizeRect = new Rect(_windowRect.width - handleSize, _windowRect.height - handleSize, handleSize, handleSize);
+            GUI.Box(resizeRect, "↘"); // Simple handle
+
+            Event e = Event.current;
+            if (e.type == EventType.MouseDown && resizeRect.Contains(e.mousePosition))
+            {
+                _isResizing = true;
+                e.Use();
+            }
+            else if (e.type == EventType.MouseUp)
+            {
+                _isResizing = false;
+            }
+            
+            if (_isResizing && e.type == EventType.MouseDrag)
+            {
+                _windowRect.width = Mathf.Max(200, _windowRect.width + e.delta.x);
+                _windowRect.height = Mathf.Max(200, _windowRect.height + e.delta.y);
+            }
+
+            GUI.DragWindow(new Rect(0,0, 10000, 20)); // Title bar drag only
         }
 
         // Census Data
