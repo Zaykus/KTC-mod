@@ -61,15 +61,15 @@ A complete screen-reader / TTS experience for blind or visually impaired players
 | File Name | Usage | Description |
 | :--- | :--- | :--- |
 | **`KTC-mod-AIOv1.5.0.zip`** | **✅ Recommended** | **All-In-One**. Contains the Mod, BepInEx loader, and all required DLLs. Best for new users. |
-| **`KTC-mod-1.5.0 (Mod Only).zip`** | **Standard** | Just the plugin DLL + BepInEx. Use this **don't** need TTS. |
-| **`KTC-mod-1.5.0 (Mod + Speech).zip`**| **Accessibility** | Plugin DLL + `System.Speech.dll`. Required if you need **Blind/TTS support** but installed BepInEx manually. |
+| **`KingdomEnhanced.dll`** | **Update / Expert** | The mod plugin itself. Download this to update your existing version. |
+| **`System.Speech.dll`**| **Optional** | Required **only** if you want Text-to-Speech (TTS) and don't use the AIO zip. |
 
 ---
 
 ### 🐧 Linux / Steam Deck / Wine Support
 This mod **DOES** work on Linux/Steam Deck, but with caveats:
 1.  **Do NOT use the AIO zip**: The included `System.Speech.dll` often crashes Wine/Proton.
-2.  **Download "Mod Only"**: Use `KTC-mod-1.5.0 (Mod Only).zip`.
+2.  **Download "KingdomEnhanced.dll"**: Do not install System.Speech.dll.
 3.  **Launch Arguments**: If the mod doesn't load, add this to Steam Launch Options:
     `--doorstop-enable true --doorstop-target "BepInEx\core\BepInEx.IL2CPP.dll"`
 4.  **No Text-to-Speech**: The accessibility features rely on Windows SAPI and will not work on Linux.
@@ -85,8 +85,8 @@ The easiest way to get started.
 
 ### Method 2: Manual Update
 Use this if you are updating an existing installation.
-1.  Download the **Mod Only** (or **Mod + Speech**) zip.
-2.  Drag `KingdomEnhanced.dll` (and `System.Speech.dll` if needed) into:
+1.  Download **`KingdomEnhanced.dll`** (and `System.Speech.dll` if needed).
+2.  Drag `KingdomEnhanced.dll` into:
     *   `\Kingdom Two Crowns\BepInEx\plugins\`
 3.  Replace existing files.
 
