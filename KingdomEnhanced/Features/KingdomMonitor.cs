@@ -12,7 +12,7 @@ namespace KingdomEnhanced.Features
         private EnemyManager _enemyManager;
         
         private bool _isVisible = true;
-        private Rect _windowRect = new Rect(10, 10, 250, 150);
+        private Rect _windowRect = new Rect(10, 10, 250, 350);
 
         private void Start()
         {
@@ -34,45 +34,51 @@ namespace KingdomEnhanced.Features
             GUI.skin.label.fontSize = 14;
             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 
-            _windowRect = GUI.Window(999, _windowRect, (GUI.WindowFunction)DrawWindow, "Kingdom Monitor (F3)");
+            _windowRect = GUI.Window(999, _windowRect, (GUI.WindowFunction)DrawWindow, "Kingdom Monitor (F4)");
         }
 
         private void DrawWindow(int windowID)
         {
             GUILayout.BeginVertical();
 
-            // 1. Cycle Info
+            // 1. Time & Season
             string cycle = "Unknown";
+            int day = 0;
+            if (Managers.Inst != null && Managers.Inst.director != null)
+            {
+               day = Managers.Inst.director.CurrentIslandDays;
+            }
+            
             if (_kingdom != null)
             {
-                bool isDay = _kingdom.isDaytime;
-                cycle = isDay ? "Day" : "Night";
+                cycle = _kingdom.isDaytime ? "Day" : "Night";
             }
-            GUILayout.Label($"Cycle: {cycle}");
+            // Bold Header
+            GUILayout.Label($"<b>Day {day} ({cycle})</b>");
 
-            // 2. Blood Moon
+            // 2. Blood Moon / Threat
             if (_enemyManager != null)
             {
                 bool danger = _enemyManager.IsDangerous;
-                string status = danger ? "<color=red>DANGER</color>" : "<color=green>Safe</color>";
+                string status = danger ? "<color=red>DANGER</color>" : "<color=green>SAFE</color>";
                 GUILayout.Label($"Threat: {status}");
             }
-
-            // 3. Citizens (Census every 1s)
-            if (_kingdom != null)
+            
+            // 3. Wallet (Player 1)
+            if (_kingdom != null && _kingdom.playerOne != null && _kingdom.playerOne.wallet != null)
             {
-                // Players
-                // v2.1: Improved Player Count logic for Single Player
-                int players = 0;
-                if (_kingdom.playerOne != null && _kingdom.playerOne.gameObject.activeInHierarchy) players++;
-                if (_kingdom.playerTwo != null && _kingdom.playerTwo.gameObject.activeInHierarchy) players++;
-                GUILayout.Label($"Players: {players}");
-
-                // Census
-                GUILayout.Label($"Archers: {_archerCount}");
-                GUILayout.Label($"Workers: {_workerCount}");
-                GUILayout.Label($"Peasants: {_peasantCount}");
+                 int coins = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Coins);
+                 int gems = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Gems);
+                 GUILayout.Label($"Wallet: {coins} Coins, {gems} Gems");
             }
+
+            GUILayout.Space(5);
+
+            // 4. Citizens (Census)
+            GUILayout.Label($"<b>Population</b>");
+            GUILayout.Label($"Archers: {_archerCount}");
+            GUILayout.Label($"Workers: {_workerCount}");
+            GUILayout.Label($"Peasants: {_peasantCount}");
 
             GUILayout.EndVertical();
             GUI.DragWindow();

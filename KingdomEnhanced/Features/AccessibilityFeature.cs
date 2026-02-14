@@ -235,8 +235,8 @@ namespace KingdomEnhanced.Features
                         // Smart Heuristic v2
                         if (action == "Build")
                         {
-                            if (_endsWithDigitRegex.IsMatch(current.name) || 
-                                _endsWithUpperRegex.IsMatch(current.name))
+                            if (_endsWithDigitRegex.IsMatch(rawName) || 
+                                _endsWithUpperRegex.IsMatch(rawName))
                             {
                                 action = "Upgrade";
                             }
