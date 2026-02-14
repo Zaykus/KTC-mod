@@ -41,6 +41,7 @@ namespace KingdomEnhanced.Features
             { "Tree Wild Pear", "Tree" },
             { "Tree Olive", "Tree" },
             { "BBB", "Banner" },
+            { "Shop Scythe", "Farmer Shop" },
             // Units
             { "Beggar", "Vagrant" },
             { "Villager", "Citizen" },
@@ -231,6 +232,8 @@ namespace KingdomEnhanced.Features
                         else if (rawName.Contains("Gem Guard") || rawName.Contains("GemKeeper")) action = "Withdraw";
                         else if (rawName.Contains("Wreck") || rawName.Contains("Ruin")) action = "Repair";
                         else if (rawName.Contains("Tree") && !rawName.Contains("Close")) action = "Chop";
+                        else if (rawName.Contains("Banner") || rawName.Contains("Bomb")) action = "Attack";
+                        else if (rawName.Contains("Scythe")) action = "Buy Scythe";
                         
                         // Smart Heuristic v2
                         if (action == "Build")
