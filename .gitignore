@@ -25,3 +25,8 @@ MemoryCaptures/
 /[Bb]uild/
 /[Bb]uilds/
 
+logOutbut.og
+RELEASE_NOTES.md
+*.zip
+Assembly.CSharp
+code-review-expert
