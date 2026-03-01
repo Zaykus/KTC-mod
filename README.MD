@@ -9,7 +9,7 @@ It grants you full control over your army and economy while providing vital info
 
 > **Tested On:** Norse Lands, Call of Olympus, Shogun, and European Biomes  
 > **Compatible Versions:** 2.3.0+ (Unity 6 Update)
-> ** 2.0.0 Update ** has added many features, but there are also many errors here... I'm sorry about that.
+> **2.0.0 Update** has added many features, but there are also many errors here... I'm sorry about that.
 
 ![Mod Preview](modpic.png?raw=true)  
 *(A clean, card-based Royal Dark Console replacing the standard UI)*
