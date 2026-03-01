@@ -18,7 +18,7 @@ namespace KingdomEnhanced.Features
         private Rect _windowRect = new Rect(10, 10, 250, 350);
         private bool _isResizing = false;
 
-        // === Style System ===
+        
         public enum MonitorStyle { Classic, Neon, Light, Ghost }
         private MonitorStyle _currentStyle = MonitorStyle.Classic;
         private readonly string[] _styleNames = { "Classic", "Neon", "Light", "Ghost" };
@@ -26,7 +26,7 @@ namespace KingdomEnhanced.Features
         private Texture2D _btnTex;
         private bool _stylesBuilt;
 
-        // === Census Data ===
+        
         private int _archerCount;
         private int _workerCount;
         private int _peasantCount;
@@ -40,7 +40,7 @@ namespace KingdomEnhanced.Features
         private float _nextCensusTime;
         private int _censusStep = 0;
 
-        // === Style Colors ===
+        
         private StyleColors[] _stylePalette;
 
         private struct StyleColors
@@ -78,10 +78,10 @@ namespace KingdomEnhanced.Features
             if (_kingdom != null && _kingdom.playerOne != null)
                 _isVisible = false;
 
-            // Initialize style palette
+            
             _stylePalette = new StyleColors[]
             {
-                // Classic - Dark Medieval with Gold Frame
+                
                 new StyleColors(
                     new Color(0.12f, 0.12f, 0.12f, 1.0f),
                     new Color(0.18f, 0.18f, 0.18f, 1.0f),
@@ -93,7 +93,7 @@ namespace KingdomEnhanced.Features
                     new Color(0.75f, 0.65f, 0.45f, 1.0f),
                     "#44ff44", "#ff4444", 0.95f, 3
                 ),
-                // Neon - Cyberpunk with Cyan Frame
+                
                 new StyleColors(
                     new Color(0.05f, 0.0f, 0.15f, 1.0f),
                     new Color(0.10f, 0.0f, 0.25f, 1.0f),
@@ -105,7 +105,7 @@ namespace KingdomEnhanced.Features
                     new Color(0.0f, 1.0f, 1.0f, 1.0f),
                     "#00ff88", "#ff0088", 0.90f, 2
                 ),
-                // Light - Clean Paper with Dark Frame
+                
                 new StyleColors(
                     new Color(0.92f, 0.92f, 0.88f, 1.0f),
                     new Color(0.98f, 0.98f, 0.95f, 1.0f),
@@ -117,7 +117,7 @@ namespace KingdomEnhanced.Features
                     new Color(0.35f, 0.30f, 0.25f, 1.0f),
                     "#006600", "#990000", 0.95f, 3
                 ),
-                // Ghost - Fully Transparent with Subtle Frame
+                
                 new StyleColors(
                     new Color(0.00f, 0.00f, 0.00f, 0.00f),
                     new Color(0.00f, 0.00f, 0.00f, 0.00f),
@@ -139,11 +139,11 @@ namespace KingdomEnhanced.Features
 
             StyleColors colors = _stylePalette[(int)_currentStyle];
             
-            // Apply background with style alpha
+            
             Color prevBg = GUI.backgroundColor;
             GUI.backgroundColor = new Color(1f, 1f, 1f, colors.baseAlpha);
             
-            // Create window style with border frame
+            
             GUIStyle windowStyle = new GUIStyle(GUI.skin.box)
             {
                 padding = new RectOffset(10 + colors.frameThickness, 10 + colors.frameThickness, 10 + colors.frameThickness, 10 + colors.frameThickness),
@@ -162,7 +162,7 @@ namespace KingdomEnhanced.Features
 
             StyleColors colors = _stylePalette[(int)_currentStyle];
 
-            // Button texture
+            
             _btnTex = new Texture2D(1, 1);
             _btnTex.SetPixel(0, 0, colors.btnBg);
             _btnTex.Apply();
@@ -184,9 +184,9 @@ namespace KingdomEnhanced.Features
             StyleColors colors = _stylePalette[(int)_currentStyle];
 
             GUILayout.BeginVertical();
-            GUILayout.Space(15); // Push content down so it doesn't overlap the title
+            GUILayout.Space(15); 
 
-            // 1. Time & Season
+            
             string cycle = "Unknown";
             int day = 0;
             if (Managers.Inst != null && Managers.Inst.director != null)
@@ -198,12 +198,12 @@ namespace KingdomEnhanced.Features
                 cycle = _kingdom.isDaytime ? "Day" : "Night";
             }
             
-            // Bold Header with style color
+            
             GUI.contentColor = colors.header;
             GUILayout.Label($"<b>Day {day} ({cycle})</b>");
             GUI.contentColor = Color.white;
 
-            // 2. Blood Moon / Threat
+            
             if (_enemyManager != null)
             {
                 bool danger = _enemyManager.IsDangerous;
@@ -216,7 +216,7 @@ namespace KingdomEnhanced.Features
                 GUI.contentColor = Color.white;
             }
             
-            // 3. Wallet (Player 1)
+            
             if (_kingdom != null && _kingdom.playerOne != null && _kingdom.playerOne.wallet != null)
             {
                 int coins = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Coins);
@@ -228,7 +228,7 @@ namespace KingdomEnhanced.Features
 
             GUILayout.Space(5);
 
-            // 4. Citizens (Census)
+            
             GUI.contentColor = colors.header;
             GUILayout.Label($"<b>Population</b>");
             GUI.contentColor = colors.body;
@@ -245,10 +245,10 @@ namespace KingdomEnhanced.Features
 
             GUILayout.FlexibleSpace();
 
-            // Footer
-            GUILayout.Space(18); // Keep the space for the resize grip even without the text
+            
+            GUILayout.Space(18); 
 
-            // Resize Logic
+            
             var handleSize = 20f;
             var resizeRect = new Rect(_windowRect.width - handleSize, _windowRect.height - handleSize, handleSize, handleSize);
             GUI.color = colors.footer;
@@ -276,7 +276,7 @@ namespace KingdomEnhanced.Features
             GUILayout.EndVertical();
         }
 
-        // === Public API Methods (Required by ModMenu) ===
+        
         public void Show() => _isVisible = true;
         public void Hide() => _isVisible = false;
         public void Toggle() => _isVisible = !_isVisible;
@@ -290,7 +290,7 @@ namespace KingdomEnhanced.Features
         {
             if (!_isVisible) return;
 
-            // Run one census check every 0.1s to avoid stuttering from finding all objects
+            
             if (Time.time > _nextCensusTime)
             {
                 _nextCensusTime = Time.time + 0.1f;

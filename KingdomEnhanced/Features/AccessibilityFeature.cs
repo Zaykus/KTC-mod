@@ -24,7 +24,7 @@ namespace KingdomEnhanced.Features
         private bool _wasInCastle = false;
         
         private bool _baseCampAnnounced = false;
-        private bool _wasInVillage = false; // Village tracking
+        private bool _wasInVillage = false; 
         
         private float _spamTimer = 0f;
         private string _lastSpokenMsg = "";
@@ -96,28 +96,28 @@ namespace KingdomEnhanced.Features
             if (current != null)
             {
                 var payable = current.GetComponent<Payable>();
-                if (payable == null) return; // Should likely be a Payable
+                if (payable == null) return; 
 
-                // IGNORE PLAYER
+                
                 if (current.GetComponent<Player>() != null || current.gameObject == _player.gameObject) return;
                 
                 if (_player.steed != null && current.gameObject == _player.steed.gameObject) return;
 
                 string rawName = PayableNameResolver.CleanName(current.name);
                 
-                // Get Price and Currency safely from Payable component
+                
                 int price = payable.Price;
                 string currency = (payable.Currency == CurrencyType.Gems) ? "Gems" : "Coins";
 
 
 
-                // Fallback for empty names
+                
                 if (string.IsNullOrEmpty(rawName))
                 {
                     rawName = current.name.Replace("(Clone)", "").Trim();
                 }
 
-                // Map Names explicitly for Boat components
+                
                 if (current.GetComponent<Boat>() != null || current.name.ToLower().Contains("boat")) 
                 {
                     rawName = "Boat";
@@ -131,34 +131,34 @@ namespace KingdomEnhanced.Features
                     rawName = "Wharf";
                 }
 
-                // Check Lock Status natively
+                
                 string techWarning = "";
                 if (payable.IsLocked(_player, out LockIndicator.LockReason reason))
                 {
-                    // Map common reasons to user-friendly text
+                    
                     switch (reason)
                     {
                         case LockIndicator.LockReason.StoneTechRequired: techWarning = "Need Stone Tech"; break;
                         case LockIndicator.LockReason.IronTechRequired: techWarning = "Need Iron Tech"; break;
                         case LockIndicator.LockReason.HermitLocked: techWarning = "Locked by Hermit"; break;
-                        case LockIndicator.LockReason.NoUpgrade: techWarning = "Fully Upgraded"; break; // Or "Max Level"
+                        case LockIndicator.LockReason.NoUpgrade: techWarning = "Fully Upgraded"; break; 
                         case LockIndicator.LockReason.Base: techWarning = "Base upgrade required"; break;
                         default: techWarning = "Locked"; break; 
                     }
-                    if (reason == LockIndicator.LockReason.NotLocked) techWarning = ""; // Just in case
+                    if (reason == LockIndicator.LockReason.NotLocked) techWarning = ""; 
                 }
 
-                // Check Tree -> Village Danger (Using 15.0f radius)
+                
                 bool isProtecting = false;
                 if (rawName.Contains("Tree") && (isProtecting = IsTreeProtectingVillage(current.transform.position.x)))
                 {
                     techWarning = "WARNING: Destroys Village";
                 }
 
-                // Determine Action Name
+                
                 string action = "Build";
                 
-                // Specific Boat Logic
+                
                 if (rawName == "Boat" || rawName.Contains("Boat") || rawName.Contains("Ship"))
                 {
                      if (price <= 3) action = "Add Parts";
@@ -180,33 +180,33 @@ namespace KingdomEnhanced.Features
                 else if (rawName.Contains("Teleporter")) action = "Teleport";
                 else if (rawName.Contains("Bell")) action = "Call";
                 else if (rawName.Contains("Gem Guard") || rawName.Contains("GemKeeper")) action = "Withdraw";
-                // else if (rawName.Contains("Wreck") || rawName.Contains("Ruin")) action = "Repair"; // Handled above
+                
                 else if (rawName.Contains("Tree") && !rawName.Contains("Close")) action = "Chop";
                 else if (rawName.Contains("Mount") || rawName.Contains("Chimera") || current.name.Contains("Steed") || current.name.Contains("Horse")) action = "Switch";
                 else if (rawName.Contains("Banner")) action = "Expedition";
                 
-                // Refine "Build" vs "Upgrade"
+                
                 if (action == "Build")
                 {
-                    // If it has a level > 0, it's likely an upgrade
-                    // We can try to guess from name numbers or component levels
+                    
+                    
                     if (_endsWithDigitRegex.IsMatch(rawName) || _endsWithUpperRegex.IsMatch(rawName)) action = "Upgrade";
                     
                     var wall = current.GetComponent<Wall>();
                     if (wall != null && wall.level > 0) action = "Upgrade Wall";
                     
                     var castle = current.GetComponent<Castle>();
-                    // Castle Logic: Level 0 = Build, >0 = Upgrade
+                    
                     if (castle != null)
                     {
                          action = (castle.level == 0) ? "Build" : "Upgrade";
                     }
                     
                     var farm = current.GetComponent<Farmhouse>();
-                    if (farm != null && price >= 3) action = "Upgrade Farm"; // Loose heuristic
+                    if (farm != null && price >= 3) action = "Upgrade Farm"; 
                 }
 
-                // Construct Message
+                
                 string message = $"{rawName}";
                 
                 if (!string.IsNullOrEmpty(techWarning))
@@ -215,14 +215,14 @@ namespace KingdomEnhanced.Features
                 }
                 else
                 {
-                    // If not locked
+                    
                     if (price > 0 || action == "Withdraw" || action == "Deposit") 
                         message += $", {price} {currency}, {action}";
                     else
                         message += $", {action}";
                 }
 
-                // Dedup
+                
                 bool changed = (current != _lastPayable || message != _lastSpokenMsg);
                 if (changed)
                 {
@@ -412,7 +412,7 @@ namespace KingdomEnhanced.Features
             float h = 4.0f; 
             float wBox = 0.5f;
 
-            // 1. CASTLE ZONE BOUNDARY CALCULATION
+            
             float minWallX = float.MaxValue, maxWallX = float.MinValue;
             var walls = FindObjectsOfType<Wall>();
             if (walls != null && walls.Length > 0)
@@ -441,7 +441,7 @@ namespace KingdomEnhanced.Features
                 _debugZones.Add(new TriggerZone { Box = new Rect(maxWallX,        y - 1f, wBox, h - 1f), Color = Color.red, Label = "Entering/Leaving Castle (Trigger)" });
             }
 
-            // 2. CAMP ZONE BOUNDARY CALCULATION
+            
             _campIntervals.Clear();
             var camps = GameObject.FindObjectsOfType<BeggarCamp>();
             if (camps != null)
@@ -548,34 +548,34 @@ namespace KingdomEnhanced.Features
 
             foreach (var zone in _debugZones)
             {
-                // Convert World Space Rect to Screen Space
+                
                 Vector3 screenPointBL = cam.WorldToScreenPoint(new Vector3(zone.Box.xMin, zone.Box.yMin, 0));
                 Vector3 screenPointTR = cam.WorldToScreenPoint(new Vector3(zone.Box.xMax, zone.Box.yMax, 0));
                 
-                // Draw unconditionally in 2D Orthographic projections, avoid relying on Z > 0 
+                
                 float width = Mathf.Abs(screenPointTR.x - screenPointBL.x);
                 float height = Mathf.Abs(screenPointTR.y - screenPointBL.y);
-                // UI coordinates: y is inverted
+                
                 Rect screenRect = new Rect(Mathf.Min(screenPointBL.x, screenPointTR.x), Screen.height - Mathf.Max(screenPointBL.y, screenPointTR.y), width, height);
                 
-                // Draw solid rect
+                
                 Color prevC = GUI.color;
                 Color prevBg = GUI.backgroundColor;
                 GUI.backgroundColor = zone.Color;
                 GUI.color = Color.white;
                 GUI.Box(screenRect, GUIContent.none, GUI.skin.box);
                 
-                // Text
+                
                 GUIStyle style = new GUIStyle(GUI.skin.label) { 
                     fontSize = 11, alignment = TextAnchor.MiddleCenter, 
                     normal = { textColor = Color.white }, fontStyle = FontStyle.Bold 
                 };
                 
-                // Shadow
+                
                 GUI.color = Color.black;
                 GUI.Label(new Rect(screenRect.x - 49, screenRect.yMax + 1, width + 100, 20), zone.Label, style);
                 
-                // Main Text
+                
                 GUI.color = zone.Color;
                 GUI.Label(new Rect(screenRect.x - 50, screenRect.yMax, width + 100, 20), zone.Label, style);
                 
@@ -586,7 +586,7 @@ namespace KingdomEnhanced.Features
 
         private BeggarCamp FindClosestCamp()
         {
-            // Simple robust find
+            
             var camps = GameObject.FindObjectsOfType<BeggarCamp>();
             if (camps == null || camps.Length == 0) return null;
             
@@ -602,11 +602,11 @@ namespace KingdomEnhanced.Features
 
         private bool IsTreeProtectingVillage(float treeX)
         {
-            // Trees are considered protecting the village only if they form the 
-            // innermost bounds bordering a camp.
+            
+            
             foreach (var interval in _campIntervals)
             {
-                // Validate if this tree matches the innermost left or right bounds perfectly
+                
                 if (Mathf.Abs(treeX - interval.x) < 0.1f || Mathf.Abs(treeX - interval.y) < 0.1f)
                 {
                     return true; 
@@ -676,7 +676,7 @@ namespace KingdomEnhanced.Features
             int archers = FindObjectsOfType<Archer>().Length;
             int workers = FindObjectsOfType<Worker>().Length;
             int peasants = FindObjectsOfType<Peasant>().Length;
-            int knights = FindObjectsOfType<Knight>().Length; // Added Knights
+            int knights = FindObjectsOfType<Knight>().Length; 
 
             ModMenu.Speak($"{archers} Archers, {workers} Workers, {peasants} Peasants, {knights} Knights");
         }

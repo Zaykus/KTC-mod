@@ -125,8 +125,8 @@ namespace KingdomEnhanced.Hooks
         {
             if (ModMenu.InstantDaySkip)
             {
-                __instance.enabled = false; // Disable component to avoid issues
-                return false; // Skip original registration
+                __instance.enabled = false; 
+                return false; 
             }
             return true;
         }

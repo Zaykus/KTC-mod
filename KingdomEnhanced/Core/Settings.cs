@@ -7,13 +7,13 @@ namespace KingdomEnhanced.Core
     {
         public static ConfigFile Config;
 
-        // Visuals
+        
         public static ConfigEntry<bool> UseBetaUI;
         public static ConfigEntry<bool> ShowStaminaBar;
         public static ConfigEntry<bool> DisplayTimes;
         public static ConfigEntry<bool> ShowGreedCounter;
         
-        // Accessibility
+        
         public static ConfigEntry<bool> EnableAccessibility;
         public static ConfigEntry<bool> EnableTTS;
         public static ConfigEntry<bool> NarratorQueueMode;
@@ -21,7 +21,7 @@ namespace KingdomEnhanced.Core
         public static ConfigEntry<bool> EnableCastleAnnouncer;
         public static ConfigEntry<bool> DebugZones;
 
-        // Cheats
+        
         public static ConfigEntry<bool> CheatsUnlocked;
         public static ConfigEntry<float> SpeedMultiplier;
         public static ConfigEntry<bool> InfiniteStamina;
@@ -33,7 +33,7 @@ namespace KingdomEnhanced.Core
         public static ConfigEntry<float> CoinIncomeMult;
         public static ConfigEntry<float> BagDropMult;
         
-        // Lab / World
+        
         public static ConfigEntry<bool> HyperBuilders;
         public static ConfigEntry<bool> LargerCamps;
         public static ConfigEntry<bool> BetterKnight;
@@ -54,16 +54,16 @@ namespace KingdomEnhanced.Core
         public static ConfigEntry<bool> BallistaBoost;
         public static ConfigEntry<bool> InstantCastle;
 
-        // Player Hack
+        
         public static ConfigEntry<bool> EnableSizeHack;
         public static ConfigEntry<float> TargetSize;
 
-        // Steed
+        
         public static ConfigEntry<float> SteedSpeedMult;
         public static ConfigEntry<bool> ChargeDmgBoost;
         public static ConfigEntry<float> BuffAuraDuration;
 
-        // Enemies
+        
         public static ConfigEntry<float> WaveSizeMult;
         public static ConfigEntry<float> EnemySpeedMult;
         public static ConfigEntry<float> PortalSpawnRate;
@@ -76,13 +76,13 @@ namespace KingdomEnhanced.Core
         {
             Config = config;
 
-            // Visuals
+            
             UseBetaUI         = Config.Bind("1. Visuals", "UseBetaUI", false, "Use the new Beta UI style");
             ShowStaminaBar    = Config.Bind("1. Visuals", "ShowStaminaBar", false, "Show the energy/stamina bar");
             DisplayTimes      = Config.Bind("1. Visuals", "DisplayTimes", false, "Show day/night and coins HUD");
             ShowGreedCounter  = Config.Bind("1. Visuals", "ShowGreedCounter", false, "Show greed counter HUD");
 
-            // Accessibility
+            
             EnableAccessibility   = Config.Bind("2. Accessibility", "EnableAccessibility", true, "Enable logic for hover tracking");
             EnableTTS             = Config.Bind("2. Accessibility", "EnableTTS", true, "Enable text-to-speech output");
             NarratorQueueMode     = Config.Bind("2. Accessibility", "NarratorQueueMode", false, "Queue messages instead of interrupting");
@@ -90,7 +90,7 @@ namespace KingdomEnhanced.Core
             EnableCastleAnnouncer = Config.Bind("2. Accessibility", "CastleAnnouncer", false, "Announce entering/leaving castle");
             DebugZones            = Config.Bind("2. Accessibility", "DebugZones", false, "Show visual debug boxes for announcer zones");
 
-            // Cheats
+            
             CheatsUnlocked    = Config.Bind("3. Cheats", "CheatsUnlocked", false, "Unlock the cheat menu");
             SpeedMultiplier   = Config.Bind("3. Cheats", "SpeedMultiplier", 1.0f, "Travel speed multiplier");
             InfiniteStamina   = Config.Bind("3. Cheats", "InfiniteStamina", false, "Infinite mount stamina");
@@ -102,7 +102,7 @@ namespace KingdomEnhanced.Core
             CoinIncomeMult    = Config.Bind("3. Cheats", "CoinIncomeMult", 1.0f, "Coin income multiplier (0.25-4.0)");
             BagDropMult       = Config.Bind("3. Cheats", "BagDropMult", 1.0f, "Bag drop multiplier (1-10)");
 
-            // Lab
+            
             HyperBuilders     = Config.Bind("4. Development", "HyperBuilders", false, "Instant construction");
             LargerCamps       = Config.Bind("4. Development", "LargerCamps", false, "Expand vagrant camps");
             BetterKnight      = Config.Bind("4. Development", "BetterKnight", false, "Elite knights buffs");
@@ -124,16 +124,16 @@ namespace KingdomEnhanced.Core
             BallistaBoost      = Config.Bind("4. Development", "BallistaBoost", false, "Ballista power boost x2");
             InstantCastle      = Config.Bind("4. Development", "InstantCastle", false, "Instant castle upgrade completion");
 
-            // Player Hack
+            
             EnableSizeHack    = Config.Bind("5. Player Hack", "EnableSizeHack", false, "Enable player scaling");
             TargetSize        = Config.Bind("5. Player Hack", "TargetSize", 1.0f, "Player scale multiplier");
 
-            // Steed
+            
             SteedSpeedMult    = Config.Bind("6. Steed", "SteedSpeedMult", 1.0f, "Steed run speed scale");
             ChargeDmgBoost    = Config.Bind("6. Steed", "ChargeDmgBoost", false, "Steed charge damage x2");
             BuffAuraDuration  = Config.Bind("6. Steed", "BuffAuraDuration", 1.0f, "Steed buff aura duration multiplier");
 
-            // Enemies
+            
             WaveSizeMult       = Config.Bind("7. Enemies", "WaveSizeMult", 1.0f, "Wave size multiplier");
             EnemySpeedMult     = Config.Bind("7. Enemies", "EnemySpeedMult", 1.0f, "Enemy speed multiplier");
             PortalSpawnRate    = Config.Bind("7. Enemies", "PortalSpawnRate", 1.0f, "Portal spawn rate multiplier");

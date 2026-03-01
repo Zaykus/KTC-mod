@@ -20,24 +20,24 @@ namespace KingdomEnhanced.UI
         public TabCategory Category;
         public string Description;
 
-        // BINDINGS
+        
         public Func<bool> GetValue;
         public Action<bool> SetValue;
 
-        // SLIDER BINDINGS
+        
         public Func<float> GetFloatValue;
         public Action<float> SetFloatValue;
         public float MinVal;
         public float MaxVal;
 
-        // ACTIONS
+        
         public Action OnAction;
 
-        // LOCKS
+        
         public Func<bool> IsLocked;
         public Func<string> GetLockReason;
 
-        // CONFLICTS
+        
         public Func<bool> HasConflict;
     }
 
@@ -362,7 +362,7 @@ namespace KingdomEnhanced.UI
             };
         }
 
-        // Helper for Toggle features
+        
         private static FeatureMeta F(string id, string label, TabCategory cat, string section, string desc, Func<bool> get, Action<bool> set, Func<bool> isLocked = null, Func<string> lockReason = null, Func<bool> hasConflict = null)
         {
             return new FeatureMeta {
@@ -372,7 +372,7 @@ namespace KingdomEnhanced.UI
             };
         }
 
-        // Helper for Action buttons
+        
         private static FeatureMeta Action(string id, string label, TabCategory cat, string section, string desc, Action act, Func<bool> isLocked = null, Func<string> lockReason = null)
         {
             return new FeatureMeta {
@@ -382,7 +382,7 @@ namespace KingdomEnhanced.UI
             };
         }
 
-        // Helper for Sliders
+        
         private static FeatureMeta Slider(string id, string label, TabCategory cat, string section, string desc, Func<float> get, Action<float> set, float min, float max)
         {
             return new FeatureMeta {
@@ -396,7 +396,7 @@ namespace KingdomEnhanced.UI
         {
             var list = new List<FeatureMeta>();
 
-            // MAIN
+            
             list.Add(F("show_stamina", "Energy Bar", TabCategory.Main, "HUD", "Shows or hides the stamina bar on the HUD.", () => ShowStaminaBar, v => ShowStaminaBar = v));
             list.Add(Action("stamina_style", "Cycle Energy Bar Style", TabCategory.Main, "HUD", "Changes the visual style of the Energy Bar.", () => CycleStaminaBarStyle(), () => !ShowStaminaBar, () => "Requires Energy Bar"));
             list.Add(Action("stamina_pos", "Cycle Energy Bar Position", TabCategory.Main, "HUD", "Changes the position of the Energy Bar on screen.", () => CycleStaminaBarPosition(), () => !ShowStaminaBar, () => "Requires Energy Bar"));
@@ -409,7 +409,7 @@ namespace KingdomEnhanced.UI
 
             list.Add(Slider("speed_mult", "Travel Speed", TabCategory.Main, "Movement", "Multiplies the monarch's base movement speed.", () => SpeedMultiplier, v => SpeedMultiplier = v, 0.5f, 10.0f));
 
-            // CHEATS
+            
             list.Add(F("infinite_stamina", "Infinite Mount Stamina", TabCategory.Cheats, "Invincibility", "Prevents mount stamina from depleting.", () => InfiniteStamina, v => InfiniteStamina = v, () => !CheatsUnlocked));
 
             list.Add(F("no_tool_cooldowns", "No Tool Cooldowns", TabCategory.Cheats, "Infinite Stone", "Removes the cooldown/timeout of all Hermit tools (Horn of Healing, Athena's Shield, Hermes' Staff, etc).", () => NoToolCooldowns, v => NoToolCooldowns = v, () => !CheatsUnlocked));
@@ -454,7 +454,7 @@ namespace KingdomEnhanced.UI
             list.Add(F("hyper_builders", "Instant Construction", TabCategory.Cheats, "Builders", "Buildings complete in one frame.", () => HyperBuilders, v => HyperBuilders = v, () => !CheatsUnlocked, null, () => HyperBuilders && LargerCamps));
             list.Add(F("larger_camps", "Expand Vagrant Camps", TabCategory.Cheats, "Builders", "Increases the maximum vagrant camp population.", () => LargerCamps, v => LargerCamps = v, () => !CheatsUnlocked, null, () => HyperBuilders && LargerCamps));
             
-            // LAB
+            
             list.Add(F("lock_summer", "Lock Summer Season", TabCategory.Lab, "World", "Prevents the season from advancing past summer.", () => LockSummer, v => LockSummer = v));
             list.Add(F("clear_weather", "Clear Weather", TabCategory.Lab, "World", "Disables rain and snow effects.", () => ClearWeather, v => ClearWeather = v, null, null, () => LockSummer && ClearWeather));
             list.Add(F("coins_stay_dry", "Buoyant Currency", TabCategory.Lab, "World", "Coins dropped in water float instead of sinking.", () => CoinsStayDry, v => CoinsStayDry = v));
@@ -468,7 +468,7 @@ namespace KingdomEnhanced.UI
             list.Add(F("berserker_rage", "Berserker Rage Mode", TabCategory.Lab, "Units", "Berserkers enter rage state permanently.", () => BerserkerRage, v => BerserkerRage = v));
             list.Add(F("ninja_speed_boost", "Ninja Speed Boost", TabCategory.Lab, "Units", "Ninjas move faster.", () => NinjaSpeedBoost, v => NinjaSpeedBoost = v));
 
-            // Cast RecruitCap (int) to float for slider
+            
             list.Add(Slider("recruit_cap", "Recruit Cap", TabCategory.Lab, "Lab Rules", "Overrides max recruitable units. 0 for default.", () => RecruitCap, v => RecruitCap = (int)v, 0, 50));
             list.Add(Slider("tree_regrow", "Tree Regrowth", TabCategory.Lab, "World", "Multiplies tree regrowth speed.", () => TreeRegrowthMult, v => TreeRegrowthMult = v, 0.1f, 5.0f));
             
@@ -483,7 +483,7 @@ namespace KingdomEnhanced.UI
             list.Add(F("charge_dmg", "Charge Damage Boost", TabCategory.Lab, "Steed", "Increases steed charge damage.", () => ChargeDmgBoost, v => ChargeDmgBoost = v));
             list.Add(Slider("buff_aura", "Buff Aura Duration", TabCategory.Lab, "Steed", "Extends duration of buff auras.", () => BuffAuraDuration, v => BuffAuraDuration = v, 1.0f, 10.0f));
 
-            // HARD
+            
             list.Add(F("no_crown_stealing", "No Crown Stealing", TabCategory.Hard, "Wave Control", "Greed units cannot steal the crown.", () => NoCrownStealing, v => NoCrownStealing = v, () => DifficultyRules.IsHardModeActive(), () => "Hard Mode"));
 
             list.Add(Slider("wave_size", "Wave Size", TabCategory.Hard, "Wave Sliders", "Multiplies the number of enemies per wave.", () => WaveSizeMult, v => WaveSizeMult = v, 0.1f, 5.0f));
@@ -502,7 +502,7 @@ namespace KingdomEnhanced.UI
         {
             GUILayout.BeginVertical();
 
-            // HEADER
+            
             GUILayout.BeginHorizontal(GUI.skin.box, GUILayout.Height(HEADER_H));
             GUILayout.BeginVertical();
             GUILayout.Space(8);
@@ -511,10 +511,10 @@ namespace KingdomEnhanced.UI
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
 
-            // BODY ROOT
+            
             GUILayout.BeginHorizontal();
 
-            // SIDEBAR
+            
             GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(SIDEBAR_W));
             GUILayout.Space(10);
             for (int i = 0; i < TAB_LABELS.Length; i++)
@@ -536,17 +536,17 @@ namespace KingdomEnhanced.UI
             GUILayout.Space(10);
             GUILayout.EndVertical();
 
-            // MAIN CONTENT TABS
+            
             GUILayout.BeginVertical();
             _scrollPos[(int)_activeTab] = GUILayout.BeginScrollView(_scrollPos[(int)_activeTab]);
             DrawCurrentTab();
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
 
-            // BODY ROOT END
+            
             GUILayout.EndHorizontal();
 
-            // DRAG / FOOTER
+            
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             Rect resizeRect = GUILayoutUtility.GetRect(20, 20);
@@ -689,7 +689,7 @@ namespace KingdomEnhanced.UI
                 return;
             }
 
-            // Draw dynamic features
+            
             string lastSection = null;
             bool inCard = false;
 
@@ -709,7 +709,7 @@ namespace KingdomEnhanced.UI
             
             if (inCard) GUILayout.EndVertical();
             
-            // Draw Static/Custom Tabs
+            
             switch (_activeTab)
             {
                 case TabCategory.Info: DrawInfoTab(); break;
@@ -748,10 +748,10 @@ namespace KingdomEnhanced.UI
         {
             GUILayout.BeginHorizontal();
             
-            // Label
+            
             GUILayout.Label(f.Label, _styleBodyText, GUILayout.Width(180));
             
-            // Lock check
+            
             bool isLocked = f.IsLocked != null && f.IsLocked();
             
             if (isLocked)
@@ -762,7 +762,7 @@ namespace KingdomEnhanced.UI
                 return;
             }
 
-            // Conflict Warning
+            
             if (f.HasConflict != null && f.HasConflict())
             {
                 GUI.color = Color.yellow;
@@ -774,10 +774,10 @@ namespace KingdomEnhanced.UI
                 GUILayout.Space(24);
             }
 
-            // Draw Controls
+            
             if (f.GetFloatValue != null)
             {
-                // Slider
+                
                 float val = f.GetFloatValue();
                 GUILayout.Label($"{val:F1}", _styleBodyText, GUILayout.Width(40));
                 float newVal = GUILayout.HorizontalSlider(val, f.MinVal, f.MaxVal, GUILayout.ExpandWidth(true));
@@ -785,12 +785,12 @@ namespace KingdomEnhanced.UI
             }
             else if (f.OnAction != null)
             {
-                // Action Button
+                
                 if (GUILayout.Button("Apply", _styleBtn, GUILayout.Width(100))) f.OnAction();
             }
             else if (f.GetValue != null)
             {
-                // Toggle
+                
                 bool val = f.GetValue();
 
                 GUI.backgroundColor = val ? C_ON : C_OFF;
@@ -827,7 +827,7 @@ namespace KingdomEnhanced.UI
             GUILayout.Label("All features and settings explained dynamically.", _styleSubtitle);
             GUILayout.Space(10);
 
-            // Dynamic Guide Generation
+            
             foreach (var f in _features)
             {
                 GUILayout.Space(6);
@@ -835,7 +835,7 @@ namespace KingdomEnhanced.UI
                 GUILayout.Label($"<b>[{f.Category.ToString().ToUpper()}]</b> — {f.Label}", _styleTitle, GUILayout.Height(20));
                 GUILayout.FlexibleSpace();
                 
-                // State/Value Display
+                
                 string stateStr = "";
                 Color stateColor = Color.white;
 
@@ -875,7 +875,7 @@ namespace KingdomEnhanced.UI
             GUILayout.Label("Mark each feature after testing. Copy to Clipboard to share your report.", _styleDimText);
             GUILayout.Space(8);
 
-            // Dynamic Report Generation
+            
             foreach (var f in _features)
             {
                 if (!_featureStatus.ContainsKey(f.Id)) _featureStatus[f.Id] = 0;
@@ -885,7 +885,7 @@ namespace KingdomEnhanced.UI
 
                 GUILayout.BeginHorizontal();
                 
-                // FIX: Safe substring to prevent crash on "Lab" or "Hard"
+                
                 string catName = f.Category.ToString().ToUpper();
                 string catDisplay = catName.Length >= 4 ? catName.Substring(0, 4) : catName;
                 GUILayout.Label($"<b>[{catDisplay}]</b>", _styleBodyText, GUILayout.Width(60));
@@ -971,7 +971,7 @@ namespace KingdomEnhanced.UI
                 }
                 else
                 {
-                    // Reset logic here
+                    
                     ShowFeedback("Settings Reset!");
                     _resetConfirmPending = false;
                 }
@@ -996,12 +996,12 @@ namespace KingdomEnhanced.UI
 
         private void DrawNotificationLog()
         {
-            // FIX: Draw from bottom left corner
+            
             float y = Screen.height - 10; 
             
-            // Iterate in reverse so newer messages appear lower (or higher depending on preference)
-            // Standard: Iterate normally, but position mathematically, or iterate reverse.
-            // Let's iterate reverse so index N (newest) is at the bottom.
+            
+            
+            
             
             for (int i = _notifications.Count - 1; i >= 0; i--)
             {
@@ -1011,7 +1011,7 @@ namespace KingdomEnhanced.UI
 
                 GUI.color = new Color(n.TextColor.r, n.TextColor.g, n.TextColor.b, n.Alpha);
                 
-                y -= 26; // Move up for the next item
+                y -= 26; 
                 var rect = new Rect(10, y, 300, 24);
                 GUI.Label(rect, n.Message, _styleNotif);
             }
@@ -1024,25 +1024,25 @@ namespace KingdomEnhanced.UI
             _feedbackTimer = 2f;
         }
 
-        // Overload 1: Used by internal ModMenu calls (text + color)
+        
         public static void Speak(string text, Color color)
         {
             if (EnableTTS) TTSManager.Speak(text);
             _notifications.Add(new Notification(text, NotificationDuration, color));
         }
 
-        // Overload 2: Used by external files (text only)
+        
         public static void Speak(string text)
         {
             Speak(text, Color.white);
         }
 
-        // Overload 3: Used by external files with interrupt flag
+        
         public static void Speak(string text, bool interrupt)
         {
-            // We call the base Speak logic. 
-            // Note: If TTSManager requires the interrupt boolean, this might need adjustment, 
-            // but TTSManager.Speak(string) is the safest known signature.
+            
+            
+            
             if (EnableTTS) TTSManager.Speak(text);
             Speak(text, Color.white);
         }

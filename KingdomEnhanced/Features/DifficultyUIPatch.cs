@@ -102,7 +102,7 @@ namespace KingdomEnhanced.Features
                         if (__instance.difficultyLocText != null)
                             UnityEngine.Object.Destroy(__instance.difficultyLocText);
                         
-                        // Game provides a GameObject container, getting raw TMPro component
+                        
                         var textMesh = __instance.difficultyText.GetComponent<TMPro.TextMeshProUGUI>();
                         if (textMesh != null)
                         {

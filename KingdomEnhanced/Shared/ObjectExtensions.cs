@@ -263,8 +263,8 @@ namespace KingdomMod
             gen.Emit(OpCodes.Ret);
 
             dm.Invoke(null, new[] { @this });
-            // var BaseFoo = (Action<object>)dm.CreateDelegate(typeof(Action<object>));
-            // BaseFoo(@this);
+            
+            
         }
     }
 }

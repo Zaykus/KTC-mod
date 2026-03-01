@@ -55,7 +55,7 @@ namespace KingdomEnhanced.Features
 
             try
             {
-                /* Blood Moon reflection removed as unused */
+                
 
                 var enemyType = typeof(EnemyManager);
                 var enemyFields = enemyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
@@ -187,7 +187,7 @@ namespace KingdomEnhanced.Features
                     int g = 0;
                     var walletType = wallet.GetType();
                     
-                    // Fallback reflection for Coins
+                    
                     var cFields = walletType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                     foreach (var field in cFields)
                     {
@@ -277,7 +277,7 @@ namespace KingdomEnhanced.Features
             float diff = endHour - currentHour;
             if (diff <= 0f) diff += 24f;
 
-            // Add a tiny buffer to ensure the threshold is crossed
+            
             director.AdvanceTime(diff + 0.1f);
             ModMenu.Speak("<color=lightblue> Fast-forwarded to Nightfall!</color>");
         }
