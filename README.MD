@@ -16,6 +16,7 @@ It grants players complete granular control over their kingdom's army, economy, 
 
 > **Tested Biomes:** Norse Lands, Call of Olympus, Shogun, and European  
 > **Compatible Versions:** 2.3.0+ (Unity 6 Update)
+> **2.0.0 Update** has added many features, but there are also many errors here... I'm sorry about that.
 
 <video src="vid3.mp4?raw=true" autoplay loop muted playsinline></video>
 *(A clean, card-based setup designed within the Royal Dark Console aesthetic replacing standard UI)*
