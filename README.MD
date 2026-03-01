@@ -18,8 +18,7 @@ It grants players complete granular control over their kingdom's army, economy, 
 > **Compatible Versions:** 2.3.0+ (Unity 6 Update)
 > **2.0.0 Update** has added many features, but there are also many errors here... I'm sorry about that.
 
-<video src="vid3.mp4?raw=true" autoplay loop muted playsinline></video>
-*(A clean, card-based setup designed within the Royal Dark Console aesthetic replacing standard UI)*
+<video src="https://github.com/Zaykus/KTC-mod/raw/main/vid3.mp4?raw=true" autoplay loop muted playsinline></video>*(A clean, card-based setup designed within the Royal Dark Console aesthetic replacing standard UI)*
 
 ---
 
@@ -100,8 +99,7 @@ The fully rebuilt custom Mod Menu implements a native horizontal layout separate
     *   `[ Oblivion ]`  : The Blood Moon rises often. Retaliation is swift.
     *   `[ No Escape ]` : Enemies are stronger, faster, and deadlier.
 
-        <video src="vid2.mp4?raw=true" width="50%" autoplay loop muted playsinline></video> 
-
+        <video src="https://github.com/Zaykus/KTC-mod/raw/main/vid2.mp4?raw=true" width="50%" autoplay loop muted playsinline></video>
 *   **Manual Overrides**
     *   `Crown Stealing` : Explicitly toggle Greed crown-stripping capabilities.
     *   `Wave Multipliers` : Multiply the exact volume of units generated per wave.
