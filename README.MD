@@ -112,7 +112,7 @@ Use this if you are updating an existing installation.
 *   **Accessibility:** Upgraded Radar, entering/leaving village TTS announcers, and village tree detection.
 *   **Fixes:** Resolved core upgrade logic bugs, fixed wallet cost notifications, and patched deprecated function hooks.
 
-<video src="vid3.mp4?raw=true" autoplay loop muted playsinline></video>
+   <video src="vid2.mp4?raw=true" autoplay loop muted playsinline></video>
 
 ### v1.5.0 - The Polish Update
 *   **New Features:** Kingdom Monitor (F3), Mount Stamina Bar.
