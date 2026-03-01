@@ -13,36 +13,32 @@ namespace KingdomEnhanced.Hooks
         public static void Postfix(Player __instance)
         {
             if (__instance == null) return;
-            GameObject go = __instance.gameObject;
 
-            KingdomEnhanced.Core.Plugin.Instance.Log.LogInfo("Player Spawned. Attaching Managers...");
+            var existing = GameObject.FindObjectOfType<WorldManager>();
+            if (existing != null) return;
 
-            // 1. Core UI & Accessibility
-            SafeAdd<ModMenu>(go);
-            SafeAdd<AccessibilityFeature>(go);
+            KingdomEnhanced.Core.Plugin.Instance.Log.LogInfo("[KE] Player spawned. Attaching world managers...");
 
-            // 2. The Big 4 Managers
+            var go = new UnityEngine.GameObject("KingdomEnhanced_WorldManagers");
+            UnityEngine.Object.DontDestroyOnLoad(go);
+            go.hideFlags = UnityEngine.HideFlags.HideAndDontSave;
+
             SafeAdd<PlayerManager>(go);
             SafeAdd<WorldManager>(go);
             SafeAdd<ArmyManager>(go);
-            // BuildingManager removed — was empty stub
-            
-            // 3. Gameplay Enhancements
             SafeAdd<KingdomMonitor>(go);
-            SafeAdd<CoinBuoyancy>(go);
         }
 
-        // Helper to safely add components without crashing
-        private static void SafeAdd<T>(GameObject go) where T : MonoBehaviour
+        private static void SafeAdd<T>(UnityEngine.GameObject go) where T : MonoBehaviour
         {
             try
             {
-                if (go.GetComponent<T>() == null)
-                    go.AddComponent<T>();
+                go.AddComponent<T>();
+                KingdomEnhanced.Core.Plugin.Instance?.Log.LogInfo($"[KE] Attached {typeof(T).Name}");
             }
             catch (Exception e)
             {
-                KingdomEnhanced.Core.Plugin.Instance?.Log.LogWarning($"Failed to attach {typeof(T).Name}: {e.Message}");
+                KingdomEnhanced.Core.Plugin.Instance?.Log.LogWarning($"[KE] Failed to attach {typeof(T).Name}: {e.Message}");
             }
         }
     }

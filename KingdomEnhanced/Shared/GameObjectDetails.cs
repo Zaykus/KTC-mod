@@ -13,7 +13,6 @@ namespace KingdomMod
     [Serializable]
     public class GameObjectDetails
     {
-        #region[Declarations]
 
         public string name = "";
         public string tag = "";
@@ -26,7 +25,6 @@ namespace KingdomMod
         public System.Collections.Generic.List<string> components = new();
         public System.Collections.Generic.List<GameObjectDetails> children = new();
 
-        #endregion
 
         public GameObjectDetails() { }
 
@@ -73,17 +71,6 @@ namespace KingdomMod
             }
         }
 
-        // internal delegate void getRootSceneObjects(int handle, IntPtr list);
-        //
-        // // Resolve the GetRootGameObjects ICall (internal Unity MethodImp functions)
-        // internal static getRootSceneObjects getRootSceneObjects_iCall =
-        //     IL2CPP.ResolveICall<getRootSceneObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
-        //
-        // private static void GetRootGameObjects_Internal(Scene scene, IntPtr list)
-        // {
-        //     getRootSceneObjects_iCall(scene.handle, list);
-        // }
-
         public static System.Collections.Generic.List<GameObject> GetAllScenesGameObjects()
         {
             Scene[] array = new Scene[SceneManager.sceneCount];
@@ -108,16 +95,6 @@ namespace KingdomMod
                 }
             }
 
-            #region[DevNote]
-
-            /*
-            The reason these differ are that GetAllScenesObjects doen't get DontDestroyOnLoad objects and it maintains heirarchy so it looks like alot less
-            For example: GetAllScenesObjects() doesn't find this Trainer and the games StageLoadManager object.
-            */
-            //log.LogMessage("AllScenesObject's Count: " + allObjectsList.Count.ToString());
-            //log.LogMessage("FindAll<GameObject>() Count: " + GameObject.FindObjectsOfType<GameObject>().Count.ToString());
-
-            #endregion
 
             return allObjectsList;
         }

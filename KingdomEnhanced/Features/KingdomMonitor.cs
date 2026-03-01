@@ -1,5 +1,5 @@
 using System;
-using System.Linq; // Added for Count()
+using System.Linq;
 using UnityEngine;
 using KingdomEnhanced.Core;
 using KingdomEnhanced.UI;
@@ -16,7 +16,55 @@ namespace KingdomEnhanced.Features
         private bool _isVisible = true;
         public bool IsVisible => _isVisible;
         private Rect _windowRect = new Rect(10, 10, 250, 350);
-        private bool _isResizing = false; // New: Resize State
+        private bool _isResizing = false;
+
+        // === Style System ===
+        public enum MonitorStyle { Classic, Neon, Light, Ghost }
+        private MonitorStyle _currentStyle = MonitorStyle.Classic;
+        private readonly string[] _styleNames = { "Classic", "Neon", "Light", "Ghost" };
+        private GUIStyle _styleBtn;
+        private Texture2D _btnTex;
+        private bool _stylesBuilt;
+
+        // === Census Data ===
+        private int _archerCount;
+        private int _workerCount;
+        private int _peasantCount;
+        private int _knightCount;
+        private int _enemyCount;
+        private int _vagrantCount;
+        private int _farmerCount;
+        private int _pikemanCount;
+        private int _coinsCount;
+        private int _gemsCount;
+        private float _nextCensusTime;
+        private int _censusStep = 0;
+
+        // === Style Colors ===
+        private StyleColors[] _stylePalette;
+
+        private struct StyleColors
+        {
+            public Color bgBottom;
+            public Color bgTop;
+            public Color header;
+            public Color body;
+            public Color footer;
+            public Color btnBg;
+            public Color btnText;
+            public Color frameColor;
+            public string safeHex;
+            public string dangerHex;
+            public float baseAlpha;
+            public int frameThickness;
+
+            public StyleColors(Color bb, Color bt, Color h, Color b, Color f, Color bbgn, Color btnT, Color fc, string s, string d, float a, int ft)
+            {
+                bgBottom = bb; bgTop = bt; header = h; body = b; footer = f;
+                btnBg = bbgn; btnText = btnT; frameColor = fc;
+                safeHex = s; dangerHex = d; baseAlpha = a; frameThickness = ft;
+            }
+        }
 
         private void Start()
         {
@@ -28,72 +76,184 @@ namespace KingdomEnhanced.Features
             if (_enemyManager == null) Plugin.Instance.Log.LogWarning("KingdomMonitor: EnemyManager not found.");
             
             if (_kingdom != null && _kingdom.playerOne != null)
-                _isVisible = false; // Default to hidden once loaded
+                _isVisible = false;
+
+            // Initialize style palette
+            _stylePalette = new StyleColors[]
+            {
+                // Classic - Dark Medieval with Gold Frame
+                new StyleColors(
+                    new Color(0.12f, 0.12f, 0.12f, 1.0f),
+                    new Color(0.18f, 0.18f, 0.18f, 1.0f),
+                    new Color(0.95f, 0.90f, 0.70f),
+                    new Color(0.85f, 0.85f, 0.85f),
+                    new Color(0.60f, 0.60f, 0.60f),
+                    new Color(0.25f, 0.20f, 0.15f, 0.9f),
+                    new Color(0.95f, 0.90f, 0.70f),
+                    new Color(0.75f, 0.65f, 0.45f, 1.0f),
+                    "#44ff44", "#ff4444", 0.95f, 3
+                ),
+                // Neon - Cyberpunk with Cyan Frame
+                new StyleColors(
+                    new Color(0.05f, 0.0f, 0.15f, 1.0f),
+                    new Color(0.10f, 0.0f, 0.25f, 1.0f),
+                    new Color(0.0f, 1.0f, 1.0f),
+                    new Color(0.0f, 1.0f, 0.5f),
+                    new Color(1.0f, 0.0f, 1.0f),
+                    new Color(0.0f, 0.3f, 0.4f, 0.9f),
+                    new Color(0.0f, 1.0f, 1.0f),
+                    new Color(0.0f, 1.0f, 1.0f, 1.0f),
+                    "#00ff88", "#ff0088", 0.90f, 2
+                ),
+                // Light - Clean Paper with Dark Frame
+                new StyleColors(
+                    new Color(0.92f, 0.92f, 0.88f, 1.0f),
+                    new Color(0.98f, 0.98f, 0.95f, 1.0f),
+                    new Color(0.15f, 0.10f, 0.05f),
+                    new Color(0.25f, 0.20f, 0.15f),
+                    new Color(0.45f, 0.40f, 0.35f),
+                    new Color(0.75f, 0.70f, 0.65f, 0.9f),
+                    new Color(0.15f, 0.10f, 0.05f),
+                    new Color(0.35f, 0.30f, 0.25f, 1.0f),
+                    "#006600", "#990000", 0.95f, 3
+                ),
+                // Ghost - Fully Transparent with Subtle Frame
+                new StyleColors(
+                    new Color(0.00f, 0.00f, 0.00f, 0.00f),
+                    new Color(0.00f, 0.00f, 0.00f, 0.00f),
+                    new Color(1.00f, 1.00f, 0.80f),
+                    new Color(0.95f, 0.95f, 0.95f),
+                    new Color(0.85f, 0.85f, 0.85f),
+                    new Color(0.00f, 0.00f, 0.00f, 0.7f),
+                    new Color(1.00f, 1.00f, 0.80f),
+                    new Color(1.0f, 1.0f, 1.0f, 0.5f),
+                    "#7CFC00", "#FF4500", 0.00f, 2
+                )
+            };
         }
-
-
 
         private void OnGUI()
         {
             if (!_isVisible) return;
+            BuildStyles();
 
-            // Simple styling
-            GUI.skin.box.fontSize = 14;
-            GUI.skin.label.fontSize = 14;
-            GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+            StyleColors colors = _stylePalette[(int)_currentStyle];
+            
+            // Apply background with style alpha
+            Color prevBg = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(1f, 1f, 1f, colors.baseAlpha);
+            
+            // Create window style with border frame
+            GUIStyle windowStyle = new GUIStyle(GUI.skin.box)
+            {
+                padding = new RectOffset(10 + colors.frameThickness, 10 + colors.frameThickness, 10 + colors.frameThickness, 10 + colors.frameThickness),
+                border = new RectOffset(colors.frameThickness, colors.frameThickness, colors.frameThickness, colors.frameThickness)
+            };
+            
+            _windowRect = GUI.Window(999, _windowRect, (GUI.WindowFunction)DrawWindow, "Kingdom Monitor", windowStyle);
+            
+            GUI.backgroundColor = prevBg;
+        }
 
-            _windowRect = GUI.Window(999, _windowRect, (GUI.WindowFunction)DrawWindow, "Kingdom Monitor (F4)");
+        private void BuildStyles()
+        {
+            if (_stylesBuilt) return;
+            _stylesBuilt = true;
+
+            StyleColors colors = _stylePalette[(int)_currentStyle];
+
+            // Button texture
+            _btnTex = new Texture2D(1, 1);
+            _btnTex.SetPixel(0, 0, colors.btnBg);
+            _btnTex.Apply();
+
+            _styleBtn = new GUIStyle(GUI.skin.button)
+            {
+                fontSize = 10,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+                normal = { background = _btnTex, textColor = colors.btnText },
+                padding = new RectOffset(4, 4, 2, 2),
+                fixedWidth = 60,
+                fixedHeight = 18
+            };
         }
 
         private void DrawWindow(int windowID)
         {
+            StyleColors colors = _stylePalette[(int)_currentStyle];
+
             GUILayout.BeginVertical();
+            GUILayout.Space(15); // Push content down so it doesn't overlap the title
 
             // 1. Time & Season
             string cycle = "Unknown";
             int day = 0;
             if (Managers.Inst != null && Managers.Inst.director != null)
             {
-               day = Managers.Inst.director.CurrentIslandDays;
+                day = Managers.Inst.director.CurrentIslandDays;
             }
-            
             if (_kingdom != null)
             {
                 cycle = _kingdom.isDaytime ? "Day" : "Night";
             }
-            // Bold Header
+            
+            // Bold Header with style color
+            GUI.contentColor = colors.header;
             GUILayout.Label($"<b>Day {day} ({cycle})</b>");
+            GUI.contentColor = Color.white;
 
             // 2. Blood Moon / Threat
             if (_enemyManager != null)
             {
                 bool danger = _enemyManager.IsDangerous;
-                string status = danger ? "<color=red>DANGER</color>" : "<color=green>SAFE</color>";
+                string status = danger 
+                    ? $"<color={colors.dangerHex}>DANGER</color>" 
+                    : $"<color={colors.safeHex}>SAFE</color>";
+                GUI.contentColor = colors.body;
                 GUILayout.Label($"Threat: {status}");
+                GUILayout.Label($"Greed: {_enemyCount}");
+                GUI.contentColor = Color.white;
             }
             
             // 3. Wallet (Player 1)
             if (_kingdom != null && _kingdom.playerOne != null && _kingdom.playerOne.wallet != null)
             {
-                 int coins = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Coins);
-                 int gems = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Gems);
-                 GUILayout.Label($"Wallet: {coins} Coins, {gems} Gems");
+                int coins = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Coins);
+                int gems = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Gems);
+                GUI.contentColor = colors.body;
+                GUILayout.Label($"Wallet: {coins} Coins, {gems} Gems");
+                GUI.contentColor = Color.white;
             }
 
             GUILayout.Space(5);
 
             // 4. Citizens (Census)
+            GUI.contentColor = colors.header;
             GUILayout.Label($"<b>Population</b>");
-            GUILayout.Label($"Archers: {_archerCount}");
-            GUILayout.Label($"Workers: {_workerCount}");
-            GUILayout.Label($"Peasants: {_peasantCount}");
+            GUI.contentColor = colors.body;
+            
+            if (_archerCount > 0) GUILayout.Label($"Archers: {_archerCount}");
+            if (_workerCount > 0) GUILayout.Label($"Workers: {_workerCount}");
+            if (_peasantCount > 0) GUILayout.Label($"Peasants: {_peasantCount}");
+            if (_farmerCount > 0) GUILayout.Label($"Farmers: {_farmerCount}");
+            if (_pikemanCount > 0) GUILayout.Label($"Pikemen: {_pikemanCount}");
+            if (_knightCount > 0) GUILayout.Label($"Knights: {_knightCount}");
+            if (_vagrantCount > 0) GUILayout.Label($"Vagrants: {_vagrantCount}");
+            
+            GUI.contentColor = Color.white;
 
-            GUILayout.EndVertical();
+            GUILayout.FlexibleSpace();
+
+            // Footer
+            GUILayout.Space(18); // Keep the space for the resize grip even without the text
 
             // Resize Logic
             var handleSize = 20f;
             var resizeRect = new Rect(_windowRect.width - handleSize, _windowRect.height - handleSize, handleSize, handleSize);
-            GUI.Box(resizeRect, "↘"); // Simple handle
+            GUI.color = colors.footer;
+            GUI.Box(resizeRect, "[➘]");
+            GUI.color = Color.white;
 
             Event e = Event.current;
             if (e.type == EventType.MouseDown && resizeRect.Contains(e.mousePosition))
@@ -112,30 +272,58 @@ namespace KingdomEnhanced.Features
                 _windowRect.height = Mathf.Max(200, _windowRect.height + e.delta.y);
             }
 
-            GUI.DragWindow(new Rect(0,0, 10000, 20)); // Title bar drag only
+            GUI.DragWindow(new Rect(0, 0, 10000, 20));
+            GUILayout.EndVertical();
         }
 
-        // Census Data
-        private int _archerCount;
-        private int _workerCount;
-        private int _peasantCount;
-        private float _nextCensusTime;
+        // === Public API Methods (Required by ModMenu) ===
+        public void Show() => _isVisible = true;
+        public void Hide() => _isVisible = false;
+        public void Toggle() => _isVisible = !_isVisible;
+        public void NextStyle()
+        {
+            _currentStyle = (MonitorStyle)(((int)_currentStyle + 1) % _stylePalette.Length);
+            _stylesBuilt = false;
+        }
 
         private void Update()
         {
-            // Toggle with F4 (F3 is used by AccessibilityFeature)
-            if (Input.GetKeyDown(KeyCode.F4))
-            {
-                _isVisible = !_isVisible;
-            }
+            if (!_isVisible) return;
 
-            // Run Census every 1 second if visible
-            if (_isVisible && Time.time > _nextCensusTime)
+            // Run one census check every 0.1s to avoid stuttering from finding all objects
+            if (Time.time > _nextCensusTime)
             {
-                _nextCensusTime = Time.time + 1.0f;
-                _archerCount = FindObjectsOfType<Archer>().Length;
-                _workerCount = FindObjectsOfType<Worker>().Length;
-                _peasantCount = FindObjectsOfType<Peasant>().Length;
+                _nextCensusTime = Time.time + 0.1f;
+                
+                try 
+                {
+                    switch (_censusStep)
+                    {
+                        case 0: _archerCount = FindObjectsOfType<Archer>().Length; break;
+                        case 1: _workerCount = FindObjectsOfType<Worker>().Length; break;
+                        case 2: _peasantCount = FindObjectsOfType<Peasant>().Length; break;
+                        case 3: _knightCount = FindObjectsOfType<Knight>().Length; break;
+                        case 4: _vagrantCount = FindObjectsOfType<Beggar>().Length; break;
+                        case 5: _farmerCount = FindObjectsOfType<Farmer>().Length; break;
+                        case 6: _pikemanCount = FindObjectsOfType<Pikeman>().Length; break;
+                        case 7:
+                            var em = _enemyManager != null ? _enemyManager : FindObjectOfType<EnemyManager>();
+                            _enemyCount = (em != null && em.AllEnemies != null) ? em.AllEnemies.Count : 0;
+                            break;
+                        case 8:
+                            var player = Managers.Inst?.kingdom?.GetPlayer(0);
+                            if (player != null && player.wallet != null)
+                            {
+                                _coinsCount = player.wallet.Coins;
+                                _gemsCount = player.wallet.Gems;
+                            }
+                            break;
+                    }
+                } 
+                catch { }
+
+                _censusStep++;
+                if (_censusStep > 8) _censusStep = 0;
             }
         }
     }

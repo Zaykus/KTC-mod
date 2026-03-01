@@ -12,9 +12,8 @@ namespace KingdomEnhanced.Systems
 
         public bool enableStaminaBar = true;
         public int visualStyle = 0;
-        public int positionMode = 0; // 0=Head, 1=Feet, 2=Bottom, 3=Left, 4=Right, 5=Manual
+        public int positionMode = 0; 
 
-        // Manual Position Coordinates
         public float manualX = 500;
         public float manualY = 500;
 
@@ -54,7 +53,6 @@ namespace KingdomEnhanced.Systems
             if (player == null || player.steed == null) return;
             var steed = player.steed;
 
-            // --- 1. DATA ---
             float pct = 0f;
             Color barColor = Color.cyan;
             string status = "";
@@ -73,10 +71,9 @@ namespace KingdomEnhanced.Systems
                 else { barColor = new Color(0.2f, 0.9f, 1f); status = $"{Mathf.Round(pct * 100)}%"; }
             }
 
-            // --- 2. POSITION ---
             float x = 0, y = 0;
             if (positionMode <= 1)
-            { // WORLD SPACE (Head/Feet)
+            { 
                 Transform t = steed._mover != null ? steed._mover.transform : steed.transform;
                 Vector3 worldPos = t.position;
                 worldPos.y += (positionMode == 0 ? 2.5f : 0.5f);
@@ -87,14 +84,13 @@ namespace KingdomEnhanced.Systems
                 x = sPos.x; y = Screen.height - sPos.y;
             }
             else
-            { // HUD SPACE
+            { 
                 if (positionMode == 2) { x = Screen.width / 2; y = Screen.height - 80; }
                 else if (positionMode == 3) { x = 80; y = 80; }
                 else if (positionMode == 4) { x = Screen.width - 80; y = 80; }
-                else if (positionMode == 5) { x = manualX; y = manualY; } // MANUAL
+                else if (positionMode == 5) { x = manualX; y = manualY; } 
             }
 
-            // --- 3. DRAW ---
             GUI.depth = -2000;
             switch (visualStyle)
             {
@@ -164,6 +160,14 @@ namespace KingdomEnhanced.Systems
         }
 
         private void DrawColoredBox(Rect r, Color c) { GUI.color = c; GUI.Box(r, "", _boxStyle); GUI.color = Color.white; }
-        private static bool IsPlaying() { return Managers.Inst?.game?.state.ToString().Contains("Playing") ?? false; }
+        private static bool IsPlaying() 
+        { 
+            try 
+            {
+                if (Managers.Inst == null || Managers.Inst.game == null) return false;
+                return Managers.Inst.game.state.ToString().Contains("Playing");
+            }
+            catch { return false; }
+        }
     }
 }

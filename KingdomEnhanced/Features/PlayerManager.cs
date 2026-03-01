@@ -14,19 +14,9 @@ namespace KingdomEnhanced.Features
         {
             if (_player == null) return;
 
-            // 1. SPEED CHEAT
-            if (_player.steed != null)
-            {
-                if (_defaultSpeed == -1f) _defaultSpeed = _player.steed.runSpeed;
-                
-                float mult = ModMenu.SpeedMultiplier;
-                bool sprint = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-                
-                if (mult > 0.1f)
-                    _player.steed.runSpeed = sprint ? _defaultSpeed * mult : _defaultSpeed;
-            }
+            if (_player.steed != null && _defaultSpeed == -1f)
+                _defaultSpeed = _player.steed.runSpeed;
 
-            // 2. SIZE CHEAT
             if (ModMenu.EnableSizeHack)
             {
                 float dir = 1f;
@@ -34,10 +24,13 @@ namespace KingdomEnhanced.Features
                 _player.transform.localScale = new Vector3(ModMenu.TargetSize * dir, ModMenu.TargetSize, 1f);
             }
 
-            // 3. ECONOMY HOTKEYS
             if (Input.GetKeyDown(KeyCode.F2))
             {
-                if (_player.wallet != null)
+                if (!DifficultyRules.CanAddCoins())
+                {
+                    ModMenu.Speak($"<color=red>🔒 Wallet Refill locked in {HardModeFeature.GetActivePreset()}</color>");
+                }
+                else if (_player.wallet != null)
                 {
                     _player.wallet.SetCurrency(CurrencyType.Coins, 50);
                     ModMenu.Speak("Cheat: Wallet Refilled.");
@@ -49,8 +42,9 @@ namespace KingdomEnhanced.Features
         {
             if (ModMenu.InfiniteStamina && _player != null && _player.steed != null)
             {
-                _player.steed.Stamina = 100f;
-                _player.steed._tiredTimer = 0f;
+                var s = _player.steed;
+                s.Stamina = 100f;
+                if (s.IsTired) s._tiredTimer = -1f;
             }
         }
 

@@ -17,13 +17,11 @@ It grants players complete granular control over their kingdom's army, economy, 
 > **Tested Biomes:** Norse Lands, Call of Olympus, Shogun, and European  
 > **Compatible Versions:** 2.3.0+ (Unity 6 Update)
 
-https://github.com/user-attachments/assets/d37c7201-4dc3-4b54-901b-ac56ac516cda 
-
+https://github.com/user-attachments/assets/d37c7201-4dc3-4b54-901b-ac56ac516cda
 *(A clean, card-based setup designed within the Royal Dark Console aesthetic replacing standard UI)*
 
 ---
 
-<a id="mod-overview--features"></a>
 ## 🌟 Mod Overview & Features
 
 ### 🏰 Kingdom Monitor & HUD
@@ -131,7 +129,6 @@ A thorough Text-To-Speech (TTS) experience tailored specifically for blind or vi
 
 ---
 
-<a id="installation-guide"></a>
 ## 📥 Installation Guide
 
 ### Which file should I download?
@@ -169,7 +166,6 @@ This mod natively handles Linux/Steam Deck parameters, given you follow proper l
 
 ---
 
-<a id="controls-reference"></a>
 ## 🎮 Controls Reference
 
 | Key | Function | Description |
@@ -187,7 +183,6 @@ This mod natively handles Linux/Steam Deck parameters, given you follow proper l
 
 ---
 
-<a id="credits--feedback"></a>
 ## 🤝 Credits & Feedback
 
 *   **[Zaykus](https://github.com/Zaykus)** — Lead Developer, Menu UI, Everything else.

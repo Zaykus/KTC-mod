@@ -9,7 +9,7 @@
 		<LangVersion>latest</LangVersion>
 
 		<!-- PATH CONFIGURATION -->
-		<GameDir>F:\vs CODE\KTC dev\Kingdom.Two.Crowns.Build.21681591</GameDir>
+		<GameDir>F:\vs CODE\mods</GameDir>
 		<BepInExDir>$(GameDir)\BepInEx</BepInExDir>
 		<InteropDir>$(BepInExDir)\interop</InteropDir>
 	</PropertyGroup>
@@ -68,6 +68,16 @@
 		</Reference>
 		<Reference Include="System.Core">
 			<HintPath>$(InteropDir)\Il2CppSystem.Core.dll</HintPath>
+		</Reference>
+		
+		<Reference Include="Rewired_Core">
+			<HintPath>$(InteropDir)\Rewired_Core.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>$(InteropDir)\UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>$(InteropDir)\Unity.TextMeshPro.dll</HintPath>
 		</Reference>
 
 	</ItemGroup>

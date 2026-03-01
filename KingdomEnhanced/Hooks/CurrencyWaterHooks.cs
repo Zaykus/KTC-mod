@@ -1,38 +1,22 @@
 using HarmonyLib;
-using KingdomEnhanced.UI;
-using UnityEngine;
+using KingdomEnhanced.UI; 
 
 namespace KingdomEnhanced.Hooks
 {
-    /// <summary>
-    /// Prevents coins from sinking when CoinsStayDry is enabled.
-    /// Uses Update loop approach instead of Collider2D trigger patching
-    /// to avoid IL2CPP interop issues with physics callbacks.
-    /// </summary>
-    public class CoinBuoyancy : MonoBehaviour
+    // Targets the specific class and method in the Kingdom Two Crowns assembly
+    [HarmonyPatch(typeof(CurrencyManagerExt), "CanDropInWater")]
+    public class CoinBuoyancyPatch
     {
-        private static float _checkTimer;
-        
-        void Update()
+        // The Postfix runs immediately after the original CanDropInWater method finishes.
+        // By passing 'ref bool __result', we can read and change what the game returns.
+        [HarmonyPostfix]
+        public static void Postfix(ref bool __result)
         {
-            if (!ModMenu.CoinsStayDry) return;
-            
-            _checkTimer += Time.deltaTime;
-            if (_checkTimer < 0.5f) return;
-            _checkTimer = 0f;
-            
-            // Find coins that have fallen below water level
-            var coins = FindObjectsOfType<DroppableCurrency>();
-            foreach (var coin in coins)
+            // Check your custom UI toggle
+            if (ModMenu.CoinsStayDry)
             {
-                if (coin == null || !coin.gameObject.activeInHierarchy) continue;
-                // If coin Y position is below water line (typically -0.5f in KTC)
-                if (coin.transform.position.y < -0.5f)
-                {
-                    var pos = coin.transform.position;
-                    pos.y = 0.2f; // Place above water
-                    coin.transform.position = pos;
-                }
+                // Overrides the game's decision, forcing it to keep the coin dry
+                __result = false; 
             }
         }
     }

@@ -1,8 +1,8 @@
 using UnityEngine;
 using KingdomEnhanced.UI;
 using KingdomEnhanced.Systems;
-using KingdomEnhanced.Utils; // New
-using KingdomEnhanced.Systems.Accessibility; // New
+using KingdomEnhanced.Utils; 
+using KingdomEnhanced.Systems.Accessibility; 
 using System.Collections.Generic;
 using System.Reflection; 
 using System.Text.RegularExpressions;
@@ -14,38 +14,31 @@ namespace KingdomEnhanced.Features
         private Player _player;
         private MonoBehaviour _lastPayable = null;
 
-        private RadarSystem _radarSystem; // New: Decoupled Radar
+        private RadarSystem _radarSystem; 
 
         void Start()
         {
-            _player = GetComponent<Player>();
             _baseCampAnnounced = false;
-            _radarSystem = new RadarSystem(_player); // Init Radar
         }
 
-        // v1.5: Castle Proximity Logic
         private bool _wasInCastle = false;
-        private float _castleCheckTimer = 0f;
         
-        // v3.0: Base Camp Orientation
         private bool _baseCampAnnounced = false;
+        private bool _wasInVillage = false; // Village tracking
         
-        // v1.5: Restoring missing fields
         private float _spamTimer = 0f;
         private string _lastSpokenMsg = "";
         private string _lastName = "";
         private int _lastPrice = -1;
 
-        // Optimization: Throttling updates
-        private float _lastPayableCheckTime = 0f;
-        private const float PAYABLE_CHECK_INTERVAL = 0.15f; // Check every ~150ms instead of frame
 
-        // Optimization: Cached Castle lists
+        private float _lastPayableCheckTime = 0f;
+        private const float PAYABLE_CHECK_INTERVAL = 0.15f; 
+
         private Castle[] _cachedCastles;
         private float _castleCacheTimer = 0f;
-        private const float CASTLE_CACHE_INTERVAL = 2.0f; // Refresh list every 2s
+        private const float CASTLE_CACHE_INTERVAL = 2.0f; 
 
-        // Cached Price PropertyInfo per type
         private static readonly Dictionary<System.Type, PropertyInfo> _pricePropertyCache = new();
 
         private static readonly Regex _endsWithDigitRegex = new Regex(@"\d$", RegexOptions.Compiled);
@@ -53,15 +46,21 @@ namespace KingdomEnhanced.Features
 
         void Update()
         {
-            if (!ModMenu.EnableAccessibility || _player == null) return;
+            if (!ModMenu.EnableAccessibility) return;
 
-            // Input Handling
+            if (_player == null)
+            {
+                _player = FindObjectOfType<Player>();
+                if (_player != null) _radarSystem = new RadarSystem(_player);
+            }
+            if (_player == null) return;
+
             if (Input.GetKeyDown(KeyCode.F5))
             {
                 if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                     ReportDetailedInfo();
                 else
-                    _radarSystem.Pulse(); // New: Use RadarSystem
+                    _radarSystem.Pulse(); 
             }
             if (Input.GetKeyDown(KeyCode.F6)) CheckCompassAndSafety();
             if (Input.GetKeyDown(KeyCode.F7)) ReportWallet();
@@ -69,7 +68,6 @@ namespace KingdomEnhanced.Features
             if (Input.GetKeyDown(KeyCode.F9)) ReportMount();
             if (Input.GetKeyDown(KeyCode.F10)) ReportCompanions();
             
-            // v3.0: Repeat Last / Message History
             if (Input.GetKeyDown(KeyCode.F11))
             {
                 if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
@@ -78,13 +76,11 @@ namespace KingdomEnhanced.Features
                     TTSManager.RepeatLast();
             }
 
-            // v1.2.1: Debug Tool (Shift+F3)
             if (Input.GetKeyDown(KeyCode.F3) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
             {
                 DumpPayableInfo();
             }
 
-            // v3.1: Poll speech queue
             TTSManager.Update();
 
             HandleHover();
@@ -94,180 +90,153 @@ namespace KingdomEnhanced.Features
 
         void HandleHover()
         {
-            // v2.4: "Running Silence" Fix - Increased range to 12m
             var current = _player.selectedPayable as MonoBehaviour; 
-            
-            if (current == null)
-            {
-                current = GetClosestPayable();
-            }
+            if (current == null) current = GetClosestPayable();
+
             if (current != null)
             {
-                    // v2.2: Improved Cleanup
-                    string rawName = PayableNameResolver.CleanName(current.name);
-                    
-                    // v2.2: Ignore Player self-hover immediately
-                    if (current.GetComponent<Player>() != null) return;
+                var payable = current.GetComponent<Payable>();
+                if (payable == null) return; // Should likely be a Payable
 
-                    // v2.3.1: Ignore current steed
-                    if (_player.steed != null && current.gameObject == _player.steed.gameObject) return;
+                // IGNORE PLAYER
+                if (current.GetComponent<Player>() != null || current.gameObject == _player.gameObject) return;
+                
+                if (_player.steed != null && current.gameObject == _player.steed.gameObject) return;
 
-                    int price = 0; 
-                    
-                    // Reflection to get Price safely (cached per type)
-                    var currentType = current.GetType();
-                    if (!_pricePropertyCache.TryGetValue(currentType, out var priceProp))
+                string rawName = PayableNameResolver.CleanName(current.name);
+                
+                // Get Price and Currency safely from Payable component
+                int price = payable.Price;
+                string currency = (payable.Currency == CurrencyType.Gems) ? "Gems" : "Coins";
+
+
+
+                // Fallback for empty names
+                if (string.IsNullOrEmpty(rawName))
+                {
+                    rawName = current.name.Replace("(Clone)", "").Trim();
+                }
+
+                // Map Names explicitly for Boat components
+                if (current.GetComponent<Boat>() != null || current.name.ToLower().Contains("boat")) 
+                {
+                    rawName = "Boat";
+                }
+                else if (current.name.ToLower().Contains("wreck"))
+                {
+                    rawName = "Shipwreck";
+                }
+                else if (current.name.ToLower().Contains("wharf"))
+                {
+                    rawName = "Wharf";
+                }
+
+                // Check Lock Status natively
+                string techWarning = "";
+                if (payable.IsLocked(_player, out LockIndicator.LockReason reason))
+                {
+                    // Map common reasons to user-friendly text
+                    switch (reason)
                     {
-                        priceProp = currentType.GetProperty("Price");
-                        _pricePropertyCache[currentType] = priceProp;
+                        case LockIndicator.LockReason.StoneTechRequired: techWarning = "Need Stone Tech"; break;
+                        case LockIndicator.LockReason.IronTechRequired: techWarning = "Need Iron Tech"; break;
+                        case LockIndicator.LockReason.HermitLocked: techWarning = "Locked by Hermit"; break;
+                        case LockIndicator.LockReason.NoUpgrade: techWarning = "Fully Upgraded"; break; // Or "Max Level"
+                        case LockIndicator.LockReason.Base: techWarning = "Base upgrade required"; break;
+                        default: techWarning = "Locked"; break; 
                     }
-                    if (priceProp != null) price = (int)priceProp.GetValue(current, null);
+                    if (reason == LockIndicator.LockReason.NotLocked) techWarning = ""; // Just in case
+                }
+
+                // Check Tree -> Village Danger (Using 15.0f radius)
+                bool isProtecting = false;
+                if (rawName.Contains("Tree") && (isProtecting = IsTreeProtectingVillage(current.transform.position.x)))
+                {
+                    techWarning = "WARNING: Destroys Village";
+                }
+
+                // Determine Action Name
+                string action = "Build";
+                
+                // Specific Boat Logic
+                if (rawName == "Boat" || rawName.Contains("Boat") || rawName.Contains("Ship"))
+                {
+                     if (price <= 3) action = "Add Parts";
+                     else if (price >= 10) action = "Sail";
+                     else action = "Repair Hull";
+                     
+                     if (rawName.Contains("Wreck") || rawName.Contains("Ruin")) action = "Repair Hull";
+                }
+                
+                if (rawName.Contains("Statue") || rawName.Contains("Idol"))
+                {
+                    action = (currency == "Gems") ? "Pay" : "Activate";
+                }
+                
+                if (rawName.Contains("Bank") || rawName.Contains("Chest")) action = "Deposit";
+                else if (rawName.Contains("Portal") || rawName.Contains("Border")) action = "Destroy Portal";
+                else if (rawName.Contains("Beggar") || rawName.Contains("Citizen") || rawName.Contains("Hermit")) action = "Hire";
+                else if (rawName.Contains("Shop") || rawName.Contains("Merchant")) action = (rawName.Contains("Merchant")) ? "Invest" : "Buy";
+                else if (rawName.Contains("Teleporter")) action = "Teleport";
+                else if (rawName.Contains("Bell")) action = "Call";
+                else if (rawName.Contains("Gem Guard") || rawName.Contains("GemKeeper")) action = "Withdraw";
+                // else if (rawName.Contains("Wreck") || rawName.Contains("Ruin")) action = "Repair"; // Handled above
+                else if (rawName.Contains("Tree") && !rawName.Contains("Close")) action = "Chop";
+                else if (rawName.Contains("Mount") || rawName.Contains("Chimera") || current.name.Contains("Steed") || current.name.Contains("Horse")) action = "Switch";
+                else if (rawName.Contains("Banner")) action = "Expedition";
+                
+                // Refine "Build" vs "Upgrade"
+                if (action == "Build")
+                {
+                    // If it has a level > 0, it's likely an upgrade
+                    // We can try to guess from name numbers or component levels
+                    if (_endsWithDigitRegex.IsMatch(rawName) || _endsWithUpperRegex.IsMatch(rawName)) action = "Upgrade";
                     
-                    // v2.2: Smart Tech Logic for Towers
-                    string techWarning = "";
-                    if (rawName.Contains("Watchtower") || rawName.Contains("Tower")) // Check if it's a tower
+                    var wall = current.GetComponent<Wall>();
+                    if (wall != null && wall.level > 0) action = "Upgrade Wall";
+                    
+                    var castle = current.GetComponent<Castle>();
+                    // Castle Logic: Level 0 = Build, >0 = Upgrade
+                    if (castle != null)
                     {
-                         var tower = current.GetComponent<Tower>();
-                         if (tower != null)
-                         {
-                             // Logic:
-                             // Level 0 (Mound) -> 1 (Wood) -> 2 (Wood Max) -> 3 (Stone) -> 4 (Stone Max) -> 5 (Iron) ??
-                             // Based on gameplay:
-                             // If Level <= 2, we are in Wood age.
-                             // If Level == 3, we need Stone to go to 4.
-                             // If Level == 4+, we need Iron for higher?
-                             
-                             // Kingdom.StoneBuildingUnlocked / IronBuildingUnlocked
-                             var k = Managers.Inst.kingdom;
-                             if (k != null)
-                             {
-                                 if (tower.level >= 3 && !k.StoneBuildingUnlocked)
-                                 {
-                                     techWarning = "Need Stone Tech";
-                                     price = 0; // Can't buy
-                                 }
-                                 else if (tower.level >= 5 && !k.IronBuildingUnlocked)
-                                 {
-                                     techWarning = "Need Iron Tech";
-                                     price = 0;
-                                 }
-                             }
-                         }
+                         action = (castle.level == 0) ? "Build" : "Upgrade";
                     }
+                    
+                    var farm = current.GetComponent<Farmhouse>();
+                    if (farm != null && price >= 3) action = "Upgrade Farm"; // Loose heuristic
+                }
 
-                    // Check change
-                    // v2.2: Use techWarning in change detection
-                    bool changed = (current != _lastPayable || rawName != _lastName || price != _lastPrice || techWarning != _lastSpokenMsg);
+                // Construct Message
+                string message = $"{rawName}";
+                
+                if (!string.IsNullOrEmpty(techWarning))
+                {
+                    message += $", {techWarning}";
+                }
+                else
+                {
+                    // If not locked
+                    if (price > 0 || action == "Withdraw" || action == "Deposit") 
+                        message += $", {price} {currency}, {action}";
+                    else
+                        message += $", {action}";
+                }
 
-                    if (changed)
-                    {
-                        string action = "Build";
-                        string currency = GetCurrencyName(current);
-                        
-                        // v1.2.1: Refined Actions
-                        // v2.5: Use rawName for better matching after cleanup/mapping
-                        if (rawName.Contains("Bank") || rawName.Contains("Chest")) action = "Deposit";
-                        else if (rawName.Contains("Boat") || rawName.Contains("Ship")) action = "Repair Boat";
-                        else if (rawName.Contains("Portal") || rawName.Contains("Border")) action = "Destroy Portal";
-                        else if (rawName.Contains("Beggar") || rawName.Contains("Citizen") || rawName.Contains("Hermit")) action = "Hire";
-                        else if (rawName.Contains("Shop") || rawName.Contains("Merchant")) action = "Buy";
-                        else if (rawName.Contains("Teleporter")) action = "Teleport";
-                        else if (rawName.Contains("Bell")) action = "Call";
-                        else if (rawName.Contains("Gem Guard") || rawName.Contains("GemKeeper")) action = "Withdraw";
-                        else if (rawName.Contains("Wreck") || rawName.Contains("Ruin")) action = "Repair";
-                        else if (rawName.Contains("Tree") && !rawName.Contains("Close")) action = "Chop";
-                        else if (rawName.Contains("Banner") || rawName.Contains("Bomb")) action = "Attack";
-                        else if (rawName.Contains("Scythe")) action = "Buy Scythe";
-                        
-                        // Smart Heuristic v2
-                        if (action == "Build")
-                        {
-                            if (_endsWithDigitRegex.IsMatch(rawName) || 
-                                _endsWithUpperRegex.IsMatch(rawName))
-                            {
-                                action = "Upgrade";
-                            }
-                        }
-                        
-                        // Farm Upgrade
-                        if (action == "Build" && current.name.Contains("Farm") && price >= 3) action = "Upgrade"; 
-                        
-                        // v2.4: Smart Castle & Wall Logic
-                        if (current.name.Contains("Castle") || current.name.Contains("Town"))
-                        {
-                            var castle = current.GetComponent<Castle>();
-                            if (castle != null)
-                            {
-                                // If level is 0/1/low it's a Camp, otherwise Castle upgrades
-                                if ((int)castle.level == 0) action = "Build Camp";
-                                else action = "Upgrade Castle";
-                            }
-                        }
-                        
-                        if (current.name.Contains("Wall"))
-                        {
-                            var wall = current.GetComponent<Wall>();
-                            if (wall != null)
-                            {
-                                if (wall.level == 0 && price <= 1) action = "Build Wall";
-                                else action = "Upgrade Wall";
-                                
-                                // v3.0: Blocked Upgrade Warning
-                                var castle = FindClosestCastle();
-                                if (castle != null && wall.level >= (int)castle.level)
-                                {
-                                    techWarning = "Upgrade blocked, upgrade castle first";
-                                }
-                            }
-                            else if (price < 2) action = "Build";
-                            else action = "Upgrade";
-                        }
-                        
-                        // v3.0: Tree fallback — catch trees that slipped past the name check
-                        if (action == "Build" && (rawName.Contains("Tree") || current.GetComponent<WorkableTree>() != null))
-                        {
-                            action = "Chop";
-                        }
-                        
-                        // v2.3: Mount Logic
-                        // If it's a mount (from mapping or component), action is "Switch" (or "Unlock" if expensive?)
-                        if (rawName.Contains("Mount") || current.name.Contains("Steed") || current.name.Contains("Horse"))
-                        {
-                             action = "Switch";
-                        }
+                // Dedup
+                bool changed = (current != _lastPayable || message != _lastSpokenMsg);
+                if (changed)
+                {
+                    ModMenu.Speak(message, interrupt: false);
+                    _lastSpokenMsg = message;
+                    _spamTimer = Time.time;
+                }
 
-                        // v2.2: Apply Tech Warning Override
-                        string message;
-                        if (!string.IsNullOrEmpty(techWarning))
-                        {
-                            message = $"{rawName}, {techWarning}";
-                        }
-                        else
-                        {
-                             // Special case: don't say price if it's 0 (unless specifically needed)
-                            if (price > 0 || action == "Withdraw" || action == "Teleport")
-                                message = $"{rawName}, {price} {currency}, {action}";
-                            else
-                                message = $"{rawName}, {action}";
-                        }
-
-                        // v2.3: Strict Anti-Spam (Modified v1.5.0)
-                        // Speak if message changed OR if we switched to a new object (even if message is same, e.g. multiple trees)
-                        if (message != _lastSpokenMsg || current != _lastPayable)
-                        {
-                             ModMenu.Speak(message, interrupt: false);
-                             _lastSpokenMsg = message;
-                             _spamTimer = Time.time; 
-                        }
-                        
-                        _lastPayable = current;
-                        _lastName = rawName;
-                        _lastPrice = price;
-                    }
+                _lastPayable = current;
+                _lastName = rawName;
+                _lastPrice = price;
             }
             else
             {
-                 // v2.3: Reset state when no target found
                  if (_lastPayable != null)
                  {
                      _lastPayable = null;
@@ -278,17 +247,14 @@ namespace KingdomEnhanced.Features
             }
         }
 
-        // v2.4: Helper to find closest payable if game hasn't selected one
-        // v2.4: Helper to find closest payable if game hasn't selected one
         MonoBehaviour GetClosestPayable()
         {
-            // Optimization: Throttle checks
-            if (Time.time < _lastPayableCheckTime + PAYABLE_CHECK_INTERVAL) return _lastPayable as MonoBehaviour; // Return last known good
+            if (Time.time < _lastPayableCheckTime + PAYABLE_CHECK_INTERVAL) return _lastPayable as MonoBehaviour; 
             _lastPayableCheckTime = Time.time;
 
             if (Managers.Inst == null || Managers.Inst.payables == null) return null;
             
-            float searchRange = 18.0f; // v1.5: Increased to 18m to better detect tall trees
+            float searchRange = 18.0f; 
             float playerX = _player.transform.position.x;
             
             MonoBehaviour closest = null;
@@ -300,7 +266,6 @@ namespace KingdomEnhanced.Features
                 var mb = p as MonoBehaviour;
                 if (mb == null || !mb.gameObject.activeInHierarchy) continue;
 
-                // v2.3.1: Ignore current mount
                 if (_player.steed != null && mb.gameObject == _player.steed.gameObject) continue;
 
                 float dist = Mathf.Abs(mb.transform.position.x - playerX);
@@ -313,11 +278,8 @@ namespace KingdomEnhanced.Features
             return closest;
         }
 
-        // v3.0: Find closest castle for upgrade-blocking checks and base camp orientation
-        // v3.0: Find closest castle for upgrade-blocking checks and base camp orientation
         Castle FindClosestCastle()
         {
-            // Optimization: Cached Castle Search (P1 Fix)
             if (_cachedCastles == null || Time.time > _castleCacheTimer + CASTLE_CACHE_INTERVAL) 
             {
                 _cachedCastles = FindObjectsOfType<Castle>();
@@ -343,12 +305,10 @@ namespace KingdomEnhanced.Features
             return closest;
         }
 
-        // v3.0: Announce base camp direction when first arriving on an island
         void HandleBaseCampOrientation()
         {
             if (_baseCampAnnounced) return;
             
-            // Wait a moment after loading before announcing
             if (Time.timeSinceLevelLoad < 3.0f) return;
 
             var castle = FindClosestCastle();
@@ -374,7 +334,6 @@ namespace KingdomEnhanced.Features
             string currency = GetCurrencyName(current);
             int price = 0;
             
-            // Get price
             var currentType = current.GetType();
             if (!_pricePropertyCache.TryGetValue(currentType, out var priceProp)) {
                 priceProp = currentType.GetProperty("Price");
@@ -382,7 +341,6 @@ namespace KingdomEnhanced.Features
             }
             if (priceProp != null) price = (int)priceProp.GetValue(current, null);
 
-            // Get level if possible
             string levelInfo = "";
             var wall = current.GetComponent<Wall>();
             if (wall != null) levelInfo = $", Level {wall.level}";
@@ -393,14 +351,13 @@ namespace KingdomEnhanced.Features
             var tower = current.GetComponent<Tower>();
             if (tower != null) 
             {
-                name = "Watchtower"; // Override
+                name = "Watchtower"; 
                 levelInfo = $", Level {tower.level}";
             }
 
             ModMenu.Speak($"{name}, {price} {currency}{levelInfo}");
         }
 
-        // v1.2.1: Debug Reflection Dump
         void DumpPayableInfo()
         {
             var current = _player.selectedPayable as MonoBehaviour;
@@ -432,35 +389,230 @@ namespace KingdomEnhanced.Features
             ModMenu.Speak("Dumped fields to log file.");
         }
 
-        void HandleCastleProximity()
+        private float _zoneUpdateTimer = 0f;
+        private float _castleMinX = 0f;
+        private float _castleMaxX = 0f;
+        private List<Vector2> _campIntervals = new List<Vector2>();
+        
+        private struct TriggerZone {
+            public Rect Box;
+            public Color Color;
+            public string Label;
+        }
+        private List<TriggerZone> _debugZones = new List<TriggerZone>();
+        
+        private float _announcerCooldown = 0f;
+
+        void UpdateZones()
         {
-            if (!ModMenu.EnableCastleAnnouncer) return;
+            if (_player == null) return;
+            
+            _debugZones.Clear();
+            float y = _player.transform.position.y;
+            float h = 4.0f; 
+            float wBox = 0.5f;
 
-            _castleCheckTimer -= Time.deltaTime;
-            if (_castleCheckTimer > 0) return;
-            _castleCheckTimer = 1.0f; // Check every second
-
-            var kingdom = Managers.Inst?.kingdom;
-            if (kingdom != null)
+            // 1. CASTLE ZONE BOUNDARY CALCULATION
+            float minWallX = float.MaxValue, maxWallX = float.MinValue;
+            var walls = FindObjectsOfType<Wall>();
+            if (walls != null && walls.Length > 0)
             {
-                // Kingdom object is usually the anchor for the town center
-                float center = kingdom.transform.position.x;
-                float playerX = _player.transform.position.x;
-                float dist = playerX - center;
-                bool inside = Mathf.Abs(dist) < 25.0f; // Approximate castle width
-
-                if (inside && !_wasInCastle)
+                foreach (var w in walls)
                 {
-                    ModMenu.Speak("Inside Castle");
-                    _wasInCastle = true;
-                }
-                else if (!inside && _wasInCastle)
-                {
-                     string dir = dist < 0 ? "Left" : "Right";
-                     ModMenu.Speak($"Leaving Castle {dir}");
-                     _wasInCastle = false;
+                    if (w.transform.position.x < minWallX) minWallX = w.transform.position.x;
+                    if (w.transform.position.x > maxWallX) maxWallX = w.transform.position.x;
                 }
             }
+            else
+            {
+                var k = Managers.Inst?.kingdom;
+                if (k != null) { minWallX = k.transform.position.x - 20f; maxWallX = k.transform.position.x + 20f; }
+            }
+
+            _castleMinX = minWallX;
+            _castleMaxX = maxWallX;
+
+            if (minWallX != float.MaxValue)
+            {
+                _debugZones.Add(new TriggerZone { Box = new Rect(minWallX, y - 2f, 0.1f, h), Color = Color.cyan, Label = "Last Wall" });
+                _debugZones.Add(new TriggerZone { Box = new Rect(maxWallX, y - 2f, 0.1f, h), Color = Color.cyan, Label = "Last Wall" });
+                
+                _debugZones.Add(new TriggerZone { Box = new Rect(minWallX - wBox, y - 1f, wBox, h - 1f), Color = Color.red, Label = "Entering/Leaving Castle (Trigger)" });
+                _debugZones.Add(new TriggerZone { Box = new Rect(maxWallX,        y - 1f, wBox, h - 1f), Color = Color.red, Label = "Entering/Leaving Castle (Trigger)" });
+            }
+
+            // 2. CAMP ZONE BOUNDARY CALCULATION
+            _campIntervals.Clear();
+            var camps = GameObject.FindObjectsOfType<BeggarCamp>();
+            if (camps != null)
+            {
+                foreach (var camp in camps)
+                {
+                    float cx = camp.transform.position.x;
+                    float treeL1 = cx - 15f; 
+                    float treeR1 = cx + 15f;
+                    float treeL_N = cx - 30f;
+                    float treeR_N = cx + 30f;
+
+                    if (Managers.Inst != null && Managers.Inst.payables != null)
+                    {
+                        float minL = float.MaxValue, minR = float.MaxValue;
+                        float maxL = float.MinValue, maxR = float.MinValue;
+
+                        foreach (var p in Managers.Inst.payables.AllPayables)
+                        {
+                            var mb = p as MonoBehaviour;
+                            if (mb == null || !mb.name.Contains("Tree") || mb.name.Contains("Close")) continue;
+                            float tx = mb.transform.position.x;
+
+                            if (tx < cx && (cx - tx) < minL) { minL = cx - tx; treeL1 = tx; }
+                            if (tx > cx && (tx - cx) < minR) { minR = tx - cx; treeR1 = tx; }
+                            
+                            if (tx < cx && (cx - tx) < 100f && (cx - tx) > maxL) { maxL = cx - tx; treeL_N = tx; }
+                            if (tx > cx && (tx - cx) < 100f && (tx - cx) > maxR) { maxR = tx - cx; treeR_N = tx; }
+                        }
+                    }
+
+                    _campIntervals.Add(new Vector2(treeL1, treeR1));
+
+                    _debugZones.Add(new TriggerZone { Box = new Rect(treeL1, y - 2f, 0.1f, h), Color = Color.cyan, Label = "Inner Tree Line" });
+                    _debugZones.Add(new TriggerZone { Box = new Rect(treeR1, y - 2f, 0.1f, h), Color = Color.cyan, Label = "Inner Tree Line" });
+
+                    _debugZones.Add(new TriggerZone { Box = new Rect(treeL1 - wBox, y - 1f, wBox, h - 1f), Color = Color.red, Label = "Entering/Leaving Camp (Trigger)" });
+                    _debugZones.Add(new TriggerZone { Box = new Rect(treeR1,        y - 1f, wBox, h - 1f), Color = Color.red, Label = "Entering/Leaving Camp (Trigger)" });
+
+                    _debugZones.Add(new TriggerZone { Box = new Rect(treeL_N, y - 0.5f, Mathf.Max(0.1f, treeL1 - treeL_N - wBox), h - 2f), Color = new Color(0.3f, 0.3f, 0.3f, 0.6f), Label = "Exclusion Zone (No triggers)" });
+                    _debugZones.Add(new TriggerZone { Box = new Rect(treeR1 + wBox, y - 0.5f, Mathf.Max(0.1f, treeR_N - treeR1 - wBox), h - 2f), Color = new Color(0.3f, 0.3f, 0.3f, 0.6f), Label = "Exclusion Zone (No triggers)" });
+                }
+            }
+        }
+
+        void HandleCastleProximity()
+        {
+            if (_announcerCooldown > 0f) _announcerCooldown -= Time.deltaTime;
+
+            _zoneUpdateTimer -= Time.deltaTime;
+            if (_zoneUpdateTimer <= 0f)
+            {
+                UpdateZones();
+                _zoneUpdateTimer = 2.0f;
+            }
+
+            if (_player == null) return;
+            float playerX = _player.transform.position.x;
+            
+            if (ModMenu.EnableCastleAnnouncer)
+            {
+                bool insideCastle = playerX >= _castleMinX && playerX <= _castleMaxX;
+                if (insideCastle != _wasInCastle)
+                {
+                    _wasInCastle = insideCastle;
+                    if (_announcerCooldown <= 0f)
+                    {
+                        ModMenu.Speak(insideCastle ? "Entering Castle" : "Leaving Castle");
+                        _announcerCooldown = 0.5f;
+                    }
+                }
+            }
+
+            bool insideAnyCamp = false;
+            foreach (var interval in _campIntervals)
+            {
+                if (playerX >= interval.x && playerX <= interval.y)
+                {
+                    insideAnyCamp = true;
+                    break;
+                }
+            }
+
+            if (insideAnyCamp != _wasInVillage)
+            {
+                _wasInVillage = insideAnyCamp;
+                if (_announcerCooldown <= 0f)
+                {
+                    ModMenu.Speak(insideAnyCamp ? "Entering Camp" : "Leaving Camp");
+                    _announcerCooldown = 0.5f;
+                }
+            }
+        }
+
+        void OnGUI()
+        {
+            if (!ModMenu.DebugZones) return;
+
+            Camera cam = Camera.main;
+            if (cam == null)
+                cam = UnityEngine.Object.FindObjectOfType<Camera>();
+
+            if (cam == null) return;
+
+            foreach (var zone in _debugZones)
+            {
+                // Convert World Space Rect to Screen Space
+                Vector3 screenPointBL = cam.WorldToScreenPoint(new Vector3(zone.Box.xMin, zone.Box.yMin, 0));
+                Vector3 screenPointTR = cam.WorldToScreenPoint(new Vector3(zone.Box.xMax, zone.Box.yMax, 0));
+                
+                // Draw unconditionally in 2D Orthographic projections, avoid relying on Z > 0 
+                float width = Mathf.Abs(screenPointTR.x - screenPointBL.x);
+                float height = Mathf.Abs(screenPointTR.y - screenPointBL.y);
+                // UI coordinates: y is inverted
+                Rect screenRect = new Rect(Mathf.Min(screenPointBL.x, screenPointTR.x), Screen.height - Mathf.Max(screenPointBL.y, screenPointTR.y), width, height);
+                
+                // Draw solid rect
+                Color prevC = GUI.color;
+                Color prevBg = GUI.backgroundColor;
+                GUI.backgroundColor = zone.Color;
+                GUI.color = Color.white;
+                GUI.Box(screenRect, GUIContent.none, GUI.skin.box);
+                
+                // Text
+                GUIStyle style = new GUIStyle(GUI.skin.label) { 
+                    fontSize = 11, alignment = TextAnchor.MiddleCenter, 
+                    normal = { textColor = Color.white }, fontStyle = FontStyle.Bold 
+                };
+                
+                // Shadow
+                GUI.color = Color.black;
+                GUI.Label(new Rect(screenRect.x - 49, screenRect.yMax + 1, width + 100, 20), zone.Label, style);
+                
+                // Main Text
+                GUI.color = zone.Color;
+                GUI.Label(new Rect(screenRect.x - 50, screenRect.yMax, width + 100, 20), zone.Label, style);
+                
+                GUI.backgroundColor = prevBg;
+                GUI.color = prevC;
+            }
+        }
+
+        private BeggarCamp FindClosestCamp()
+        {
+            // Simple robust find
+            var camps = GameObject.FindObjectsOfType<BeggarCamp>();
+            if (camps == null || camps.Length == 0) return null;
+            
+            BeggarCamp closest = null;
+            float minDst = float.MaxValue;
+            foreach (var c in camps)
+            {
+                float d = Mathf.Abs(c.transform.position.x - _player.transform.position.x);
+                if (d < minDst) { minDst = d; closest = c; }
+            }
+            return closest;
+        }
+
+        private bool IsTreeProtectingVillage(float treeX)
+        {
+            // Trees are considered protecting the village only if they form the 
+            // innermost bounds bordering a camp.
+            foreach (var interval in _campIntervals)
+            {
+                // Validate if this tree matches the innermost left or right bounds perfectly
+                if (Mathf.Abs(treeX - interval.x) < 0.1f || Mathf.Abs(treeX - interval.y) < 0.1f)
+                {
+                    return true; 
+                }
+            }
+            return false;
         }
 
 
@@ -468,7 +620,6 @@ namespace KingdomEnhanced.Features
         {
             string dir = (_player.mover.GetDirection() == Side.Left) ? "Left" : "Right";
             
-            // v3.1: Add threat status and time of day
             string threat = "Safe";
             string timeOfDay = "Day";
             string borderInfo = "";
@@ -482,7 +633,6 @@ namespace KingdomEnhanced.Features
                 if (kingdom != null && !kingdom.isDaytime)
                     timeOfDay = "Night";
                     
-                // 9.6 Border Position
                 var walls = FindObjectsOfType<Wall>();
                 if (walls != null && walls.Length > 0)
                 {
@@ -503,7 +653,6 @@ namespace KingdomEnhanced.Features
         {
             int coins = _player.wallet.GetCurrency(CurrencyType.Coins);
             int gems = _player.wallet.GetCurrency(CurrencyType.Gems);
-            // Concise: "35 Gold, 5 Gems"
             ModMenu.Speak($"{coins} Gold, {gems} Gems");
         }
 
@@ -527,8 +676,9 @@ namespace KingdomEnhanced.Features
             int archers = FindObjectsOfType<Archer>().Length;
             int workers = FindObjectsOfType<Worker>().Length;
             int peasants = FindObjectsOfType<Peasant>().Length;
+            int knights = FindObjectsOfType<Knight>().Length; // Added Knights
 
-            ModMenu.Speak($"{archers} Archers, {workers} Workers, {peasants} Peasants");
+            ModMenu.Speak($"{archers} Archers, {workers} Workers, {peasants} Peasants, {knights} Knights");
         }
 
         void OnDestroy()
@@ -539,18 +689,14 @@ namespace KingdomEnhanced.Features
         }
 
 
-        // v1.2.1: Reflection-based Currency Detection
         string GetCurrencyName(MonoBehaviour target)
         {
-            // v2.5: Explicit overrides for known gem containers
             if (target.name.Contains("Gem Guard") || target.name.Contains("GemKeeper")) return "gems";
 
             try
             {
-                // Try to find "currency" or "priceType" fields
                 var type = target.GetType();
                 
-                // Common field names in Kingdom Assembly
                 var fields = new[] { "currency", "priceType", "coinType", "paymentType" };
                 
                 foreach (var fieldName in fields)
@@ -567,7 +713,6 @@ namespace KingdomEnhanced.Features
                         }
                     }
                     
-                     // Also check Properties
                     PropertyInfo prop = type.GetProperty(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                     if (prop != null)
                     {
@@ -583,7 +728,7 @@ namespace KingdomEnhanced.Features
             }
             catch {}
             
-            return "coins"; // Default
+            return "coins"; 
         }
     }
 }

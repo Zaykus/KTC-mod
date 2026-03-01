@@ -7,17 +7,11 @@ using System.Collections.Generic;
 
 namespace KingdomEnhanced.Features
 {
-    /// <summary>
-    /// Manages world information display and game status monitoring
-    /// </summary>
     public class WorldManager : MonoBehaviour
     {
-        #region GUI Styles
         private GUIStyle _timeStyle;
         private GUIStyle _coinStyle;
-        #endregion
 
-        #region Timers
         private float _statusTimer = 0f;
         private float _radarTimer = 0f;
         private float _lastAttackAlert = 0f;
@@ -25,21 +19,15 @@ namespace KingdomEnhanced.Features
         private const float STATUS_CHECK_INTERVAL = 2.0f;
         private const float RADAR_CHECK_INTERVAL = 4.0f;
         private const float ATTACK_ALERT_COOLDOWN = 60f;
-        #endregion
 
-        #region State Tracking
         private bool _wasDay = true;
-        private bool _wasBloodMoon = false;
-        #endregion
 
-        #region Reflection Caches
-        private FieldInfo _bloodMoonField;
-        private PropertyInfo _bloodMoonProperty;
+
+
+
         private FieldInfo _enemiesListField;
         private bool _fieldsDiscovered = false;
-        #endregion
 
-        #region Unity Lifecycle
         void Start()
         {
             DiscoverFields();
@@ -54,55 +42,21 @@ namespace KingdomEnhanced.Features
 
         void OnGUI()
         {
-            // If Monitor is open, hide this HUD to prevent overlap
             if (KingdomMonitor.Instance != null && KingdomMonitor.Instance.IsVisible) return;
 
             if (!ModMenu.DisplayTimes || !IsManagersValid()) return;
             InitializeStyles();
             DrawHUD();
         }
-        #endregion
 
-        #region Initialization
         private void DiscoverFields()
         {
             if (_fieldsDiscovered) return;
 
             try
             {
-                // Try multiple approaches to find Blood Moon indicator
-                var directorType = typeof(Director);
-                
-                // Approach 1: Search for bool fields with "blood" or "moon" in name
-                var allFields = directorType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                foreach (var field in allFields)
-                {
-                    string fieldName = field.Name.ToLower();
-                    if (field.FieldType == typeof(bool) && (fieldName.Contains("blood") || fieldName.Contains("moon")))
-                    {
-                        _bloodMoonField = field;
-                        Debug.Log($"[WorldManager] Found blood moon field: {field.Name}");
-                        break;
-                    }
-                }
+                /* Blood Moon reflection removed as unused */
 
-                // Approach 2: Try properties
-                if (_bloodMoonField == null)
-                {
-                    var allProps = directorType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    foreach (var prop in allProps)
-                    {
-                        string propName = prop.Name.ToLower();
-                        if (prop.PropertyType == typeof(bool) && (propName.Contains("blood") || propName.Contains("moon")))
-                        {
-                            _bloodMoonProperty = prop;
-                            Debug.Log($"[WorldManager] Found blood moon property: {prop.Name}");
-                            break;
-                        }
-                    }
-                }
-
-                // Try to find Enemy List for radar
                 var enemyType = typeof(EnemyManager);
                 var enemyFields = enemyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 
@@ -149,31 +103,32 @@ namespace KingdomEnhanced.Features
                 };
             }
         }
-        #endregion
 
-        #region HUD Drawing
         private void DrawHUD()
         {
-            const float hudWidth = 320f;
-            float hudX = (Screen.width / 2) - (hudWidth / 2);
-            float hudY = 20f;
-
-            var director = Managers.Inst.director;
-            
-            // Time Display
-            string timeDisplay = FormatTimeDisplay(director);
-            DrawShadowedLabel(new Rect(hudX, hudY, hudWidth, 25), timeDisplay, _timeStyle);
-            
-            // Coin Count Display
-            int bagCoins = GetPlayerCoins();
-            if (bagCoins >= 0)
+            try
             {
-                DrawShadowedLabel(
-                    new Rect(hudX, hudY + 25, hudWidth, 22), 
-                    $" Bag: {bagCoins} Coins", 
-                    _coinStyle
-                );
+                const float hudWidth = 320f;
+                float hudX = (Screen.width / 2) - (hudWidth / 2);
+                float hudY = 20f;
+
+                var director = Managers.Inst?.director;
+                if (director == null) return;
+
+                string timeDisplay = FormatTimeDisplay(director);
+                DrawShadowedLabel(new Rect(hudX, hudY, hudWidth, 25), timeDisplay, _timeStyle);
+
+                var stats = GetPlayerWalletStats();
+                if (stats.Coins >= 0)
+                {
+                    DrawShadowedLabel(
+                        new Rect(hudX, hudY + 25, hudWidth, 22),
+                        $" Coins: {stats.Coins}   Gems: {stats.Gems}",
+                        _coinStyle
+                    );
+                }
             }
+            catch { }
         }
 
         private string FormatTimeDisplay(Director director)
@@ -203,83 +158,59 @@ namespace KingdomEnhanced.Features
         {
             Color originalColor = GUI.color;
             
-            // Shadow
             GUI.color = new Color(0, 0, 0, 0.8f);
             GUI.Label(new Rect(rect.x + 2, rect.y + 2, rect.width, rect.height), text, style);
             
-            // Main text
             GUI.color = originalColor;
             GUI.Label(rect, text, style);
         }
-        #endregion
 
-        #region Coin Counting
-        private int GetPlayerCoins()
+        private (int Coins, int Gems) GetPlayerWalletStats()
         {
             try
             {
                 var player = Managers.Inst?.kingdom?.GetPlayer(0);
-                if (player == null)
-                {
-                    return -1;
-                }
+                if (player == null) return (-1, 0);
 
-                // Try to get wallet
                 var wallet = player.wallet;
-                if (wallet == null)
-                {
-                    return -1;
-                }
+                if (wallet == null) return (-1, 0);
 
-                // Method 1: Try GetCurrency method
                 try
                 {
                     int coins = wallet.GetCurrency(CurrencyType.Coins);
-                    return coins;
+                    int gems = wallet.GetCurrency(CurrencyType.Gems);
+                    return (coins, gems);
                 }
                 catch
                 {
-                    // Method 2: Try reflection to find coins field
+                    int c = -1;
+                    int g = 0;
                     var walletType = wallet.GetType();
-                    var fields = walletType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                     
-                    foreach (var field in fields)
+                    // Fallback reflection for Coins
+                    var cFields = walletType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    foreach (var field in cFields)
                     {
-                        string fieldName = field.Name.ToLower();
-                        if ((fieldName.Contains("coin") && !fieldName.Contains("gem")) || 
-                            fieldName == "_coins" || 
-                            fieldName == "coins")
+                        string fn = field.Name.ToLower();
+                        if (fn == "_coins" || fn == "coins" || (fn.Contains("coin") && !fn.Contains("gem")))
                         {
-                            if (field.FieldType == typeof(int))
-                            {
-                                return (int)field.GetValue(wallet);
-                            }
+                            if (field.FieldType == typeof(int)) c = (int)field.GetValue(wallet);
+                        }
+                        if (fn == "_gems" || fn == "gems" || (fn.Contains("gem") && !fn.Contains("coin")))
+                        {
+                            if (field.FieldType == typeof(int)) g = (int)field.GetValue(wallet);
                         }
                     }
-
-                    // Method 3: Try properties
-                    var properties = walletType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    foreach (var prop in properties)
-                    {
-                        string propName = prop.Name.ToLower();
-                        if ((propName.Contains("coin") && !propName.Contains("gem")) && prop.PropertyType == typeof(int))
-                        {
-                            return (int)prop.GetValue(wallet);
-                        }
-                    }
+                    return (c, g);
                 }
-
-                return -1;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[WorldManager] Error getting player coins: {ex.Message}");
-                return -1;
+                Debug.LogError($"[WorldManager] Error getting wallet stats: {ex.Message}");
+                return (-1, 0);
             }
         }
-        #endregion
 
-        #region Update Logic
         private void UpdateTimers(float deltaTime)
         {
             _statusTimer += deltaTime;
@@ -289,6 +220,9 @@ namespace KingdomEnhanced.Features
             {
                 _statusTimer = 0f;
                 CheckGameStatus();
+                if (ModMenu.InvincibleWalls) RepairWalls();
+                if (ModMenu.ClearWeather) ClearWeather();
+                ApplyPortalRates();
             }
 
             if (_radarTimer >= RADAR_CHECK_INTERVAL)
@@ -297,9 +231,34 @@ namespace KingdomEnhanced.Features
                 CheckForGreedAttack();
             }
         }
-        #endregion
 
-        #region Game Status Monitor
+        private void RepairWalls()
+        {
+            var walls = FindObjectsOfType<Wall>();
+            foreach (var w in walls) {
+                if (w == null || !w.gameObject.activeInHierarchy) continue;
+                var d = w.GetComponent<Damageable>();
+                if (d != null && d.initialHitPoints > 0) d.hitPoints = d.initialHitPoints;
+            }
+        }
+
+        private void ClearWeather()
+        {
+            var pre = FindObjectsOfType<Precipitation>();
+            foreach (var p in pre) {
+                if (p != null && p.gameObject.activeSelf) p.gameObject.SetActive(false);
+            }
+        }
+
+        private void ApplyPortalRates()
+        {
+            if (ModMenu.PortalSpawnRate == 1.0f) return;
+            var portals = FindObjectsOfType<Portal>();
+            foreach (var p in portals) {
+                if (p != null) KingdomEnhanced.Hooks.LabPatches.PortalApplyRate(p);
+            }
+        }
+
         private void CheckGameStatus()
         {
             var director = Managers.Inst.director;
@@ -308,18 +267,47 @@ namespace KingdomEnhanced.Features
             CheckDayNightTransition(director);
         }
 
+        public static void SkipDaytime()
+        {
+            var director = Managers.Inst?.director;
+            if (director == null || !director.IsDaytime) return;
+
+            float currentHour = director.currentTime % 24f;
+            float endHour = director.dayEnd;
+            float diff = endHour - currentHour;
+            if (diff <= 0f) diff += 24f;
+
+            // Add a tiny buffer to ensure the threshold is crossed
+            director.AdvanceTime(diff + 0.1f);
+            ModMenu.Speak("<color=lightblue> Fast-forwarded to Nightfall!</color>");
+        }
+
+        public static void SkipNighttime()
+        {
+            var director = Managers.Inst?.director;
+            if (director == null || director.IsDaytime) return;
+
+            float currentHour = director.currentTime % 24f;
+            float startHour = director.dayStart;
+            float diff = startHour - currentHour;
+            if (diff <= 0f) diff += 24f;
+
+            director.AdvanceTime(diff + 0.1f);
+            ModMenu.Speak("<color=orange> Fast-forwarded to Dawn!</color>");
+        }
+
         private void CheckDayNightTransition(Director director)
         {
             try
             {
                 if (director.IsDaytime && !_wasDay)
                 {
-                    ModMenu.Speak("<color=orange> ● The sun rises.</color>");
+                    ModMenu.Speak("<color=orange> O The sun rises.</color>");
                     _wasDay = true;
                 }
                 else if (!director.IsDaytime && _wasDay)
                 {
-                    ModMenu.Speak("<color=lightblue> ★ Stars appear.</color>");
+                    ModMenu.Speak("<color=lightblue> * Stars appear.</color>");
                     _wasDay = false;
                 }
             }
@@ -332,27 +320,22 @@ namespace KingdomEnhanced.Features
         
         private void CheckForGreedAttack()
         {
-            // Only check at night
-            if (Managers.Inst.director.IsDaytime) return;
-
             try
             {
+                if (Managers.Inst?.director == null || Managers.Inst.director.IsDaytime) return;
+
                 var enemyManager = UnityEngine.Object.FindObjectOfType<EnemyManager>();
                 if (enemyManager == null || _enemiesListField == null) return;
 
                 int enemyCount = GetEnemyCount(enemyManager);
-                
+
                 if (ShouldTriggerSiegeAlert(enemyCount))
                 {
                     ModMenu.Speak("<color=red><b>⚠️ SIEGE DETECTED!</b></color>");
                     _lastAttackAlert = Time.time;
                 }
             }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[WorldManager] Error checking for greed attack: {ex.Message}");
-                // Silent fail - greed detection is optional
-            }
+            catch { }
         }
 
         private int GetEnemyCount(EnemyManager enemyManager)
@@ -362,7 +345,6 @@ namespace KingdomEnhanced.Features
                 var enemyList = _enemiesListField.GetValue(enemyManager);
                 if (enemyList == null) return 0;
 
-                // Try to get count from list
                 var countProperty = enemyList.GetType().GetProperty("Count");
                 if (countProperty != null)
                 {
@@ -389,13 +371,11 @@ namespace KingdomEnhanced.Features
             return enemyCount > SIEGE_THRESHOLD && 
                    Time.time > _lastAttackAlert + ATTACK_ALERT_COOLDOWN;
         }
-        #endregion
 
-        #region Helper Methods
         private bool IsManagersValid()
         {
-            return Managers.Inst != null && Managers.Inst.director != null;
+            try { return Managers.Inst != null && Managers.Inst.director != null; }
+            catch { return false; }
         }
-        #endregion
     }
 }

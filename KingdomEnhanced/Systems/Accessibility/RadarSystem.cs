@@ -23,7 +23,6 @@ namespace KingdomEnhanced.Systems.Accessibility
             Dictionary<string, float> closestLeft = new Dictionary<string, float>();
             Dictionary<string, float> closestRight = new Dictionary<string, float>();
 
-            // 1. Scan Payables
             var payables = Managers.Inst?.payables;
             if (payables != null)
             {
@@ -36,11 +35,6 @@ namespace KingdomEnhanced.Systems.Accessibility
                     ProcessRadarTarget(mb, playerX, _range, closestLeft, closestRight);
                 }
             }
-
-            // 2. Scan Shops - simplified approach (relying on PayableShop being a Payable usually)
-            // If specific non-payable shops exist, we'd add logic here. 
-            // Original code used FindObjectsOfType which is slow, but acceptable for manual trigger.
-            // We'll stick to Payables for now as most interactables are Payables.
             
             List<string> results = new List<string>();
             foreach (var kvp in closestLeft) results.Add($"{kvp.Key} {Mathf.RoundToInt(kvp.Value)}m Left");
@@ -57,7 +51,6 @@ namespace KingdomEnhanced.Systems.Accessibility
             string n = mb.name.ToLower();
             string type = "";
 
-            // v2.4: ShopTag Support
             var shopTag = mb.GetComponent<ShopTag>();
             if (shopTag != null)
             {
@@ -65,7 +58,6 @@ namespace KingdomEnhanced.Systems.Accessibility
             }
             else
             {
-                // Fallback to name parsing
                 if (n.Contains("beggar")) type = "Beggar";
                 else if (n.Contains("chest")) type = "Chest";
                 else if (n.Contains("portal")) type = "Portal";
