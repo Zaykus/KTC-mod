@@ -98,6 +98,9 @@ The fully rebuilt custom Mod Menu implements a native horizontal layout separate
     *   `[ Relentless ]` : Nights are longer. Enemies never retreat.
     *   `[ Oblivion ]`  : The Blood Moon rises often. Retaliation is swift.
     *   `[ No Escape ]` : Enemies are stronger, faster, and deadlier.
+
+        <video src="vid2.mp4?raw=true" width="50%" autoplay loop muted playsinline></video> 
+
 *   **Manual Overrides**
     *   `Crown Stealing` : Explicitly toggle Greed crown-stripping capabilities.
     *   `Wave Multipliers` : Multiply the exact volume of units generated per wave.
