@@ -18,7 +18,7 @@ It grants players complete granular control over their kingdom's army, economy, 
 > **Compatible Versions:** 2.3.0+ (Unity 6 Update)
 > **2.0.0 Update** has added many features, but there are also many errors here... I'm sorry about that.
 
-[![Watch Demo](https://img.shields.io/badge/Watch-Demo%20Video-blue)](https://github.com/Zaykus/KTC-mod/raw/main/vid3.mp4)*(A clean, card-based setup designed within the Royal Dark Console aesthetic replacing standard UI)*
+[Watch video](https://github.com/Zaykus/KTC-mod/raw/main/vid3.mp4?raw=true)
 
 ---
 
