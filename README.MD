@@ -60,6 +60,9 @@ The fully rebuilt custom Mod Menu implements a native horizontal layout separate
     *   `Infinite Stamina` : Prevent steeds from ever tiring or pausing.
     *   `Artemis Bow` : A custom bow configuration tool. Overwrite standard arrow behavior to shoot multiple projectiles, scale the spread range distance, and universally multiply damage output.
 *   **Economy Modifiers**
+
+https://github.com/user-attachments/assets/cd747d70-b891-43a7-b8cd-940ee16f86ff
+
     Instantly inject +10/+50 Coins or +5 Gems into your wallet, or trigger an absolute "Fill to Max". Utilize override sliders to scale passive coin income logic and adjust global physical bag drop rates.
 *   **Military Commands**
     *   Instantly recruit all active vagrants island-wide.
