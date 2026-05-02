@@ -15,7 +15,7 @@ namespace KingdomEnhanced.Features
             {
                 try
                 {
-                    Plugin.Instance.Log.LogInfo("BiomeHolder Awake: injecting custom difficulty levels...");
+                    Plugin.Instance.LogSource.LogInfo("BiomeHolder Awake: injecting custom difficulty levels...");
 
                     var difficulties = __instance.difficultyLevels;
 
@@ -29,13 +29,13 @@ namespace KingdomEnhanced.Features
                         {
                             var data = HardModePresets.CreateDifficultyData(preset);
                             difficulties.Add(level, data);
-                            Plugin.Instance.Log.LogInfo($"Injected Difficulty: {data.difficultyName} (ID: {(int)level})");
+                            Plugin.Instance.LogSource.LogInfo($"Injected Difficulty: {data.difficultyName} (ID: {(int)level})");
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    Plugin.Instance.Log.LogError($"Failed to inject difficulty levels: {e}");
+                    Plugin.Instance.LogSource.LogError($"Failed to inject difficulty levels: {e}");
                 }
             }
         }

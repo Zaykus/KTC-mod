@@ -84,15 +84,15 @@ namespace KingdomEnhanced.Hooks
 
                 if (target == null)
                 {
-                    Core.Plugin.Instance.Log.LogWarning($"[Lab] '{name}' skipped — {type.Name}.{method} not found");
+                    Core.Plugin.Instance.LogSource.LogWarning($"[Lab] '{name}' skipped — {type.Name}.{method} not found");
                     return;
                 }
                 harmony.Patch(target, prefix: prefix, postfix: postfix);
-                Core.Plugin.Instance.Log.LogInfo($"[Lab] '{name}' patch applied");
+                Core.Plugin.Instance.LogSource.LogInfo($"[Lab] '{name}' patch applied");
             }
             catch (Exception ex)
             {
-                Core.Plugin.Instance.Log.LogWarning($"[Lab] '{name}' patch failed: {ex.Message}");
+                Core.Plugin.Instance.LogSource.LogWarning($"[Lab] '{name}' patch failed: {ex.Message}");
             }
         }
 

@@ -190,6 +190,9 @@ This mod natively handles Linux/Steam Deck parameters, given you follow proper l
 *   **[Abevol](https://github.com/abevol)** — Start Point & IL2CPP Tools
 *   **[BepInEx Team](https://github.com/BepInEx/BepInEx)** — Mod Loader Framework
 
+### 👥 Contributing
+Interested in contributing? See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, build instructions, and code style guidelines.
+
 Found a bug or visual error?
 1. Press **F1** -> **Report** Tab.
 2. Click **Copy Report**.

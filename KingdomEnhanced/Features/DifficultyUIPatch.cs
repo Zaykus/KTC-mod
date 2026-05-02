@@ -5,7 +5,11 @@ using KingdomEnhanced.Core;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+#if IL2CPP
 using Il2CppSystem.Collections.Generic;
+#else
+using System.Collections.Generic;
+#endif
 
 namespace KingdomEnhanced.Features
 {
@@ -23,7 +27,7 @@ namespace KingdomEnhanced.Features
 
                     if (selectorList == null)
                     {
-                        Plugin.Instance.Log.LogError("DifficultyUIPatch: selector list is null.");
+                        Plugin.Instance.LogSource.LogError("DifficultyUIPatch: selector list is null.");
                         return;
                     }
 
@@ -35,7 +39,7 @@ namespace KingdomEnhanced.Features
 
                     if (template == null || parent == null)
                     {
-                        Plugin.Instance.Log.LogError("DifficultyUIPatch: template or parent is null.");
+                        Plugin.Instance.LogSource.LogError("DifficultyUIPatch: template or parent is null.");
                         return;
                     }
 
@@ -49,8 +53,8 @@ namespace KingdomEnhanced.Features
 
                         var newSelector = new DifficultySelector();
                         newSelector._rectXForm = newGO.GetComponent<RectTransform>();
-                        newSelector._difficultyImages = new Il2CppSystem.Collections.Generic.List<Image>();
-                        newSelector._difficultyTexts = new Il2CppSystem.Collections.Generic.List<Text>();
+                        newSelector._difficultyImages = new List<Image>();
+                        newSelector._difficultyTexts = new List<Text>();
 
                         newSelector._difficultyMaterial = template._difficultyMaterial;
                         newSelector._materialCopy = template._materialCopy;
@@ -83,7 +87,7 @@ namespace KingdomEnhanced.Features
                 }
                 catch (Exception e)
                 {
-                    Plugin.Instance.Log.LogError($"DifficultyUIPatch: failed to inject UI: {e}");
+                    Plugin.Instance.LogSource.LogError($"DifficultyUIPatch: failed to inject UI: {e}");
                 }
             }
         }
@@ -112,7 +116,7 @@ namespace KingdomEnhanced.Features
                 }
                 catch (Exception e)
                 {
-                    Plugin.Instance.Log.LogError($"Menu Custom Difficulty Text Patch failed: {e}");
+                    Plugin.Instance.LogSource.LogError($"Menu Custom Difficulty Text Patch failed: {e}");
                 }
             }
         }

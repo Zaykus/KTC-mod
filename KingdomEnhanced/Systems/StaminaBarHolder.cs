@@ -1,13 +1,21 @@
 ﻿using UnityEngine;
 using KingdomEnhanced.Core;
 using KingdomEnhanced.UI;
-using Il2CppInterop.Runtime.Injection;
 using System;
+#if IL2CPP
+using KingdomEnhanced.Shared.Attributes;
+#endif
 
 namespace KingdomEnhanced.Systems
 {
+#if IL2CPP
+    [RegisterTypeInIl2Cpp]
+#endif
     public class StaminaBarHolder : MonoBehaviour
     {
+#if IL2CPP
+        public StaminaBarHolder(IntPtr ptr) : base(ptr) { }
+#endif
         public static StaminaBarHolder Instance { get; private set; }
 
         public bool enableStaminaBar = true;
@@ -24,7 +32,6 @@ namespace KingdomEnhanced.Systems
         public static void Initialize()
         {
             if (Instance != null) return;
-            ClassInjector.RegisterTypeInIl2Cpp<StaminaBarHolder>();
             GameObject obj = new GameObject("KingdomEnhanced_StaminaBar");
             DontDestroyOnLoad(obj);
             obj.hideFlags = HideFlags.HideAndDontSave;

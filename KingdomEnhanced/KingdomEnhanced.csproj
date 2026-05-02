@@ -183,7 +183,7 @@
         </Reference>
     </ItemGroup>
 
-    <Target Name="CopyOutput" AfterTargets="Build" Condition="'$(BepInExPluginsPath)'!=''">
+    <Target Name="CopyOutput" AfterTargets="Build" Condition="'$(Configuration)'=='Debug' and '$(BepInExPluginsPath)'!=''">
         <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFolder="$(BepInExPluginsPath)$(AssemblyName)\" OverwriteReadOnlyFiles="true" />
         <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFolder="$(BepInExPluginsPath)$(AssemblyName)\" OverwriteReadOnlyFiles="true" Condition="Exists('$(OutputPath)\$(AssemblyName).pdb')" />
         <Message Text="Copied mod to $(BepInExPluginsPath)$(AssemblyName)\" Importance="high" />

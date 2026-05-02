@@ -1,11 +1,21 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using KingdomEnhanced.UI;
+#if IL2CPP
+using KingdomEnhanced.Shared.Attributes;
+#endif
 
 namespace KingdomEnhanced.Features
 {
+#if IL2CPP
+    [RegisterTypeInIl2Cpp]
+#endif
     public class ArmyManager : MonoBehaviour
     {
+#if IL2CPP
+        public ArmyManager(IntPtr ptr) : base(ptr) { }
+#endif
         #region State
         private float _campTimer = 0f;
         private float _builderTimer = 0f;
@@ -40,7 +50,7 @@ namespace KingdomEnhanced.Features
         #region Unit Buff Hooks
         private void ApplyUnitBuffs() {
             if (ModMenu.BerserkerRage) {
-                var berserkers = FindObjectsOfType<Berserker>();
+                var berserkers = FindObjectsByType<Berserker>(FindObjectsSortMode.None);
                 foreach (var b in berserkers) {
                     if (b != null && b.gameObject.activeInHierarchy) {
                         KingdomEnhanced.Hooks.LabPatches.BerserkerPostfix(b);
@@ -48,7 +58,7 @@ namespace KingdomEnhanced.Features
                 }
             }
             if (ModMenu.NinjaSpeedBoost) {
-                var ninjas = FindObjectsOfType<Ninja>();
+                var ninjas = FindObjectsByType<Ninja>(FindObjectsSortMode.None);
                 foreach (var n in ninjas) {
                     if (n != null && n.gameObject.activeInHierarchy) {
                         KingdomEnhanced.Hooks.LabPatches.NinjaPostfix(n);
@@ -56,7 +66,7 @@ namespace KingdomEnhanced.Features
                 }
             }
             if (ModMenu.BetterKnight) {
-                var knights = FindObjectsOfType<Knight>();
+                var knights = FindObjectsByType<Knight>(FindObjectsSortMode.None);
                 foreach (var k in knights) {
                     if (k != null && k.gameObject.activeInHierarchy) {
                         var d = k.GetComponent<Damageable>();
@@ -73,7 +83,7 @@ namespace KingdomEnhanced.Features
             if (!DifficultyRules.CanUseInstantConstruction()) {
                 float sp = DifficultyRules.GetBuilderSpeedMultiplier();
                 float wt = DifficultyRules.GetBuilderWorkTime();
-                var workers = FindObjectsOfType<Worker>();
+                var workers = FindObjectsByType<Worker>(FindObjectsSortMode.None);
                 foreach (var w in workers) {
                     if (w != null) {
                         w.runSpeed = 4.0f * sp;
@@ -82,7 +92,7 @@ namespace KingdomEnhanced.Features
                 }
                 return;
             }
-            var allWorkers = FindObjectsOfType<Worker>();
+            var allWorkers = FindObjectsByType<Worker>(FindObjectsSortMode.None);
             foreach (var w in allWorkers) {
                 if (w != null) {
                     w.runSpeed = 8.0f;
@@ -92,7 +102,7 @@ namespace KingdomEnhanced.Features
         }
 
         private void BoostCamps() {
-            var camps = Object.FindObjectsOfType<BeggarCamp>();
+            var camps = UnityEngine.Object.FindObjectsByType<BeggarCamp>(FindObjectsSortMode.None);
             foreach (var camp in camps) {
                 if (camp != null) { 
                     camp.maxBeggars = 10; 
@@ -105,7 +115,7 @@ namespace KingdomEnhanced.Features
         #region Actions & Cheats
 
         public static void RecruitBeggars() {
-            var beggars = Object.FindObjectsOfType<Beggar>();
+            var beggars = UnityEngine.Object.FindObjectsByType<Beggar>(FindObjectsSortMode.None);
             var player = Managers.Inst?.kingdom?.GetPlayer(0);
 
             if (player == null || player.wallet == null) {
@@ -164,7 +174,7 @@ namespace KingdomEnhanced.Features
             var toolPrefab = FindTool(toolName);
             if (toolPrefab == null) return;
 
-            var peasants = FindObjectsOfType<Peasant>();
+            var peasants = FindObjectsByType<Peasant>(FindObjectsSortMode.None);
             int count = 0;
             foreach (var p in peasants) {
                 if (p != null && p.gameObject.activeInHierarchy) {
@@ -221,7 +231,7 @@ namespace KingdomEnhanced.Features
 
         public static void KillAllEnemies()
         {
-            var enemies = FindObjectsOfType<Enemy>();
+            var enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
             int count = 0;
             foreach (var e in enemies)
             {
@@ -237,7 +247,7 @@ namespace KingdomEnhanced.Features
 
         public static void DestroyAllPortals()
         {
-            var portals = FindObjectsOfType<Portal>();
+            var portals = FindObjectsByType<Portal>(FindObjectsSortMode.None);
             int count = 0;
             foreach (var p in portals)
             {
@@ -259,7 +269,7 @@ namespace KingdomEnhanced.Features
             if (player == null) return;
             
             int max = ModMenu.RecruitCap > 0 ? ModMenu.RecruitCap : 50;
-            var current = FindObjectsOfType<Peasant>().Length + FindObjectsOfType<Archer>().Length + FindObjectsOfType<Worker>().Length + FindObjectsOfType<Knight>().Length;
+            var current = FindObjectsByType<Peasant>(FindObjectsSortMode.None).Length + FindObjectsByType<Archer>(FindObjectsSortMode.None).Length + FindObjectsByType<Worker>(FindObjectsSortMode.None).Length + FindObjectsByType<Knight>(FindObjectsSortMode.None).Length;
             int toSpawn = max - current;
             
             if (toSpawn <= 0)
@@ -271,7 +281,7 @@ namespace KingdomEnhanced.Features
             Vector3 pos = player.transform.position;
             for (int i = 0; i < toSpawn; i++)
             {
-                UnityEngine.Object.Instantiate((UnityEngine.Object)prefab, pos + new Vector3(Random.Range(-4f, 4f), 0, 0), Quaternion.identity);
+                UnityEngine.Object.Instantiate((UnityEngine.Object)prefab, pos + new Vector3(UnityEngine.Random.Range(-4f, 4f), 0, 0), Quaternion.identity);
             }
             ModMenu.Speak($"Spawned {toSpawn} peasants!", ModMenu.C_ON);
         }
@@ -313,7 +323,7 @@ namespace KingdomEnhanced.Features
 
         public static void SpawnHermit(string hermitName)
         {
-            var activeHermits = UnityEngine.Object.FindObjectsOfType<Hermit>();
+            var activeHermits = UnityEngine.Object.FindObjectsByType<Hermit>(FindObjectsSortMode.None);
 
             Hermit.HermitType typeWanted = Hermit.HermitType.Baker;
             switch(hermitName.ToLower())

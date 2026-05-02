@@ -46,7 +46,7 @@ namespace KingdomEnhanced.Hooks
             }
             catch (System.Exception ex)
             {
-                Plugin.Instance.Log.LogWarning($"CurrencyHook Error: {ex.Message}");
+                Plugin.Instance.LogSource.LogWarning($"CurrencyHook Error: {ex.Message}");
             }
         }
     }
