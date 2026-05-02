@@ -7,6 +7,9 @@ using KingdomEnhanced.Features;
 using KingdomEnhanced.Systems;
 using KingdomEnhanced.Core;
 using KingdomEnhanced.Shared;
+#if IL2CPP
+using KingdomEnhanced.Shared.Attributes;
+#endif
 
 namespace KingdomEnhanced.UI
 {
@@ -41,8 +44,14 @@ namespace KingdomEnhanced.UI
         public Func<bool> HasConflict;
     }
 
+#if IL2CPP
+    [RegisterTypeInIl2Cpp]
+#endif
     public class ModMenu : MonoBehaviour
     {
+#if IL2CPP
+        public ModMenu(IntPtr ptr) : base(ptr) { }
+#endif
         #region PUBLIC SETTINGS
         public static bool ShowStaminaBar;
         public static bool EnableAccessibility;

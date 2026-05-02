@@ -1,43 +1,74 @@
-﻿using BepInEx;
-using BepInEx.Unity.IL2CPP;
+﻿using System;
+using System.Reflection;
+using BepInEx;
+using BepInEx.Logging;
 using HarmonyLib;
-using Il2CppInterop.Runtime.Injection;
+using UnityEngine;
+
+#if IL2CPP
+using BepInEx.Unity.IL2CPP;
+using KingdomEnhanced.Shared.Attributes;
+#endif
+
+#if MONO
+using BepInEx.Unity.Mono;
+#endif
+
 using KingdomEnhanced.Features;
 using KingdomEnhanced.UI;
 using KingdomEnhanced.Systems;
 using KingdomEnhanced.Hooks;
-using UnityEngine;
 
 namespace KingdomEnhanced.Core
 {
-    [BepInPlugin("kingdomenhanced", "Kingdom Enhanced", ModVersion.FULL)] 
-    public class Plugin : BasePlugin
+    [BepInPlugin("kingdomenhanced", "Kingdom Enhanced", ModVersion.FULL)]
+    public class Plugin :
+#if IL2CPP
+        BasePlugin
+#else
+        BaseUnityPlugin
+#endif
     {
         public static Plugin Instance;
+
+        public ManualLogSource LogSource
+#if IL2CPP
+            => Log;
+#else
+            => Logger;
+#endif
+
+#if IL2CPP
         public override void Load()
         {
+            RegisterTypeInIl2Cpp.RegisterAssembly(Assembly.GetExecutingAssembly());
+
+            Init();
+        }
+#else
+        internal void Awake()
+        {
+            Init();
+        }
+#endif
+
+        private void Init()
+        {
             Instance = this;
-            Log.LogInfo($"Kingdom Enhanced {ModVersion.DISPLAY} loaded!");
+            LogSource.LogInfo($"Kingdom Enhanced {ModVersion.DISPLAY} loaded!");
             Settings.Init(Config);
-            ClassInjector.RegisterTypeInIl2Cpp<PlayerManager>();
-            ClassInjector.RegisterTypeInIl2Cpp<WorldManager>();
-            ClassInjector.RegisterTypeInIl2Cpp<ArmyManager>();
-            ClassInjector.RegisterTypeInIl2Cpp<ModMenu>();
-            ClassInjector.RegisterTypeInIl2Cpp<AccessibilityFeature>();
-            ClassInjector.RegisterTypeInIl2Cpp<KingdomMonitor>();
-            ClassInjector.RegisterTypeInIl2Cpp<HardModeBuffData>();
             StaminaBarHolder.Initialize();
 
             var go = new GameObject("KingdomEnhanced_UI");
-            Object.DontDestroyOnLoad(go);
+            UnityEngine.Object.DontDestroyOnLoad(go);
             go.hideFlags = HideFlags.HideAndDontSave;
             go.AddComponent<ModMenu>();
             go.AddComponent<AccessibilityFeature>();
 
             var harmony = new Harmony("kingdomenhanced.harmony");
-            harmony.PatchAll(); 
+            harmony.PatchAll();
             LabPatches.ApplyAll(harmony);
-            Log.LogInfo("Kingdom Enhanced ready. Waiting for player spawn...");
+            LogSource.LogInfo("Kingdom Enhanced ready. Waiting for player spawn...");
         }
     }
 }

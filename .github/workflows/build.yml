@@ -8,9 +8,14 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        config: [BIE6_IL2CPP, BIE6_Mono]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -18,13 +23,13 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Restore
-        run: dotnet restore KingdomEnhanced/KingdomEnhanced.csproj
+        run: dotnet restore KingdomEnhanced/KingdomEnhanced.csproj -p:Configuration=${{ matrix.config }}
 
-      - name: Build
-        run: dotnet build KingdomEnhanced/KingdomEnhanced.csproj -c Release --no-restore
+      - name: Build ${{ matrix.config }}
+        run: dotnet build KingdomEnhanced/KingdomEnhanced.csproj -c ${{ matrix.config }} --no-restore
 
-      - name: Upload Artifact
+      - name: Upload Artifact (${{ matrix.config }})
         uses: actions/upload-artifact@v4
         with:
-          name: KingdomEnhanced
-          path: KingdomEnhanced/bin/Release/net6.0-windows/KingdomEnhanced.dll
+          name: KingdomEnhanced-${{ matrix.config }}
+          path: KingdomEnhanced/bin/${{ matrix.config }}/KingdomEnhanced.dll

@@ -1,16 +1,30 @@
+using System;
 using System.Collections;
 using UnityEngine;
+#if IL2CPP
 using Il2CppInterop.Runtime.Attributes;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
+using KingdomEnhanced.Shared.Attributes;
+#endif
 using KingdomEnhanced.Core;
 
 namespace KingdomEnhanced.Features
 {
+#if IL2CPP
+    [RegisterTypeInIl2Cpp]
+#endif
     public class AutoPayHandler : MonoBehaviour
     {
+#if IL2CPP
+        public AutoPayHandler(IntPtr ptr) : base(ptr) { }
+#endif
         public void StartPayment(Payable payable, int amount, Player player)
         {
+#if IL2CPP
             StartCoroutine(PayRoutine(payable, amount, player).WrapToIl2Cpp());
+#else
+            StartCoroutine(PayRoutine(payable, amount, player));
+#endif
         }
 
         private IEnumerator PayRoutine(Payable payable, int amount, Player player)
@@ -29,7 +43,7 @@ namespace KingdomEnhanced.Features
                     }
                     catch (System.Exception ex)
                     {
-                        Plugin.Instance?.Log.LogWarning($"AutoPay Error: {ex.Message}");
+                        Plugin.Instance?.LogSource.LogWarning($"AutoPay Error: {ex.Message}");
                     }
                 }
                 else

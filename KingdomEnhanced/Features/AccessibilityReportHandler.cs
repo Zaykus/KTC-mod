@@ -23,15 +23,15 @@ namespace KingdomEnhanced.Features
             string borderInfo = "";
             try
             {
-                var enemyMgr = UnityEngine.Object.FindObjectOfType<EnemyManager>();
+                var enemyMgr = UnityEngine.Object.FindFirstObjectByType<EnemyManager>();
                 if (enemyMgr != null && enemyMgr.IsDangerous)
                     threat = "DANGER";
 
-                var kingdom = UnityEngine.Object.FindObjectOfType<Kingdom>();
+                var kingdom = UnityEngine.Object.FindFirstObjectByType<Kingdom>();
                 if (kingdom != null && !kingdom.isDaytime)
                     timeOfDay = "Night";
 
-                var walls = UnityEngine.Object.FindObjectsOfType<Wall>();
+                var walls = UnityEngine.Object.FindObjectsByType<Wall>(FindObjectsSortMode.None);
                 if (walls != null && walls.Length > 0)
                 {
                     float min = float.MaxValue;
@@ -72,10 +72,10 @@ namespace KingdomEnhanced.Features
 
         public static void ReportCompanions()
         {
-            int archers = UnityEngine.Object.FindObjectsOfType<Archer>().Length;
-            int workers = UnityEngine.Object.FindObjectsOfType<Worker>().Length;
-            int peasants = UnityEngine.Object.FindObjectsOfType<Peasant>().Length;
-            int knights = UnityEngine.Object.FindObjectsOfType<Knight>().Length;
+            int archers = UnityEngine.Object.FindObjectsByType<Archer>(FindObjectsSortMode.None).Length;
+            int workers = UnityEngine.Object.FindObjectsByType<Worker>(FindObjectsSortMode.None).Length;
+            int peasants = UnityEngine.Object.FindObjectsByType<Peasant>(FindObjectsSortMode.None).Length;
+            int knights = UnityEngine.Object.FindObjectsByType<Knight>(FindObjectsSortMode.None).Length;
 
             ModMenu.Speak($"{archers} Archers, {workers} Workers, {peasants} Peasants, {knights} Knights");
         }

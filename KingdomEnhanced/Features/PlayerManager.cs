@@ -1,10 +1,20 @@
+using System;
 using UnityEngine;
 using KingdomEnhanced.UI;
+#if IL2CPP
+using KingdomEnhanced.Shared.Attributes;
+#endif
 
 namespace KingdomEnhanced.Features
 {
+#if IL2CPP
+    [RegisterTypeInIl2Cpp]
+#endif
     public class PlayerManager : MonoBehaviour
     {
+#if IL2CPP
+        public PlayerManager(IntPtr ptr) : base(ptr) { }
+#endif
         private Player _player;
         private float _defaultSpeed = -1f;
 
@@ -50,7 +60,7 @@ namespace KingdomEnhanced.Features
 
         public static void ForceBankerPayout()
         {
-            var banker = FindObjectOfType<Banker>();
+            var banker = FindFirstObjectByType<Banker>();
             if (banker != null)
             {
                 banker.SendMessage("AddCoins", 100, SendMessageOptions.DontRequireReceiver);

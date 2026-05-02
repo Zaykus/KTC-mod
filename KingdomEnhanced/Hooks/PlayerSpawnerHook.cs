@@ -1,8 +1,9 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using KingdomEnhanced.Features;
 using KingdomEnhanced.UI;
 using UnityEngine;
 using System;
+using Object = UnityEngine.Object;
 
 namespace KingdomEnhanced.Hooks
 {
@@ -14,10 +15,10 @@ namespace KingdomEnhanced.Hooks
         {
             if (__instance == null) return;
 
-            var existing = GameObject.FindObjectOfType<WorldManager>();
+            var existing = Object.FindFirstObjectByType<WorldManager>();
             if (existing != null) return;
 
-            KingdomEnhanced.Core.Plugin.Instance.Log.LogInfo("[KE] Player spawned. Attaching world managers...");
+            KingdomEnhanced.Core.Plugin.Instance.LogSource.LogInfo("[KE] Player spawned. Attaching world managers...");
 
             var go = new UnityEngine.GameObject("KingdomEnhanced_WorldManagers");
             UnityEngine.Object.DontDestroyOnLoad(go);
@@ -34,11 +35,11 @@ namespace KingdomEnhanced.Hooks
             try
             {
                 go.AddComponent<T>();
-                KingdomEnhanced.Core.Plugin.Instance?.Log.LogInfo($"[KE] Attached {typeof(T).Name}");
+                KingdomEnhanced.Core.Plugin.Instance?.LogSource.LogInfo($"[KE] Attached {typeof(T).Name}");
             }
             catch (Exception e)
             {
-                KingdomEnhanced.Core.Plugin.Instance?.Log.LogWarning($"[KE] Failed to attach {typeof(T).Name}: {e.Message}");
+                KingdomEnhanced.Core.Plugin.Instance?.LogSource.LogWarning($"[KE] Failed to attach {typeof(T).Name}: {e.Message}");
             }
         }
     }

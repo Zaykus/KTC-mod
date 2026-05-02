@@ -3,11 +3,20 @@ using System.Linq;
 using UnityEngine;
 using KingdomEnhanced.Core;
 using KingdomEnhanced.UI;
+#if IL2CPP
+using KingdomEnhanced.Shared.Attributes;
+#endif
 
 namespace KingdomEnhanced.Features
 {
+#if IL2CPP
+    [RegisterTypeInIl2Cpp]
+#endif
     public class KingdomMonitor : MonoBehaviour
     {
+#if IL2CPP
+        public KingdomMonitor(IntPtr ptr) : base(ptr) { }
+#endif
         private Kingdom _kingdom;
         private EnemyManager _enemyManager;
         
@@ -69,11 +78,11 @@ namespace KingdomEnhanced.Features
         private void Start()
         {
             Instance = this;
-            _kingdom = FindObjectOfType<Kingdom>();
-            _enemyManager = FindObjectOfType<EnemyManager>();
+            _kingdom = FindFirstObjectByType<Kingdom>();
+            _enemyManager = FindFirstObjectByType<EnemyManager>();
             
-            if (_kingdom == null) Plugin.Instance.Log.LogWarning("KingdomMonitor: Kingdom not found.");
-            if (_enemyManager == null) Plugin.Instance.Log.LogWarning("KingdomMonitor: EnemyManager not found.");
+            if (_kingdom == null) Plugin.Instance.LogSource.LogWarning("KingdomMonitor: Kingdom not found.");
+            if (_enemyManager == null) Plugin.Instance.LogSource.LogWarning("KingdomMonitor: EnemyManager not found.");
             
             if (_kingdom != null && _kingdom.playerOne != null)
                 _isVisible = false;
@@ -299,15 +308,15 @@ namespace KingdomEnhanced.Features
                 {
                     switch (_censusStep)
                     {
-                        case 0: _archerCount = FindObjectsOfType<Archer>().Length; break;
-                        case 1: _workerCount = FindObjectsOfType<Worker>().Length; break;
-                        case 2: _peasantCount = FindObjectsOfType<Peasant>().Length; break;
-                        case 3: _knightCount = FindObjectsOfType<Knight>().Length; break;
-                        case 4: _vagrantCount = FindObjectsOfType<Beggar>().Length; break;
-                        case 5: _farmerCount = FindObjectsOfType<Farmer>().Length; break;
-                        case 6: _pikemanCount = FindObjectsOfType<Pikeman>().Length; break;
+                        case 0: _archerCount = FindObjectsByType<Archer>(FindObjectsSortMode.None).Length; break;
+                        case 1: _workerCount = FindObjectsByType<Worker>(FindObjectsSortMode.None).Length; break;
+                        case 2: _peasantCount = FindObjectsByType<Peasant>(FindObjectsSortMode.None).Length; break;
+                        case 3: _knightCount = FindObjectsByType<Knight>(FindObjectsSortMode.None).Length; break;
+                        case 4: _vagrantCount = FindObjectsByType<Beggar>(FindObjectsSortMode.None).Length; break;
+                        case 5: _farmerCount = FindObjectsByType<Farmer>(FindObjectsSortMode.None).Length; break;
+                        case 6: _pikemanCount = FindObjectsByType<Pikeman>(FindObjectsSortMode.None).Length; break;
                         case 7:
-                            var em = _enemyManager != null ? _enemyManager : FindObjectOfType<EnemyManager>();
+                            var em = _enemyManager != null ? _enemyManager : FindFirstObjectByType<EnemyManager>();
                             _enemyCount = (em != null && em.AllEnemies != null) ? em.AllEnemies.Count : 0;
                             break;
                         case 8:

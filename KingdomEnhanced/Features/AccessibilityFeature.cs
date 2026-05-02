@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using KingdomEnhanced.UI;
 using KingdomEnhanced.Systems;
@@ -5,11 +6,20 @@ using KingdomEnhanced.Utils;
 using KingdomEnhanced.Systems.Accessibility; 
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+#if IL2CPP
+using KingdomEnhanced.Shared.Attributes;
+#endif
 
 namespace KingdomEnhanced.Features
 {
+#if IL2CPP
+    [RegisterTypeInIl2Cpp]
+#endif
     public class AccessibilityFeature : MonoBehaviour
     {
+#if IL2CPP
+        public AccessibilityFeature(IntPtr ptr) : base(ptr) { }
+#endif
         private Player _player;
         private MonoBehaviour _lastPayable = null;
 
@@ -47,7 +57,7 @@ namespace KingdomEnhanced.Features
 
             if (_player == null)
             {
-                _player = FindObjectOfType<Player>();
+                _player = FindFirstObjectByType<Player>();
                 if (_player != null) _radarSystem = new RadarSystem(_player);
             }
             if (_player == null) return;
@@ -279,7 +289,7 @@ namespace KingdomEnhanced.Features
         {
             if (_cachedCastles == null || Time.time > _castleCacheTimer + CASTLE_CACHE_INTERVAL) 
             {
-                _cachedCastles = FindObjectsOfType<Castle>();
+                _cachedCastles = FindObjectsByType<Castle>(FindObjectsSortMode.None);
                 _castleCacheTimer = Time.time;
             }
 
@@ -344,7 +354,7 @@ namespace KingdomEnhanced.Features
 
             
             float minWallX = float.MaxValue, maxWallX = float.MinValue;
-            var walls = FindObjectsOfType<Wall>();
+            var walls = FindObjectsByType<Wall>(FindObjectsSortMode.None);
             if (walls != null && walls.Length > 0)
             {
                 foreach (var w in walls)
@@ -373,7 +383,7 @@ namespace KingdomEnhanced.Features
 
             
             _campIntervals.Clear();
-            var camps = GameObject.FindObjectsOfType<BeggarCamp>();
+            var camps = GameObject.FindObjectsByType<BeggarCamp>(FindObjectsSortMode.None);
             if (camps != null)
             {
                 foreach (var camp in camps)
@@ -472,7 +482,7 @@ namespace KingdomEnhanced.Features
 
             Camera cam = Camera.main;
             if (cam == null)
-                cam = UnityEngine.Object.FindObjectOfType<Camera>();
+                cam = UnityEngine.Object.FindFirstObjectByType<Camera>();
 
             if (cam == null) return;
 
@@ -517,7 +527,7 @@ namespace KingdomEnhanced.Features
         private BeggarCamp FindClosestCamp()
         {
             
-            var camps = GameObject.FindObjectsOfType<BeggarCamp>();
+            var camps = GameObject.FindObjectsByType<BeggarCamp>(FindObjectsSortMode.None);
             if (camps == null || camps.Length == 0) return null;
             
             BeggarCamp closest = null;

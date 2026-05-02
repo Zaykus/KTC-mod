@@ -4,11 +4,20 @@ using System.Reflection;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+#if IL2CPP
+using KingdomEnhanced.Shared.Attributes;
+#endif
 
 namespace KingdomEnhanced.Features
 {
+#if IL2CPP
+    [RegisterTypeInIl2Cpp]
+#endif
     public class WorldManager : MonoBehaviour
     {
+#if IL2CPP
+        public WorldManager(IntPtr ptr) : base(ptr) { }
+#endif
         private GUIStyle _timeStyle;
         private GUIStyle _coinStyle;
 
@@ -234,7 +243,7 @@ namespace KingdomEnhanced.Features
 
         private void RepairWalls()
         {
-            var walls = FindObjectsOfType<Wall>();
+            var walls = FindObjectsByType<Wall>(FindObjectsSortMode.None);
             foreach (var w in walls) {
                 if (w == null || !w.gameObject.activeInHierarchy) continue;
                 var d = w.GetComponent<Damageable>();
@@ -244,7 +253,7 @@ namespace KingdomEnhanced.Features
 
         private void ClearWeather()
         {
-            var pre = FindObjectsOfType<Precipitation>();
+            var pre = FindObjectsByType<Precipitation>(FindObjectsSortMode.None);
             foreach (var p in pre) {
                 if (p != null && p.gameObject.activeSelf) p.gameObject.SetActive(false);
             }
@@ -253,7 +262,7 @@ namespace KingdomEnhanced.Features
         private void ApplyPortalRates()
         {
             if (ModMenu.PortalSpawnRate == 1.0f) return;
-            var portals = FindObjectsOfType<Portal>();
+            var portals = FindObjectsByType<Portal>(FindObjectsSortMode.None);
             foreach (var p in portals) {
                 if (p != null) KingdomEnhanced.Hooks.LabPatches.PortalApplyRate(p);
             }
@@ -324,7 +333,7 @@ namespace KingdomEnhanced.Features
             {
                 if (Managers.Inst?.director == null || Managers.Inst.director.IsDaytime) return;
 
-                var enemyManager = UnityEngine.Object.FindObjectOfType<EnemyManager>();
+                var enemyManager = UnityEngine.Object.FindFirstObjectByType<EnemyManager>();
                 if (enemyManager == null || _enemiesListField == null) return;
 
                 int enemyCount = GetEnemyCount(enemyManager);
