@@ -5,7 +5,7 @@ using System.Collections.Generic;
 #endif
 using UnityEngine;
 
-namespace KingdomMod
+namespace KingdomEnhanced.Shared
 {
     public class GameExtensions
     {

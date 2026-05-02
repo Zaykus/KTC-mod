@@ -211,7 +211,7 @@ namespace KingdomEnhanced.UI
         #region LIFECYCLE
         void Start()
         {
-            BuildFeatureMetadata();
+            _features = ModMenuFeatures.Build();
             LoadFromSettings();
             TTSManager.Initialize();
             Speak("Kingdom Enhanced initialized", C_ON);
@@ -362,139 +362,6 @@ namespace KingdomEnhanced.UI
             };
         }
 
-        
-        private static FeatureMeta F(string id, string label, TabCategory cat, string section, string desc, Func<bool> get, Action<bool> set, Func<bool> isLocked = null, Func<string> lockReason = null, Func<bool> hasConflict = null)
-        {
-            return new FeatureMeta {
-                Id = id, Label = label, Section = section, Category = cat, Description = desc,
-                GetValue = get, SetValue = set, OnAction = null,
-                IsLocked = isLocked, GetLockReason = lockReason, HasConflict = hasConflict
-            };
-        }
-
-        
-        private static FeatureMeta Action(string id, string label, TabCategory cat, string section, string desc, Action act, Func<bool> isLocked = null, Func<string> lockReason = null)
-        {
-            return new FeatureMeta {
-                Id = id, Label = label, Section = section, Category = cat, Description = desc,
-                GetValue = null, SetValue = null, OnAction = act,
-                IsLocked = isLocked, GetLockReason = lockReason, HasConflict = null
-            };
-        }
-
-        
-        private static FeatureMeta Slider(string id, string label, TabCategory cat, string section, string desc, Func<float> get, Action<float> set, float min, float max)
-        {
-            return new FeatureMeta {
-                Id = id, Label = label, Section = section, Category = cat, Description = desc,
-                GetFloatValue = get, SetFloatValue = set, MinVal = min, MaxVal = max,
-                IsLocked = null, GetLockReason = null, HasConflict = null
-            };
-        }
-
-        private void BuildFeatureMetadata()
-        {
-            var list = new List<FeatureMeta>();
-
-            
-            list.Add(F("show_stamina", "Energy Bar", TabCategory.Main, "HUD", "Shows or hides the stamina bar on the HUD.", () => ShowStaminaBar, v => ShowStaminaBar = v));
-            list.Add(Action("stamina_style", "Cycle Energy Bar Style", TabCategory.Main, "HUD", "Changes the visual style of the Energy Bar.", () => CycleStaminaBarStyle(), () => !ShowStaminaBar, () => "Requires Energy Bar"));
-            list.Add(Action("stamina_pos", "Cycle Energy Bar Position", TabCategory.Main, "HUD", "Changes the position of the Energy Bar on screen.", () => CycleStaminaBarPosition(), () => !ShowStaminaBar, () => "Requires Energy Bar"));
-            list.Add(F("display_times", "HUD Display", TabCategory.Main, "HUD", "Toggles the entire in-game HUD overlay.", () => DisplayTimes, v => DisplayTimes = v));
-            list.Add(Action("monitor_style", "Cycle Monitor Style", TabCategory.Main, "HUD", "Changes the visual style of the Kingdom Monitor panel.", () => KingdomMonitor.Instance?.NextStyle(), () => KingdomMonitor.Instance == null || !KingdomMonitor.Instance.IsVisible, () => "Requires Monitor"));
-
-            list.Add(F("enable_tts", "Narrator (TTS)", TabCategory.Main, "Accessibility", "Reads menu interactions aloud using the system TTS engine.", () => EnableTTS, v => EnableTTS = v));
-            list.Add(F("simplify_names", "Simplify Names", TabCategory.Main, "Accessibility", "Replaces payable object names with shorter labels.", () => SimplifyNames, v => SimplifyNames = v));
-            list.Add(F("castle_announcer", "Castle Announcer", TabCategory.Main, "Accessibility", "Announces castle events via TTS.", () => EnableCastleAnnouncer, v => EnableCastleAnnouncer = v));
-
-            list.Add(Slider("speed_mult", "Travel Speed", TabCategory.Main, "Movement", "Multiplies the monarch's base movement speed.", () => SpeedMultiplier, v => SpeedMultiplier = v, 0.5f, 10.0f));
-
-            
-            list.Add(F("infinite_stamina", "Infinite Mount Stamina", TabCategory.Cheats, "Invincibility", "Prevents mount stamina from depleting.", () => InfiniteStamina, v => InfiniteStamina = v, () => !CheatsUnlocked));
-
-            list.Add(F("no_tool_cooldowns", "No Tool Cooldowns", TabCategory.Cheats, "Infinite Stone", "Removes the cooldown/timeout of all Hermit tools (Horn of Healing, Athena's Shield, Hermes' Staff, etc).", () => NoToolCooldowns, v => NoToolCooldowns = v, () => !CheatsUnlocked));
-            list.Add(Slider("artemis_arrows", "Artemis Arrow Count", TabCategory.Cheats, "Infinite Stone", "How many arrows fall per cast of the Artemis Bow.", () => ArtemisArrowCount, v => ArtemisArrowCount = v, 1f, 50f));
-            list.Add(Slider("artemis_range", "Artemis Range", TabCategory.Cheats, "Infinite Stone", "Multiplies the range across which arrows are spread.", () => ArtemisRangeMult, v => ArtemisRangeMult = v, 0.5f, 5.0f));
-            list.Add(Slider("artemis_damage", "Artemis Arrow Damage", TabCategory.Cheats, "Infinite Stone", "Multiplies damage dealt per arrow.", () => ArtemisArrowDamageMult, v => ArtemisArrowDamageMult = v, 0.5f, 5.0f));
-
-            list.Add(Action("add_10_coins", "+10 Coins", TabCategory.Cheats, "Economy", "Adds 10 coins instantly.", () => GiveCurrency(10, false), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("add_50_coins", "+50 Coins", TabCategory.Cheats, "Economy", "Adds 50 coins instantly.", () => GiveCurrency(50, false), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("add_5_gems", "+5 Gems", TabCategory.Cheats, "Economy", "Instant gem grant.", () => GiveCurrency(5, true), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("fill_wallet", "Fill Wallet to Max", TabCategory.Cheats, "Economy", "Fills coins and gems to capacity.", () => FillWallet(), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Slider("coin_income", "Coin Income", TabCategory.Cheats, "Economy", "Multiplies passive coin income rate.", () => CoinIncomeMult, v => CoinIncomeMult = v, 0.5f, 4.0f));
-            list.Add(Slider("bag_drop", "Bag Drop Rate", TabCategory.Cheats, "Economy", "Multiplies bag drop rate.", () => BagDropMult, v => BagDropMult = v, 0.5f, 4.0f));
-
-            list.Add(Action("recruit_beggars", "Recruit All Beggars", TabCategory.Cheats, "Military", "Forces all vagrants to immediately pick up tools and join.", () => ArmyManager.RecruitBeggars(), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("drop_archer", "Drop Archer Bow", TabCategory.Cheats, "Military", "Spawns an archer bow pickup at the monarch's position.", () => ArmyManager.DropTools("Archer"), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("drop_builder", "Drop Builder Hammer", TabCategory.Cheats, "Military", "Spawns a builder hammer pickup at the monarch's position.", () => ArmyManager.DropTools("Builder"), () => !CheatsUnlocked, () => "Locked"));
-            
-            list.Add(Action("kill_enemies", "Kill All Enemies", TabCategory.Cheats, "Military", "Instantly destroys all active Greed units.", () => ArmyManager.KillAllEnemies(), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("destroy_portals", "Destroy All Portals", TabCategory.Cheats, "Military", "Closes all active portals.", () => ArmyManager.DestroyAllPortals(), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("max_army", "Spawn Max Army", TabCategory.Cheats, "Military", "Fills all available archer/knight slots instantly.", () => ArmyManager.SpawnMaxArmy(), () => !CheatsUnlocked, () => "Locked"));
-
-            list.Add(Slider("spawn_unit_count", "Unit Spawn Amount", TabCategory.Cheats, "Unit Spawner", "Select amount of units to spawn (1-50).", () => SpawnUnitCount, v => SpawnUnitCount = (int)v, 1f, 50f));
-            list.Add(Action("spawn_u_vagrant", "Spawn Vagrants", TabCategory.Cheats, "Unit Spawner", "Spawns Vagrants (Baggers).", () => ArmyManager.SpawnUnit("Beggar", (int)SpawnUnitCount), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_u_villager", "Spawn Villagers", TabCategory.Cheats, "Unit Spawner", "Spawns Villagers.", () => ArmyManager.SpawnUnit("Peasant", (int)SpawnUnitCount), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_u_archer", "Spawn Archers", TabCategory.Cheats, "Unit Spawner", "Spawns Archers.", () => ArmyManager.SpawnUnit("Archer", (int)SpawnUnitCount), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_u_builder", "Spawn Builders", TabCategory.Cheats, "Unit Spawner", "Spawns Builders.", () => ArmyManager.SpawnUnit("Worker", (int)SpawnUnitCount), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_u_farmer", "Spawn Farmers", TabCategory.Cheats, "Unit Spawner", "Spawns Farmers.", () => ArmyManager.SpawnUnit("Farmer", (int)SpawnUnitCount), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_u_pikeman", "Spawn Pikemen", TabCategory.Cheats, "Unit Spawner", "Spawns Pikemen.", () => ArmyManager.SpawnUnit("Pikeman", (int)SpawnUnitCount), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_u_ninja", "Spawn Ninjas", TabCategory.Cheats, "Unit Spawner", "Spawns Ninjas (Shogun only).", () => ArmyManager.SpawnUnit("Ninja", (int)SpawnUnitCount), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_u_berserker", "Spawn Berserkers", TabCategory.Cheats, "Unit Spawner", "Spawns Berserkers (Norse only).", () => ArmyManager.SpawnUnit("Berserker", (int)SpawnUnitCount), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_u_knight", "Spawn Knights", TabCategory.Cheats, "Unit Spawner", "Spawns Knights.", () => ArmyManager.SpawnUnit("Knight", (int)SpawnUnitCount), () => !CheatsUnlocked, () => "Locked"));
-
-            list.Add(Action("spawn_h_bakery", "Spawn Bakery Hermit", TabCategory.Cheats, "Hermit Spawner", "Spawns the Bakery Hermit.", () => ArmyManager.SpawnHermit("Bakery"), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_h_ballista", "Spawn Ballista Hermit", TabCategory.Cheats, "Hermit Spawner", "Spawns the Ballista Hermit.", () => ArmyManager.SpawnHermit("Ballista"), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_h_berserker", "Spawn Berserker Hermit", TabCategory.Cheats, "Hermit Spawner", "Spawns the Berserker Hermit (Norse only).", () => ArmyManager.SpawnHermit("Berserker"), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_h_fire", "Spawn Fire Hermit", TabCategory.Cheats, "Hermit Spawner", "Spawns the Fire Hermit.", () => ArmyManager.SpawnHermit("Fire"), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_h_horn", "Spawn Horn Hermit", TabCategory.Cheats, "Hermit Spawner", "Spawns the Horn Hermit.", () => ArmyManager.SpawnHermit("Horn"), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_h_stable", "Spawn Stable Hermit", TabCategory.Cheats, "Hermit Spawner", "Spawns the Stable Hermit.", () => ArmyManager.SpawnHermit("Stable"), () => !CheatsUnlocked, () => "Locked"));
-            list.Add(Action("spawn_h_warrior", "Spawn Warrior Hermit", TabCategory.Cheats, "Hermit Spawner", "Spawns the Warrior Hermit.", () => ArmyManager.SpawnHermit("Warrior"), () => !CheatsUnlocked, () => "Locked"));
-
-            list.Add(F("hyper_builders", "Instant Construction", TabCategory.Cheats, "Builders", "Buildings complete in one frame.", () => HyperBuilders, v => HyperBuilders = v, () => !CheatsUnlocked, null, () => HyperBuilders && LargerCamps));
-            list.Add(F("larger_camps", "Expand Vagrant Camps", TabCategory.Cheats, "Builders", "Increases the maximum vagrant camp population.", () => LargerCamps, v => LargerCamps = v, () => !CheatsUnlocked, null, () => HyperBuilders && LargerCamps));
-            
-            
-            list.Add(F("lock_summer", "Lock Summer Season", TabCategory.Lab, "World", "Prevents the season from advancing past summer.", () => LockSummer, v => LockSummer = v));
-            list.Add(F("clear_weather", "Clear Weather", TabCategory.Lab, "World", "Disables rain and snow effects.", () => ClearWeather, v => ClearWeather = v, null, null, () => LockSummer && ClearWeather));
-            list.Add(F("coins_stay_dry", "Buoyant Currency", TabCategory.Lab, "World", "Coins dropped in water float instead of sinking.", () => CoinsStayDry, v => CoinsStayDry = v));
-            list.Add(F("no_blood_moons", "Disable Blood Moons", TabCategory.Lab, "World", "Prevents blood moon wave events.", () => NoBloodMoons, v => NoBloodMoons = v));
-            
-            list.Add(F("invincible_walls", "Self-Repairing Walls", TabCategory.Lab, "Structures", "Damaged walls automatically restore over time.", () => InvincibleWalls, v => InvincibleWalls = v));
-            list.Add(F("better_citizen_houses", "Rapid Citizen Housing", TabCategory.Lab, "Structures", "Citizens move into houses faster.", () => BetterCitizenHouses, v => BetterCitizenHouses = v));
-            list.Add(F("better_knight", "Elite Knights", TabCategory.Lab, "Combat", "Increases knight combat effectiveness.", () => BetterKnight, v => BetterKnight = v));
-            
-            list.Add(F("archer_fire_boost", "Archer Fire Rate Boost", TabCategory.Lab, "Units", "Archers shoot significantly faster.", () => ArcherFireBoost, v => ArcherFireBoost = v));
-            list.Add(F("berserker_rage", "Berserker Rage Mode", TabCategory.Lab, "Units", "Berserkers enter rage state permanently.", () => BerserkerRage, v => BerserkerRage = v));
-            list.Add(F("ninja_speed_boost", "Ninja Speed Boost", TabCategory.Lab, "Units", "Ninjas move faster.", () => NinjaSpeedBoost, v => NinjaSpeedBoost = v));
-
-            
-            list.Add(Slider("recruit_cap", "Recruit Cap", TabCategory.Lab, "Lab Rules", "Overrides max recruitable units. 0 for default.", () => RecruitCap, v => RecruitCap = (int)v, 0, 50));
-            list.Add(Slider("tree_regrow", "Tree Regrowth", TabCategory.Lab, "World", "Multiplies tree regrowth speed.", () => TreeRegrowthMult, v => TreeRegrowthMult = v, 0.1f, 5.0f));
-            
-            list.Add(F("farm_output", "Farm Output Boost", TabCategory.Lab, "World", "Increases farm production yield.", () => FarmOutputBoost, v => FarmOutputBoost = v));
-            list.Add(F("tower_fire", "Tower Fire Boost", TabCategory.Lab, "World", "Increases tower fire rate.", () => TowerFireBoost, v => TowerFireBoost = v));
-            list.Add(F("ballista_boost", "Ballista Boost", TabCategory.Lab, "World", "Increases ballista damage/speed.", () => BallistaBoost, v => BallistaBoost = v));
-            list.Add(F("instant_castle", "Instant Castle Upgrade", TabCategory.Lab, "World", "Castle upgrades finish immediately.", () => InstantCastle, v => InstantCastle = v));
-            list.Add(F("instant_day_skip", "Instant Day Skip", TabCategory.Lab, "World", "Skips the day/night transition delays.", () => InstantDaySkip, v => InstantDaySkip = v));
-            list.Add(F("animal_spawn", "Animal Spawn Boost", TabCategory.Lab, "World", "Increases animal spawn rates.", () => AnimalSpawnBoost, v => AnimalSpawnBoost = v));
-
-            list.Add(Slider("steed_speed", "Steed Speed", TabCategory.Lab, "Steed", "Multiplies steed movement speed.", () => SteedSpeedMult, v => SteedSpeedMult = v, 0.5f, 3.0f));
-            list.Add(F("charge_dmg", "Charge Damage Boost", TabCategory.Lab, "Steed", "Increases steed charge damage.", () => ChargeDmgBoost, v => ChargeDmgBoost = v));
-            list.Add(Slider("buff_aura", "Buff Aura Duration", TabCategory.Lab, "Steed", "Extends duration of buff auras.", () => BuffAuraDuration, v => BuffAuraDuration = v, 1.0f, 10.0f));
-
-            
-            list.Add(F("no_crown_stealing", "No Crown Stealing", TabCategory.Hard, "Wave Control", "Greed units cannot steal the crown.", () => NoCrownStealing, v => NoCrownStealing = v, () => DifficultyRules.IsHardModeActive(), () => "Hard Mode"));
-
-            list.Add(Slider("wave_size", "Wave Size", TabCategory.Hard, "Wave Sliders", "Multiplies the number of enemies per wave.", () => WaveSizeMult, v => WaveSizeMult = v, 0.1f, 5.0f));
-            list.Add(Slider("enemy_speed", "Enemy Speed", TabCategory.Hard, "Wave Sliders", "Multiplies Greed unit movement speed.", () => EnemySpeedMult, v => EnemySpeedMult = v, 0.5f, 3.0f));
-            list.Add(Slider("portal_rate", "Portal Spawn Rate", TabCategory.Hard, "Wave Sliders", "Multiplies portal spawn rate.", () => PortalSpawnRate, v => PortalSpawnRate = v, 0.1f, 5.0f));
-            list.Add(Slider("queen_hp", "Greed Queen HP", TabCategory.Hard, "Wave Sliders", "Multiplies the Greed Queen's max health.", () => GreedQueenHPScale, v => GreedQueenHPScale = v, 0.5f, 5.0f));
-            list.Add(Slider("threat", "Director Threat", TabCategory.Hard, "Wave Sliders", "Multiplies the Director's threat scaling.", () => DirectorThreatMult, v => DirectorThreatMult = v, 0.1f, 5.0f));
-
-            _features = list.ToArray();
-        }
-        
         #endregion
 
         #region UI RENDERING
@@ -1047,7 +914,7 @@ namespace KingdomEnhanced.UI
             Speak(text, Color.white);
         }
         
-        private void GiveCurrency(int amount, bool isGem)
+        public static void GiveCurrency(int amount, bool isGem)
         {
             var player = Managers.Inst?.kingdom?.GetPlayer(0);
             if (player == null || player.wallet == null) return;
@@ -1064,7 +931,7 @@ namespace KingdomEnhanced.UI
             }
         }
 
-        private void FillWallet()
+        public static void FillWallet()
         {
             var player = Managers.Inst?.kingdom?.GetPlayer(0);
             if (player == null || player.wallet == null) return;
@@ -1073,7 +940,7 @@ namespace KingdomEnhanced.UI
             Speak("Wallet Filled to Max!", C_GOLD);
         }
 
-        private void CycleStaminaBarStyle()
+        public static void CycleStaminaBarStyle()
         {
             if (StaminaBarHolder.Instance == null) return;
             StaminaBarHolder.Instance.visualStyle =
@@ -1081,7 +948,7 @@ namespace KingdomEnhanced.UI
             Speak($"Style: {StaminaBarHolder.Instance.GetStyleName()}");
         }
 
-        private void CycleStaminaBarPosition()
+        public static void CycleStaminaBarPosition()
         {
             if (StaminaBarHolder.Instance == null) return;
             StaminaBarHolder.Instance.positionMode =

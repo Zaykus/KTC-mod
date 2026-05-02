@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore
+        run: dotnet restore KingdomEnhanced/KingdomEnhanced.csproj
+
+      - name: Build
+        run: dotnet build KingdomEnhanced/KingdomEnhanced.csproj -c Release --no-restore
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KingdomEnhanced
+          path: KingdomEnhanced/bin/Release/net6.0-windows/KingdomEnhanced.dll

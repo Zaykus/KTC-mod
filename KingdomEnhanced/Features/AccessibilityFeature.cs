@@ -4,7 +4,6 @@ using KingdomEnhanced.Systems;
 using KingdomEnhanced.Utils; 
 using KingdomEnhanced.Systems.Accessibility; 
 using System.Collections.Generic;
-using System.Reflection; 
 using System.Text.RegularExpressions;
 
 namespace KingdomEnhanced.Features
@@ -39,8 +38,6 @@ namespace KingdomEnhanced.Features
         private float _castleCacheTimer = 0f;
         private const float CASTLE_CACHE_INTERVAL = 2.0f; 
 
-        private static readonly Dictionary<System.Type, PropertyInfo> _pricePropertyCache = new();
-
         private static readonly Regex _endsWithDigitRegex = new Regex(@"\d$", RegexOptions.Compiled);
         private static readonly Regex _endsWithUpperRegex = new Regex(@"[A-Z]$", RegexOptions.Compiled);
 
@@ -58,15 +55,15 @@ namespace KingdomEnhanced.Features
             if (Input.GetKeyDown(KeyCode.F5))
             {
                 if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-                    ReportDetailedInfo();
+                    AccessibilityReportHandler.ReportDetailedInfo(_player);
                 else
                     _radarSystem.Pulse(); 
             }
-            if (Input.GetKeyDown(KeyCode.F6)) CheckCompassAndSafety();
-            if (Input.GetKeyDown(KeyCode.F7)) ReportWallet();
-            if (Input.GetKeyDown(KeyCode.F8)) ReportWorld();
-            if (Input.GetKeyDown(KeyCode.F9)) ReportMount();
-            if (Input.GetKeyDown(KeyCode.F10)) ReportCompanions();
+            if (Input.GetKeyDown(KeyCode.F6)) AccessibilityReportHandler.CheckCompassAndSafety(_player);
+            if (Input.GetKeyDown(KeyCode.F7)) AccessibilityReportHandler.ReportWallet(_player);
+            if (Input.GetKeyDown(KeyCode.F8)) AccessibilityReportHandler.ReportWorld();
+            if (Input.GetKeyDown(KeyCode.F9)) AccessibilityReportHandler.ReportMount(_player);
+            if (Input.GetKeyDown(KeyCode.F10)) AccessibilityReportHandler.ReportCompanions();
             
             if (Input.GetKeyDown(KeyCode.F11))
             {
@@ -78,7 +75,7 @@ namespace KingdomEnhanced.Features
 
             if (Input.GetKeyDown(KeyCode.F3) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
             {
-                DumpPayableInfo();
+                AccessibilityReportHandler.DumpPayableInfo(_player);
             }
 
             TTSManager.Update();
@@ -322,73 +319,6 @@ namespace KingdomEnhanced.Features
             }
         }
 
-        void ReportDetailedInfo()
-        {
-            var current = _player.selectedPayable as MonoBehaviour ?? GetClosestPayable();
-            if (current == null) {
-                ModMenu.Speak("No object selected.");
-                return;
-            }
-
-            string name = PayableNameResolver.CleanName(current.name);
-            string currency = GetCurrencyName(current);
-            int price = 0;
-            
-            var currentType = current.GetType();
-            if (!_pricePropertyCache.TryGetValue(currentType, out var priceProp)) {
-                priceProp = currentType.GetProperty("Price");
-                _pricePropertyCache[currentType] = priceProp;
-            }
-            if (priceProp != null) price = (int)priceProp.GetValue(current, null);
-
-            string levelInfo = "";
-            var wall = current.GetComponent<Wall>();
-            if (wall != null) levelInfo = $", Level {wall.level}";
-            
-            var castle = current.GetComponent<Castle>();
-            if (castle != null) levelInfo = $", Level {(int)castle.level}";
-
-            var tower = current.GetComponent<Tower>();
-            if (tower != null) 
-            {
-                name = "Watchtower"; 
-                levelInfo = $", Level {tower.level}";
-            }
-
-            ModMenu.Speak($"{name}, {price} {currency}{levelInfo}");
-        }
-
-        void DumpPayableInfo()
-        {
-            var current = _player.selectedPayable as MonoBehaviour;
-            if (current == null) current = GetClosestPayable();
-
-            if (current == null)
-            {
-                ModMenu.Speak("No object found to inspect.");
-                return;
-            }
-
-            ModMenu.Speak($"Inspecting: {current.name}");
-            Debug.Log($"[DEBUG] Inspecting {current.name} ({current.GetType().Name})");
-
-            var fields = current.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            foreach (var f in fields)
-            {
-                Debug.Log($"   Field: {f.Name} = {f.GetValue(current)}");
-            }
-            
-            var props = current.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            foreach (var p in props)
-            {
-                try {
-                    Debug.Log($"   Property: {p.Name} = {p.GetValue(current, null)}");
-                } catch {}
-            }
-            
-            ModMenu.Speak("Dumped fields to log file.");
-        }
-
         private float _zoneUpdateTimer = 0f;
         private float _castleMinX = 0f;
         private float _castleMaxX = 0f;
@@ -616,119 +546,10 @@ namespace KingdomEnhanced.Features
         }
 
 
-        void CheckCompassAndSafety()
-        {
-            string dir = (_player.mover.GetDirection() == Side.Left) ? "Left" : "Right";
-            
-            string threat = "Safe";
-            string timeOfDay = "Day";
-            string borderInfo = "";
-            try
-            {
-                var enemyMgr = FindObjectOfType<EnemyManager>();
-                if (enemyMgr != null && enemyMgr.IsDangerous)
-                    threat = "DANGER";
-                    
-                var kingdom = FindObjectOfType<Kingdom>();
-                if (kingdom != null && !kingdom.isDaytime)
-                    timeOfDay = "Night";
-                    
-                var walls = FindObjectsOfType<Wall>();
-                if (walls != null && walls.Length > 0)
-                {
-                    float min = float.MaxValue;
-                    foreach(var w in walls) {
-                        float d = Mathf.Abs(w.transform.position.x - _player.transform.position.x);
-                        if (d < min) min = d;
-                    }
-                    if (min < float.MaxValue) borderInfo = $", {Mathf.RoundToInt(min)}m to Wall";
-                }
-            }
-            catch { }
-            
-            ModMenu.Speak($"Facing {dir}, {timeOfDay}, {threat}{borderInfo}");
-        }
-
-        void ReportWallet()
-        {
-            int coins = _player.wallet.GetCurrency(CurrencyType.Coins);
-            int gems = _player.wallet.GetCurrency(CurrencyType.Gems);
-            ModMenu.Speak($"{coins} Gold, {gems} Gems");
-        }
-
-        void ReportWorld()
-        {
-            var d = Managers.Inst.director;
-            string time = d.IsDaytime ? "Day" : "Night";
-            ModMenu.Speak($"Day {d.CurrentIslandDays}, {time}");
-        }
-
-        void ReportMount()
-        {
-            if (_player.steed == null) return;
-            string n = PayableNameResolver.CleanName(_player.steed.name);
-            string status = _player.steed.IsTired ? "Tired" : "Ready";
-            ModMenu.Speak($"{n}, {status}");
-        }
-
-        void ReportCompanions()
-        {
-            int archers = FindObjectsOfType<Archer>().Length;
-            int workers = FindObjectsOfType<Worker>().Length;
-            int peasants = FindObjectsOfType<Peasant>().Length;
-            int knights = FindObjectsOfType<Knight>().Length; 
-
-            ModMenu.Speak($"{archers} Archers, {workers} Workers, {peasants} Peasants, {knights} Knights");
-        }
-
         void OnDestroy()
         {
             _lastPayable = null;
             _lastSpokenMsg = "";
-            _pricePropertyCache.Clear();
-        }
-
-
-        string GetCurrencyName(MonoBehaviour target)
-        {
-            if (target.name.Contains("Gem Guard") || target.name.Contains("GemKeeper")) return "gems";
-
-            try
-            {
-                var type = target.GetType();
-                
-                var fields = new[] { "currency", "priceType", "coinType", "paymentType" };
-                
-                foreach (var fieldName in fields)
-                {
-                    FieldInfo field = type.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    if (field != null)
-                    {
-                        object value = field.GetValue(target);
-                        if (value != null)
-                        {
-                            string sVal = value.ToString().ToLower();
-                            if (sVal.Contains("gem")) return "gems";
-                            if (sVal.Contains("coin") || sVal.Contains("gold")) return "coins";
-                        }
-                    }
-                    
-                    PropertyInfo prop = type.GetProperty(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    if (prop != null)
-                    {
-                         object value = prop.GetValue(target, null);
-                         if (value != null)
-                         {
-                             string sVal = value.ToString().ToLower();
-                             if (sVal.Contains("gem")) return "gems";
-                             if (sVal.Contains("coin") || sVal.Contains("gold")) return "coins";
-                         }
-                    }
-                }
-            }
-            catch {}
-            
-            return "coins"; 
         }
     }
 }
