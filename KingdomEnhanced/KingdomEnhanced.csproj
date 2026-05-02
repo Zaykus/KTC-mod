@@ -1,94 +1,191 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <AssemblyName>KingdomEnhanced</AssemblyName>
+        <Description>Enhanced Kingdom Two Crowns Mod</Description>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <RootNamespace>KingdomEnhanced</RootNamespace>
+        <Configurations>Debug;BIE6_IL2CPP;BIE6_Mono</Configurations>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <MinVerTagPrefix>v</MinVerTagPrefix>
+        <WarningsAsErrors>$(WarningsAsErrors);NU1605</WarningsAsErrors>
+        <RestoreAdditionalProjectSources>
+            https://api.nuget.org/v3/index.json;
+            https://nuget.bepinex.dev/v3/index.json
+        </RestoreAdditionalProjectSources>
+    </PropertyGroup>
 
-	<PropertyGroup>
-		<TargetFramework>net6.0-windows</TargetFramework>
-		<AssemblyName>KingdomEnhanced</AssemblyName>
-		<Description>Enhanced Kingdom Two Crowns Mod</Description>
-		<Version>1.0.0</Version>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<LangVersion>latest</LangVersion>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <TargetFramework>net6.0</TargetFramework>
+        <DefineConstants>IL2CPP,BIE,BIE6</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='BIE6_IL2CPP|AnyCPU'">
+        <TargetFramework>net6.0</TargetFramework>
+        <DefineConstants>IL2CPP,BIE,BIE6</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='BIE6_Mono|AnyCPU'">
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <DefineConstants>MONO,BIE,BIE6</DefineConstants>
+    </PropertyGroup>
 
-		<!-- PATH CONFIGURATION -->
-		<!-- Copy Directory.Build.props.example to Directory.Build.props and set your game path -->
-		<GameDir Condition="'$(GameDir)'==''">$(MSBuildThisFileDirectory)..\..</GameDir>
-		<BepInExDir>$(GameDir)\BepInEx</BepInExDir>
-		<InteropDir>$(BepInExDir)\interop</InteropDir>
-	</PropertyGroup>
+    <ItemGroup>
+        <Compile Remove="NewFolder\**" />
+        <EmbeddedResource Remove="NewFolder\**" />
+        <None Remove="NewFolder\**" />
+    </ItemGroup>
 
-	<ItemGroup>
-	  <Compile Remove="NewFolder\**" />
-	  <EmbeddedResource Remove="NewFolder\**" />
-	  <None Remove="NewFolder\**" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+        <PackageReference Include="MinVer" Version="6.*" PrivateAssets="All" />
+    </ItemGroup>
 
-	<ItemGroup>
-		<!-- Core BepInEx Libraries -->
-		<Reference Include="BepInEx">
-			<!-- FIXED: Pointing to BepInEx.Core.dll as seen in your screenshot -->
-			<HintPath>$(BepInExDir)\core\BepInEx.Core.dll</HintPath>
-		</Reference>
-		<Reference Include="BepInEx.Unity.IL2CPP">
-			<HintPath>$(BepInExDir)\core\BepInEx.Unity.IL2CPP.dll</HintPath>
-		</Reference>
-		<Reference Include="Il2CppInterop.Runtime">
-			<HintPath>$(BepInExDir)\core\Il2CppInterop.Runtime.dll</HintPath>
-		</Reference>
-		<Reference Include="Il2CppInterop.Common">
-			<HintPath>$(BepInExDir)\core\Il2CppInterop.Common.dll</HintPath>
-		</Reference>
-		<Reference Include="0Harmony">
-			<HintPath>$(BepInExDir)\core\0Harmony.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.PhysicsModule">
-			<HintPath>$(InteropDir)\UnityEngine.PhysicsModule.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.TextRenderingModule">
-			<HintPath>$(InteropDir)\UnityEngine.TextRenderingModule.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.UIModule">
-			<HintPath>$(InteropDir)\UnityEngine.UIModule.dll</HintPath>
-		</Reference>
-		<!-- Game Interop Assemblies -->
-		<Reference Include="UnityEngine">
-			<HintPath>$(InteropDir)\UnityEngine.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.CoreModule">
-			<HintPath>$(InteropDir)\UnityEngine.CoreModule.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.IMGUIModule">
-			<HintPath>$(InteropDir)\UnityEngine.IMGUIModule.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.InputLegacyModule">
-			<HintPath>$(InteropDir)\UnityEngine.InputLegacyModule.dll</HintPath>
-		</Reference>
-		<Reference Include="Assembly-CSharp">
-			<HintPath>$(InteropDir)\Assembly-CSharp.dll</HintPath>
-		</Reference>
-		<Reference Include="Il2Cppmscorlib">
-			<HintPath>$(InteropDir)\Il2Cppmscorlib.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Core">
-			<HintPath>$(InteropDir)\Il2CppSystem.Core.dll</HintPath>
-		</Reference>
-		
-		<Reference Include="Rewired_Core">
-			<HintPath>$(InteropDir)\Rewired_Core.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.UI">
-			<HintPath>$(InteropDir)\UnityEngine.UI.dll</HintPath>
-		</Reference>
-		<Reference Include="Unity.TextMeshPro">
-			<HintPath>$(InteropDir)\Unity.TextMeshPro.dll</HintPath>
-		</Reference>
+    <Target Name="_EnsureMinVerBeforePluginInfo" BeforeTargets="AddGeneratedFile" DependsOnTargets="MinVer" />
 
-	</ItemGroup>
+    <!-- BIE6_IL2CPP || Debug -->
+    <ItemGroup Condition="'$(Configuration)'=='BIE6_IL2CPP' or '$(Configuration)'=='Debug'">
+        <Reference Include="0Harmony">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\core\0Harmony.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="BepInEx.Core">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\core\BepInEx.Core.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="BepInEx.Unity.IL2CPP">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\core\BepInEx.Unity.IL2CPP.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Il2CppInterop.Common">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\core\Il2CppInterop.Common.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Il2CppInterop.Runtime">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\core\Il2CppInterop.Runtime.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
+        <Reference Include="Assembly-CSharp">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\Assembly-CSharp.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Il2Cppmscorlib">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\Il2Cppmscorlib.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Il2CppSystem.Core">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\Il2CppSystem.Core.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Rewired_Core">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\Rewired_Core.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\Unity.TextMeshPro.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.CoreModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.IMGUIModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.InputLegacyModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.PhysicsModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.PhysicsModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.UI.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.UIModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
 
+    <!-- BIE6_Mono -->
+    <ItemGroup Condition="'$(Configuration)'=='BIE6_Mono'">
+        <Reference Include="0Harmony">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\core\0Harmony.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="BepInEx.Core">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\core\BepInEx.Core.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="BepInEx.Unity.Mono">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\core\BepInEx.Unity.Mono.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\core\Mono.Cecil.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-	<!-- Auto-Copy Build Artifacts -->
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)\plugins" />
-		<Message Text="Copied mod to $(BepInExDir)\plugins" Importance="High" />
-	</Target>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\Assembly-CSharp-publicized.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Rewired_Core">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\Rewired_Core.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\Unity.TextMeshPro.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\UnityEngine.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\UnityEngine.CoreModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.PhysicsModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\UnityEngine.UI.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\UnityEngine.UIModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
 
+    <Target Name="CopyOutput" AfterTargets="Build" Condition="'$(BepInExPluginsPath)'!=''">
+        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFolder="$(BepInExPluginsPath)$(AssemblyName)\" OverwriteReadOnlyFiles="true" />
+        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFolder="$(BepInExPluginsPath)$(AssemblyName)\" OverwriteReadOnlyFiles="true" Condition="Exists('$(OutputPath)\$(AssemblyName).pdb')" />
+        <Message Text="Copied mod to $(BepInExPluginsPath)$(AssemblyName)\" Importance="high" />
+    </Target>
 </Project>

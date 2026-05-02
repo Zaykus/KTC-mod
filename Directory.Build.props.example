@@ -5,10 +5,15 @@
 <Project>
   <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
     <!-- Path to the Windows game root directory (the one containing the BepInEx subdirectory) -->
-    <GameDir>D:\SteamLibrary\steamapps\common\Kingdom Two Crowns</GameDir>
+    <GameDir>D:\SteamLibrary\steamapps\common\Kingdom Two Crowns\</GameDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
     <!-- Path to the Linux/macOS game root directory (the one containing the BepInEx subdirectory) -->
-    <GameDir>/mnt/d/SteamLibrary/steamapps/common/Kingdom Two Crowns</GameDir>
+    <GameDir>/mnt/d/SteamLibrary/steamapps/common/Kingdom Two Crowns/</GameDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <BepInExConfigPath>$(GameDir)BepInEx\config\</BepInExConfigPath>
+    <BepInExPluginsPath>$(GameDir)BepInEx\plugins\</BepInExPluginsPath>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
   </PropertyGroup>
 </Project>

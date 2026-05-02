@@ -12,7 +12,7 @@ MemoryCaptures/
 *.suo
 /[Bb]uild/
 /[Bb]uilds/
-logOutbut.og
+logOutput.log
 RELEASE_NOTES.md
 *.zip
 Assembly.CSharp
@@ -24,3 +24,6 @@ KTC Data
 logOutbut.log
 CHANGELOG.md
 diff.txt
+
+# Local developer config (do not commit)
+Directory.Build.props
