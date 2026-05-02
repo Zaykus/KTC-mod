@@ -186,8 +186,8 @@ This mod natively handles Linux/Steam Deck parameters, given you follow proper l
 
 ## 🤝 Credits & Feedback
 
-*   **[Zaykus](https://github.com/Zaykus)** — Lead Developer, Menu UI, Everything else.
-*   **[Abevol](https://github.com/abevol)** — Start Point & IL2CPP Tools
+*   **[Zaykus](https://github.com/Zaykus)** — Lead Developer, Menu UI, Everything else*.
+*   **[Abevol](https://github.com/abevol)** — Start Point & IL2CPP Tools & Mono version Handler
 *   **[BepInEx Team](https://github.com/BepInEx/BepInEx)** — Mod Loader Framework
 
 ### 👥 Contributing
