@@ -1,0 +1,14 @@
+<!--
+  Copy this file to Directory.Build.props and adjust paths for your system.
+  The correct OS path is automatically selected via MSBuild conditions.
+-->
+<Project>
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <!-- Path to the Windows game root directory (the one containing the BepInEx subdirectory) -->
+    <GameDir>D:\SteamLibrary\steamapps\common\Kingdom Two Crowns</GameDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+    <!-- Path to the Linux/macOS game root directory (the one containing the BepInEx subdirectory) -->
+    <GameDir>/mnt/d/SteamLibrary/steamapps/common/Kingdom Two Crowns</GameDir>
+  </PropertyGroup>
+</Project>

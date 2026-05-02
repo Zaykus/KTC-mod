@@ -54,4 +54,9 @@ def process_dir(directory):
                 remove_comments_from_file(os.path.join(root, file))
 
 if __name__ == '__main__':
-    process_dir(r'f:\vs CODE\KTC dev\KTC MOD 4.0\KingdomEnhanced')
+    import sys
+    if len(sys.argv) > 1:
+        target_dir = sys.argv[1]
+    else:
+        target_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'KingdomEnhanced')
+    process_dir(target_dir)

@@ -9,7 +9,8 @@
 		<LangVersion>latest</LangVersion>
 
 		<!-- PATH CONFIGURATION -->
-		<GameDir>F:\vs CODE\mods</GameDir>
+		<!-- Copy Directory.Build.props.example to Directory.Build.props and set your game path -->
+		<GameDir Condition="'$(GameDir)'==''">$(MSBuildThisFileDirectory)..\..</GameDir>
 		<BepInExDir>$(GameDir)\BepInEx</BepInExDir>
 		<InteropDir>$(BepInExDir)\interop</InteropDir>
 	</PropertyGroup>
@@ -86,8 +87,8 @@
 
 	<!-- Auto-Copy Build Artifacts -->
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Copy SourceFiles="$(TargetPath)" DestinationFolder="F:\vs CODE\mods\BepInEx\plugins" />
-		<Message Text="Copied mod to F:\vs CODE\mods\BepInEx\plugins" Importance="High" />
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)\plugins" />
+		<Message Text="Copied mod to $(BepInExDir)\plugins" Importance="High" />
 	</Target>
 
 </Project>
