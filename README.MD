@@ -263,11 +263,3 @@ No compatibility issues.
 No manual setup complexity.  
 
 **Just install and play.**
-```
-
----
-
-If you want next iteration, I can:
-
-* Add **visual badges for Mono / IL2CPP auto-detection**
-* Or make a **super clean minimal README (GitHub trending style)**
