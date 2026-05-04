@@ -10,7 +10,7 @@ New-Item -ItemType Directory -Path $releasesDir | Out-Null
 if (Test-Path $workDir) { Remove-Item -Path $workDir -Recurse -Force }
 New-Item -ItemType Directory -Path $workDir | Out-Null
 
-$version = "v2.1.0-beta"
+$version = "v2.1.0-beta2"
 
 $targets = @(
     @{ file="BepInEx-Unity.Mono-win-x86-6.0.0-be.755+3fab71a.zip"; name="KTC_Mod_$version`_Mono_Win_x86"; type="Mono"; os="win" },
