@@ -5,7 +5,7 @@ namespace KingdomEnhanced.Core
         public const string MAJOR = "2";
         public const string MINOR = "1";
         public const string PATCH = "0";
-        public const string SUFFIX = "-beta";
+        public const string SUFFIX = "-beta2";
         public const string FULL = MAJOR + "." + MINOR + "." + PATCH;
         public const string DISPLAY = "v" + FULL + SUFFIX;
     }
