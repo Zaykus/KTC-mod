@@ -30,7 +30,7 @@ namespace KingdomEnhanced.Features
 
         public static bool CanUseInstantConstruction()
         {
-            return true;
+            return KingdomEnhanced.UI.ModMenu.HyperBuilders && !IsHardModeActive();
         }
 
 

@@ -45,16 +45,14 @@ namespace KingdomEnhanced.Hooks
 
                 float travelMult = ModMenu.SpeedMultiplier;
                 float steedMult  = ModMenu.SteedSpeedMult;
-                if (travelMult != 1.0f || steedMult != 1.0f)
+                int id = __instance.GetInstanceID();
+                if (!_speedCache.ContainsKey(id))
                 {
-                    int id = __instance.GetInstanceID();
-                    if (!_speedCache.ContainsKey(id))
-                    {
-                        if (__instance.runSpeed <= 0.1f) goto stamina;
-                        _speedCache[id] = __instance.runSpeed;
-                    }
-                    __instance.runSpeed = _speedCache[id] * travelMult * steedMult;
+                    if (__instance.runSpeed <= 0.1f) goto stamina;
+                    _speedCache[id] = __instance.runSpeed;
                 }
+                
+                __instance.runSpeed = _speedCache[id] * travelMult * steedMult;
 
                 stamina:
                 if (ModMenu.InfiniteStamina && __instance.Rider != null)

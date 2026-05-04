@@ -69,6 +69,9 @@ namespace KingdomEnhanced.UI
                 () => KingdomMonitor.Instance == null || !KingdomMonitor.Instance.IsVisible,
                 () => "Requires Monitor"));
 
+            list.Add(Toggle("enable_accessibility", "Accessibility & Radar", TabCategory.Main, "Accessibility",
+                "Enables world tracking, radar pings, and proximity alerts.",
+                () => ModMenu.EnableAccessibility, v => ModMenu.EnableAccessibility = v));
             list.Add(Toggle("enable_tts", "Narrator (TTS)", TabCategory.Main, "Accessibility",
                 "Reads menu interactions aloud using the system TTS engine.",
                 () => ModMenu.EnableTTS, v => ModMenu.EnableTTS = v));

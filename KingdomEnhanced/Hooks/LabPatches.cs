@@ -202,11 +202,16 @@ namespace KingdomEnhanced.Hooks
 
         public static void BerserkerPostfix(Berserker __instance)
         {
-            if (__instance == null || !ModMenu.BerserkerRage) return;
+            if (__instance == null) return;
             int id = __instance.GetInstanceID();
             if (!_berserkerBaseSpeed.TryGetValue(id, out float baseSpeed)) return;
-            __instance.runSpeed  = baseSpeed * 2.5f;
-            __instance.rageTimer = float.MaxValue;
+            
+            if (ModMenu.BerserkerRage) {
+                __instance.runSpeed  = baseSpeed * 2.5f;
+                __instance.rageTimer = float.MaxValue;
+            } else {
+                __instance.runSpeed  = baseSpeed;
+            }
         }
 
         public static void NinjaAwakePostfix(Ninja __instance)
@@ -219,10 +224,10 @@ namespace KingdomEnhanced.Hooks
 
         public static void NinjaPostfix(Ninja __instance)
         {
-            if (__instance == null || !ModMenu.NinjaSpeedBoost) return;
+            if (__instance == null) return;
             int id = __instance.GetInstanceID();
             if (!_ninjaBaseSpeed.TryGetValue(id, out float baseSpeed)) return;
-            __instance.runSpeed = baseSpeed * 2.0f;
+            __instance.runSpeed = ModMenu.NinjaSpeedBoost ? baseSpeed * 2.0f : baseSpeed;
         }
 
         #endregion
@@ -249,14 +254,22 @@ namespace KingdomEnhanced.Hooks
 
         public static void BallistaLaunchPostfix(Bolt __instance)
         {
-            if (__instance == null || !ModMenu.BallistaBoost) return;
-            if (__instance._boltData == null) return;
+            if (__instance == null || __instance._boltData == null) return;
             int id = __instance.GetInstanceID();
+            
             if (!_boltBaseDamage.ContainsKey(id))
             {
                 _boltBaseDamage[id] = __instance._boltData._damage;
                 _boltBaseForce[id]  = __instance._boltData._shootForce;
             }
+            
+            if (!ModMenu.BallistaBoost)
+            {
+                __instance._boltData._damage = _boltBaseDamage[id];
+                __instance._boltData._shootForce = _boltBaseForce[id];
+                return;
+            }
+
             __instance._boltData._damage     = _boltBaseDamage[id] * 2;
             __instance._boltData._shootForce = _boltBaseForce[id]  * 2f;
         }
@@ -292,7 +305,7 @@ namespace KingdomEnhanced.Hooks
 
         public static void MoverUpdatePostfix(Mover __instance)
         {
-            if (__instance == null || ModMenu.EnemySpeedMult == 1.0f) return;
+            if (__instance == null) return;
             int id = __instance.GetInstanceID();
             if (!_enemyMoverIds.Contains(id)) return;
             var f = GetMoverSpeedField();
@@ -326,7 +339,7 @@ namespace KingdomEnhanced.Hooks
 
         public static void PortalApplyRate(Portal __instance)
         {
-            if (__instance == null || ModMenu.PortalSpawnRate == 1.0f) return;
+            if (__instance == null) return;
             int id = __instance.GetInstanceID();
             if (!_portalBaseInterval.TryGetValue(id, out float baseInterval)) return;
             __instance._spawnInterval = baseInterval / ModMenu.PortalSpawnRate;

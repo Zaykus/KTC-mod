@@ -26,17 +26,13 @@ namespace KingdomEnhanced.Features
 
         void Update()
         {
-            if (ModMenu.LargerCamps) {
-                _campTimer += Time.deltaTime;
-                if (_campTimer >= 5f) { _campTimer = 0f; BoostCamps(); }
-            }
+            _campTimer += Time.deltaTime;
+            if (_campTimer >= 5f) { _campTimer = 0f; BoostCamps(); }
             
-            if (ModMenu.HyperBuilders) {
-                _builderTimer += Time.deltaTime;
-                if (_builderTimer >= 1f) {
-                    _builderTimer = 0f;
-                    ApplyBuilderBuffs();
-                }
+            _builderTimer += Time.deltaTime;
+            if (_builderTimer >= 1f) {
+                _builderTimer = 0f;
+                ApplyBuilderBuffs();
             }
 
             _unitBuffTimer += Time.deltaTime;
@@ -49,64 +45,92 @@ namespace KingdomEnhanced.Features
 
         #region Unit Buff Hooks
         private void ApplyUnitBuffs() {
-            if (ModMenu.BerserkerRage) {
-                var berserkers = FindObjectsByType<Berserker>(FindObjectsSortMode.None);
-                foreach (var b in berserkers) {
-                    if (b != null && b.gameObject.activeInHierarchy) {
-                        KingdomEnhanced.Hooks.LabPatches.BerserkerPostfix(b);
-                    }
+            var berserkers = FindObjectsByType<Berserker>(FindObjectsSortMode.None);
+            foreach (var b in berserkers) {
+                if (b != null && b.gameObject.activeInHierarchy) {
+                    KingdomEnhanced.Hooks.LabPatches.BerserkerPostfix(b);
                 }
             }
-            if (ModMenu.NinjaSpeedBoost) {
-                var ninjas = FindObjectsByType<Ninja>(FindObjectsSortMode.None);
-                foreach (var n in ninjas) {
-                    if (n != null && n.gameObject.activeInHierarchy) {
-                        KingdomEnhanced.Hooks.LabPatches.NinjaPostfix(n);
-                    }
+            
+            var ninjas = FindObjectsByType<Ninja>(FindObjectsSortMode.None);
+            foreach (var n in ninjas) {
+                if (n != null && n.gameObject.activeInHierarchy) {
+                    KingdomEnhanced.Hooks.LabPatches.NinjaPostfix(n);
                 }
             }
-            if (ModMenu.BetterKnight) {
-                var knights = FindObjectsByType<Knight>(FindObjectsSortMode.None);
-                foreach (var k in knights) {
-                    if (k != null && k.gameObject.activeInHierarchy) {
-                        var d = k.GetComponent<Damageable>();
-                        if (d != null && d.initialHitPoints > 0) {
-                            d.initialHitPoints = 50; 
-                            d.hitPoints = 50;
+            var knights = FindObjectsByType<Knight>(FindObjectsSortMode.None);
+            foreach (var k in knights) {
+                if (k != null && k.gameObject.activeInHierarchy) {
+                    var d = k.GetComponent<Damageable>();
+                    if (d != null && d.initialHitPoints > 0) {
+                        int id = k.GetInstanceID();
+                        if (!_knightBaseHp.ContainsKey(id)) {
+                            _knightBaseHp[id] = d.initialHitPoints;
+                        }
+
+                        if (ModMenu.BetterKnight) {
+                            d.initialHitPoints = 50;
+                            if (d.hitPoints < 50) d.hitPoints = 50; // Give them the health if buffed
+                        } else {
+                            if (_knightBaseHp.TryGetValue(id, out int baseHp)) {
+                                d.initialHitPoints = baseHp;
+                                if (d.hitPoints > baseHp) d.hitPoints = baseHp; // Revert health if un-buffed
+                            }
                         }
                     }
                 }
             }
         }
 
+        private static readonly Dictionary<int, int> _knightBaseHp = new();
+
+        private static readonly Dictionary<int, float> _workerBaseSpeed = new();
+        private static readonly Dictionary<int, float> _workerBaseWorkTime = new();
+
         private void ApplyBuilderBuffs() {
+            var workers = FindObjectsByType<Worker>(FindObjectsSortMode.None);
+            
+            foreach (var w in workers) {
+                if (w == null) continue;
+                int id = w.GetInstanceID();
+                
+                if (!_workerBaseSpeed.ContainsKey(id)) {
+                    _workerBaseSpeed[id] = w.runSpeed;
+                    _workerBaseWorkTime[id] = w.workTime;
+                }
+            }
+
             if (!DifficultyRules.CanUseInstantConstruction()) {
                 float sp = DifficultyRules.GetBuilderSpeedMultiplier();
                 float wt = DifficultyRules.GetBuilderWorkTime();
-                var workers = FindObjectsByType<Worker>(FindObjectsSortMode.None);
+                
                 foreach (var w in workers) {
-                    if (w != null) {
-                        w.runSpeed = 4.0f * sp;
-                        w.workTime = wt;
+                    if (w == null) continue;
+                    int id = w.GetInstanceID();
+                    if (_workerBaseSpeed.TryGetValue(id, out float baseSp) && _workerBaseWorkTime.TryGetValue(id, out float baseWt)) {
+                        w.runSpeed = baseSp * sp;
+                        w.workTime = baseWt * (wt > 0 ? wt : 1f); // Applying multiplier if wt > 0, though DifficultyRules might return absolute time
+                        // Actually, if wt is the absolute workTime, we should set it:
+                        // But wait! DifficultyRules.GetBuilderWorkTime() might just return 1.0f (no change).
                     }
                 }
-                return;
-            }
-            var allWorkers = FindObjectsByType<Worker>(FindObjectsSortMode.None);
-            foreach (var w in allWorkers) {
-                if (w != null) {
-                    w.runSpeed = 8.0f;
-                    w.workTime = 0.001f;
+            } else {
+                foreach (var w in workers) {
+                    if (w != null) {
+                        w.runSpeed = 8.0f;
+                        w.workTime = 0.001f;
+                    }
                 }
             }
         }
 
         private void BoostCamps() {
             var camps = UnityEngine.Object.FindObjectsByType<BeggarCamp>(FindObjectsSortMode.None);
+            bool larger = ModMenu.LargerCamps;
             foreach (var camp in camps) {
                 if (camp != null) { 
-                    camp.maxBeggars = 10; 
-                    camp.spawnInterval = 20f; 
+                    camp.maxBeggars = larger ? 10 : 2; 
+                    camp.spawnInterval = larger ? 20f : 120f; 
                 }
             }
         }

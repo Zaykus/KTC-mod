@@ -53,6 +53,9 @@ namespace KingdomEnhanced.Features
 
         void Update()
         {
+            // TTS queue must always drain, even if Accessibility is off
+            TTSManager.Update();
+
             if (!ModMenu.EnableAccessibility) return;
 
             if (_player == null)
@@ -87,8 +90,6 @@ namespace KingdomEnhanced.Features
             {
                 AccessibilityReportHandler.DumpPayableInfo(_player);
             }
-
-            TTSManager.Update();
 
             HandleHover();
             HandleCastleProximity();
@@ -256,7 +257,7 @@ namespace KingdomEnhanced.Features
 
         MonoBehaviour GetClosestPayable()
         {
-            if (Time.time < _lastPayableCheckTime + PAYABLE_CHECK_INTERVAL) return _lastPayable as MonoBehaviour; 
+            if (Time.time < _lastPayableCheckTime + 0.3f) return _lastPayable as MonoBehaviour; 
             _lastPayableCheckTime = Time.time;
 
             if (Managers.Inst == null || Managers.Inst.payables == null) return null;
@@ -267,17 +268,20 @@ namespace KingdomEnhanced.Features
             MonoBehaviour closest = null;
             float closestDist = float.MaxValue;
 
-            foreach (var p in Managers.Inst.payables.AllPayables)
+            var allPayables = Managers.Inst.payables.AllPayables;
+            int count = allPayables.Length;
+            for (int i = 0; i < count; i++)
             {
+                var p = allPayables[i];
                 if (p == null) continue;
-                var mb = p as MonoBehaviour;
-                if (mb == null || !mb.gameObject.activeInHierarchy) continue;
-
-                if (_player.steed != null && mb.gameObject == _player.steed.gameObject) continue;
-
-                float dist = Mathf.Abs(mb.transform.position.x - playerX);
+                
+                float dist = Mathf.Abs(p.transform.position.x - playerX);
                 if (dist < searchRange && dist < closestDist)
                 {
+                    var mb = p as MonoBehaviour;
+                    if (mb == null || !mb.gameObject.activeInHierarchy) continue;
+                    if (_player.steed != null && mb.gameObject == _player.steed.gameObject) continue;
+
                     closest = mb;
                     closestDist = dist;
                 }
@@ -287,7 +291,7 @@ namespace KingdomEnhanced.Features
 
         Castle FindClosestCastle()
         {
-            if (_cachedCastles == null || Time.time > _castleCacheTimer + CASTLE_CACHE_INTERVAL) 
+            if (_cachedCastles == null || Time.time > _castleCacheTimer + 5.0f) 
             {
                 _cachedCastles = FindObjectsByType<Castle>(FindObjectsSortMode.None);
                 _castleCacheTimer = Time.time;
@@ -299,8 +303,9 @@ namespace KingdomEnhanced.Features
             float closestDist = float.MaxValue;
             float playerX = _player.transform.position.x;
 
-            foreach (var c in _cachedCastles)
+            for (int i = 0; i < _cachedCastles.Length; i++)
             {
+                var c = _cachedCastles[i];
                 if (c == null) continue;
                 float dist = Mathf.Abs(c.transform.position.x - playerX);
                 if (dist < closestDist)
@@ -343,6 +348,9 @@ namespace KingdomEnhanced.Features
         
         private float _announcerCooldown = 0f;
 
+        private BeggarCamp[] _cachedCamps = null;
+        private Wall[] _cachedWalls = null;
+
         void UpdateZones()
         {
             if (_player == null) return;
@@ -352,15 +360,19 @@ namespace KingdomEnhanced.Features
             float h = 4.0f; 
             float wBox = 0.5f;
 
-            
             float minWallX = float.MaxValue, maxWallX = float.MinValue;
-            var walls = FindObjectsByType<Wall>(FindObjectsSortMode.None);
-            if (walls != null && walls.Length > 0)
+            if (_cachedWalls == null || UnityEngine.Random.value < 0.2f) 
+                _cachedWalls = FindObjectsByType<Wall>(FindObjectsSortMode.None);
+
+            if (_cachedWalls != null && _cachedWalls.Length > 0)
             {
-                foreach (var w in walls)
+                for (int i = 0; i < _cachedWalls.Length; i++)
                 {
-                    if (w.transform.position.x < minWallX) minWallX = w.transform.position.x;
-                    if (w.transform.position.x > maxWallX) maxWallX = w.transform.position.x;
+                    var w = _cachedWalls[i];
+                    if (w == null) continue;
+                    float wx = w.transform.position.x;
+                    if (wx < minWallX) minWallX = wx;
+                    if (wx > maxWallX) maxWallX = wx;
                 }
             }
             else
@@ -381,13 +393,17 @@ namespace KingdomEnhanced.Features
                 _debugZones.Add(new TriggerZone { Box = new Rect(maxWallX,        y - 1f, wBox, h - 1f), Color = Color.red, Label = "Entering/Leaving Castle (Trigger)" });
             }
 
-            
             _campIntervals.Clear();
-            var camps = GameObject.FindObjectsByType<BeggarCamp>(FindObjectsSortMode.None);
-            if (camps != null)
+            if (_cachedCamps == null)
+                _cachedCamps = GameObject.FindObjectsByType<BeggarCamp>(FindObjectsSortMode.None);
+
+            if (_cachedCamps != null)
             {
-                foreach (var camp in camps)
+                for (int i = 0; i < _cachedCamps.Length; i++)
                 {
+                    var camp = _cachedCamps[i];
+                    if (camp == null) continue;
+                    
                     float cx = camp.transform.position.x;
                     float treeL1 = cx - 15f; 
                     float treeR1 = cx + 15f;
@@ -399,10 +415,15 @@ namespace KingdomEnhanced.Features
                         float minL = float.MaxValue, minR = float.MaxValue;
                         float maxL = float.MinValue, maxR = float.MinValue;
 
-                        foreach (var p in Managers.Inst.payables.AllPayables)
+                        var allPayables = Managers.Inst.payables.AllPayables;
+                        int count = allPayables.Length;
+                        for (int j = 0; j < count; j++)
                         {
+                            var p = allPayables[j];
+                            if (p == null) continue;
                             var mb = p as MonoBehaviour;
                             if (mb == null || !mb.name.Contains("Tree") || mb.name.Contains("Close")) continue;
+                            
                             float tx = mb.transform.position.x;
 
                             if (tx < cx && (cx - tx) < minL) { minL = cx - tx; treeL1 = tx; }
@@ -435,7 +456,7 @@ namespace KingdomEnhanced.Features
             if (_zoneUpdateTimer <= 0f)
             {
                 UpdateZones();
-                _zoneUpdateTimer = 2.0f;
+                _zoneUpdateTimer = 10.0f; // Increased to 10 seconds to drastically reduce stutters
             }
 
             if (_player == null) return;

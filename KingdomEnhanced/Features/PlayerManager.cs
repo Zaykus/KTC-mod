@@ -33,6 +33,12 @@ namespace KingdomEnhanced.Features
                 if (_player.mover != null && _player.mover.GetDirection() == Side.Left) dir = -1f;
                 _player.transform.localScale = new Vector3(ModMenu.TargetSize * dir, ModMenu.TargetSize, 1f);
             }
+            else
+            {
+                float dir = 1f;
+                if (_player.mover != null && _player.mover.GetDirection() == Side.Left) dir = -1f;
+                _player.transform.localScale = new Vector3(dir, 1f, 1f);
+            }
 
             if (Input.GetKeyDown(KeyCode.F2))
             {
