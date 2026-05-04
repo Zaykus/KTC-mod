@@ -9,7 +9,7 @@ It grants players granular control over their kingdom’s army, economy, and wor
 
 ---
 
-## 🚀 Universal Compatibility Update (v2.1.0)
+## Universal Compatibility Update (v2.1.0)
 
 This update focuses on **eliminating compatibility limitations** and ensuring the mod works across all environments.
 
@@ -63,9 +63,9 @@ Check your game folder:
 
 ---
 
-## 🌟 Mod Overview & Features
+##  Mod Overview & Features
 
-### 🏰 Kingdom Monitor & HUD
+###  Kingdom Monitor & HUD
 | Sub-System | Description |
 | :--- | :--- |
 | **Kingdom Monitor (F3)** | Real-time dashboard for kingdom stats, population (including vagrants), and economy systems |
@@ -76,7 +76,7 @@ Check your game folder:
 
 ## 🎛️ Mod Menu Suites (F1)
 
-### ⚙️ MAIN  
+### MAIN  
 *Core System Controls & Readouts*
 
 - HUD visibility and layout control  
@@ -85,7 +85,7 @@ Check your game folder:
 
 ---
 
-### ⚡ CHEATS  
+### CHEATS  
 *Gameplay Overrides & System Control*
 
 - **Character**
@@ -110,7 +110,7 @@ Check your game folder:
 
 ---
 
-### 🧪 LAB (Experimental)  
+### LAB (Experimental)  
 *Advanced World & Engine Manipulation*
 
 - Weather & season control  
@@ -133,7 +133,7 @@ Check your game folder:
 
 ---
 
-### 💀 HARD (Custom Difficulty)  
+### HARD (Custom Difficulty)  
 *Experimental Director Overrides*
 
 - Presets: Nightmare, Relentless, Oblivion, No Escape  
@@ -170,7 +170,7 @@ A full **Text-to-Speech (TTS)** system designed for blind and visually impaired 
 
 ---
 
-## ⚡ Performance & Stability
+## Performance & Stability
 
 - Reduced CPU usage (radar & detection systems)  
 - Optimized update cycles and caching  
@@ -255,7 +255,7 @@ See `CONTRIBUTING.md` for setup and guidelines.
 
 ---
 
-## 🌟 Final Note
+## Final Note
 
 **Kingdom Enhanced v2.1.0** removes backend and platform limitations entirely.
 
