@@ -10,10 +10,15 @@ namespace KingdomEnhanced.Hooks
     [HarmonyPatch(typeof(Player), nameof(Player.Start))]
     public static class PlayerSpawnerHook
     {
+        private static bool _isInitialized = false;
+
         [HarmonyPostfix]
         public static void Postfix(Player __instance)
         {
             if (__instance == null) return;
+
+            if (_isInitialized) return;
+            _isInitialized = true;
 
             var existing = Object.FindFirstObjectByType<WorldManager>();
             if (existing != null) return;

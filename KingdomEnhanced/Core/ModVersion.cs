@@ -3,9 +3,10 @@ namespace KingdomEnhanced.Core
     public static class ModVersion
     {
         public const string MAJOR = "2";
-        public const string MINOR = "0";
+        public const string MINOR = "1";
         public const string PATCH = "0";
+        public const string SUFFIX = "-beta";
         public const string FULL = MAJOR + "." + MINOR + "." + PATCH;
-        public const string DISPLAY = "v" + FULL;
+        public const string DISPLAY = "v" + FULL + SUFFIX;
     }
 }

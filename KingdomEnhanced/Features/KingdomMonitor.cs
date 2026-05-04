@@ -198,14 +198,18 @@ namespace KingdomEnhanced.Features
             
             string cycle = "Unknown";
             int day = 0;
-            if (Managers.Inst != null && Managers.Inst.director != null)
-            {
-                day = Managers.Inst.director.CurrentIslandDays;
-            }
-            if (_kingdom != null)
-            {
-                cycle = _kingdom.isDaytime ? "Day" : "Night";
-            }
+            try {
+                if (Managers.Inst != null && Managers.Inst.director != null)
+                {
+                    day = Managers.Inst.director.CurrentIslandDays;
+                }
+                
+                if (_kingdom == null) _kingdom = FindFirstObjectByType<Kingdom>();
+                if (_kingdom != null)
+                {
+                    cycle = _kingdom.isDaytime ? "Day" : "Night";
+                }
+            } catch { }
             
             
             GUI.contentColor = colors.header;
@@ -213,27 +217,32 @@ namespace KingdomEnhanced.Features
             GUI.contentColor = Color.white;
 
             
-            if (_enemyManager != null)
-            {
-                bool danger = _enemyManager.IsDangerous;
-                string status = danger 
-                    ? $"<color={colors.dangerHex}>DANGER</color>" 
-                    : $"<color={colors.safeHex}>SAFE</color>";
-                GUI.contentColor = colors.body;
-                GUILayout.Label($"Threat: {status}");
-                GUILayout.Label($"Greed: {_enemyCount}");
-                GUI.contentColor = Color.white;
-            }
+            try {
+                if (_enemyManager == null) _enemyManager = FindFirstObjectByType<EnemyManager>();
+                if (_enemyManager != null)
+                {
+                    bool danger = _enemyManager.IsDangerous;
+                    string status = danger 
+                        ? $"<color={colors.dangerHex}>DANGER</color>" 
+                        : $"<color={colors.safeHex}>SAFE</color>";
+                    GUI.contentColor = colors.body;
+                    GUILayout.Label($"Threat: {status}");
+                    GUILayout.Label($"Greed: {_enemyCount}");
+                    GUI.contentColor = Color.white;
+                }
+            } catch { }
             
             
-            if (_kingdom != null && _kingdom.playerOne != null && _kingdom.playerOne.wallet != null)
-            {
-                int coins = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Coins);
-                int gems = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Gems);
-                GUI.contentColor = colors.body;
-                GUILayout.Label($"Wallet: {coins} Coins, {gems} Gems");
-                GUI.contentColor = Color.white;
-            }
+            try {
+                if (_kingdom != null && _kingdom.playerOne != null && _kingdom.playerOne.wallet != null)
+                {
+                    int coins = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Coins);
+                    int gems = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Gems);
+                    GUI.contentColor = colors.body;
+                    GUILayout.Label($"Wallet: {coins} Coins, {gems} Gems");
+                    GUI.contentColor = Color.white;
+                }
+            } catch { }
 
             GUILayout.Space(5);
 
