@@ -83,8 +83,15 @@ namespace KingdomEnhanced.UI
                 () => ModMenu.EnableCastleAnnouncer, v => ModMenu.EnableCastleAnnouncer = v));
 
             list.Add(Slider("speed_mult", "Travel Speed", TabCategory.Main, "Movement",
-                "Multiplies the monarch's base movement speed.",
+                "Multiplies the monarch's movement speed while mounted.",
                 () => ModMenu.SpeedMultiplier, v => ModMenu.SpeedMultiplier = v, 0.5f, 10.0f));
+
+            list.Add(Toggle("size_hack", "Player Size Hack", TabCategory.Main, "Player",
+                "Scales the monarch sprite larger or smaller.",
+                () => ModMenu.EnableSizeHack, v => ModMenu.EnableSizeHack = v));
+            list.Add(Slider("target_size", "Player Size", TabCategory.Main, "Player",
+                "Multiplies the monarch's visual size (requires Player Size Hack to be ON).",
+                () => ModMenu.TargetSize, v => ModMenu.TargetSize = v, 0.2f, 3.0f));
 
             // ==================== CHEATS ====================
             list.Add(Toggle("infinite_stamina", "Infinite Mount Stamina", TabCategory.Cheats, "Invincibility",
@@ -185,11 +192,13 @@ namespace KingdomEnhanced.UI
             list.Add(Button("spawn_u_ninja", "Spawn Ninjas", TabCategory.Cheats, "Unit Spawner",
                 "Spawns Ninjas (Shogun only).",
                 () => ArmyManager.SpawnUnit("Ninja", (int)ModMenu.SpawnUnitCount),
-                () => !ModMenu.CheatsUnlocked, () => "Locked"));
+                () => !ModMenu.CheatsUnlocked || BiomeHolder.Inst == null || BiomeHolder.Inst.BiomeIndex != (int)BiomeHolder.Biomes.Shogun, 
+                () => !ModMenu.CheatsUnlocked ? "Locked" : "Shogun Only"));
             list.Add(Button("spawn_u_berserker", "Spawn Berserkers", TabCategory.Cheats, "Unit Spawner",
                 "Spawns Berserkers (Norse only).",
                 () => ArmyManager.SpawnUnit("Berserker", (int)ModMenu.SpawnUnitCount),
-                () => !ModMenu.CheatsUnlocked, () => "Locked"));
+                () => !ModMenu.CheatsUnlocked || BiomeHolder.Inst == null || BiomeHolder.Inst.BiomeIndex != (int)BiomeHolder.Biomes.Norselands, 
+                () => !ModMenu.CheatsUnlocked ? "Locked" : "Norse Only"));
             list.Add(Button("spawn_u_knight", "Spawn Knights", TabCategory.Cheats, "Unit Spawner",
                 "Spawns Knights.",
                 () => ArmyManager.SpawnUnit("Knight", (int)ModMenu.SpawnUnitCount),
@@ -206,7 +215,8 @@ namespace KingdomEnhanced.UI
             list.Add(Button("spawn_h_berserker", "Spawn Berserker Hermit", TabCategory.Cheats, "Hermit Spawner",
                 "Spawns the Berserker Hermit (Norse only).",
                 () => ArmyManager.SpawnHermit("Berserker"),
-                () => !ModMenu.CheatsUnlocked, () => "Locked"));
+                () => !ModMenu.CheatsUnlocked || BiomeHolder.Inst == null || BiomeHolder.Inst.BiomeIndex != (int)BiomeHolder.Biomes.Norselands, 
+                () => !ModMenu.CheatsUnlocked ? "Locked" : "Norse Only"));
             list.Add(Button("spawn_h_fire", "Spawn Fire Hermit", TabCategory.Cheats, "Hermit Spawner",
                 "Spawns the Fire Hermit.",
                 () => ArmyManager.SpawnHermit("Fire"),
@@ -222,6 +232,35 @@ namespace KingdomEnhanced.UI
             list.Add(Button("spawn_h_warrior", "Spawn Warrior Hermit", TabCategory.Cheats, "Hermit Spawner",
                 "Spawns the Warrior Hermit.",
                 () => ArmyManager.SpawnHermit("Warrior"),
+                () => !ModMenu.CheatsUnlocked, () => "Locked"));
+
+            list.Add(Button("spawn_e_weak", "Spawn Greedling", TabCategory.Cheats, "Enemy Spawner",
+                "Spawns basic Greedlings.",
+                () => ArmyManager.SpawnEnemy(EnemyType.TrollWeak, (int)ModMenu.SpawnUnitCount),
+                () => !ModMenu.CheatsUnlocked, () => "Locked"));
+            list.Add(Button("spawn_e_squid", "Spawn Greed (Flyer)", TabCategory.Cheats, "Enemy Spawner",
+                "Spawns Greed flyers (Squids).",
+                () => ArmyManager.SpawnEnemy(EnemyType.Squid, (int)ModMenu.SpawnUnitCount),
+                () => !ModMenu.CheatsUnlocked, () => "Locked"));
+            list.Add(Button("spawn_e_stealer", "Spawn Crown Stealer", TabCategory.Cheats, "Enemy Spawner",
+                "Spawns Crown Stealers.",
+                () => ArmyManager.SpawnEnemy(EnemyType.Stealer, (int)ModMenu.SpawnUnitCount),
+                () => !ModMenu.CheatsUnlocked, () => "Locked"));
+            list.Add(Button("spawn_e_boss", "Spawn Breeder", TabCategory.Cheats, "Enemy Spawner",
+                "Spawns Breeders.",
+                () => ArmyManager.SpawnEnemy(EnemyType.Boss, (int)ModMenu.SpawnUnitCount),
+                () => !ModMenu.CheatsUnlocked, () => "Locked"));
+            list.Add(Button("spawn_e_crusher", "Spawn Crusher", TabCategory.Cheats, "Enemy Spawner",
+                "Spawns Crushers.",
+                () => ArmyManager.SpawnEnemy(EnemyType.Crusher, (int)ModMenu.SpawnUnitCount),
+                () => !ModMenu.CheatsUnlocked, () => "Locked"));
+            list.Add(Button("spawn_e_knight", "Spawn Greed Knight", TabCategory.Cheats, "Enemy Spawner",
+                "Spawns Greed Knights.",
+                () => ArmyManager.SpawnEnemy(EnemyType.Knight, (int)ModMenu.SpawnUnitCount),
+                () => !ModMenu.CheatsUnlocked, () => "Locked"));
+            list.Add(Button("spawn_e_archer", "Spawn Greed Archer", TabCategory.Cheats, "Enemy Spawner",
+                "Spawns Greed Archers.",
+                () => ArmyManager.SpawnEnemy(EnemyType.Archer, (int)ModMenu.SpawnUnitCount),
                 () => !ModMenu.CheatsUnlocked, () => "Locked"));
 
             list.Add(Toggle("hyper_builders", "Instant Construction", TabCategory.Cheats, "Builders",
@@ -296,9 +335,6 @@ namespace KingdomEnhanced.UI
                 "Increases animal spawn rates.",
                 () => ModMenu.AnimalSpawnBoost, v => ModMenu.AnimalSpawnBoost = v));
 
-            list.Add(Slider("steed_speed", "Steed Speed", TabCategory.Lab, "Steed",
-                "Multiplies steed movement speed.",
-                () => ModMenu.SteedSpeedMult, v => ModMenu.SteedSpeedMult = v, 0.5f, 3.0f));
             list.Add(Toggle("charge_dmg", "Charge Damage Boost", TabCategory.Lab, "Steed",
                 "Increases steed charge damage.",
                 () => ModMenu.ChargeDmgBoost, v => ModMenu.ChargeDmgBoost = v));

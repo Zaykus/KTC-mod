@@ -86,38 +86,91 @@ namespace KingdomEnhanced.Features
 
         private static readonly Dictionary<int, float> _workerBaseSpeed = new();
         private static readonly Dictionary<int, float> _workerBaseWorkTime = new();
+        private static readonly Collider2D[] _weaponCheckColliders = new Collider2D[16];
 
         private void ApplyBuilderBuffs() {
             var workers = FindObjectsByType<Worker>(FindObjectsSortMode.None);
-            
-            foreach (var w in workers) {
-                if (w == null) continue;
-                int id = w.GetInstanceID();
-                
-                if (!_workerBaseSpeed.ContainsKey(id)) {
-                    _workerBaseSpeed[id] = w.runSpeed;
-                    _workerBaseWorkTime[id] = w.workTime;
-                }
-            }
+            bool boostOn = DifficultyRules.CanUseInstantConstruction();
 
-            if (!DifficultyRules.CanUseInstantConstruction()) {
-                float sp = DifficultyRules.GetBuilderSpeedMultiplier();
-                float wt = DifficultyRules.GetBuilderWorkTime();
-                
+            // Cache vanilla values only when the boost is OFF so we capture true base values.
+            // If boost is on, workers may already have boosted values — don't cache those.
+            if (!boostOn) {
                 foreach (var w in workers) {
                     if (w == null) continue;
                     int id = w.GetInstanceID();
-                    if (_workerBaseSpeed.TryGetValue(id, out float baseSp) && _workerBaseWorkTime.TryGetValue(id, out float baseWt)) {
-                        w.runSpeed = baseSp * sp;
-                        w.workTime = baseWt * (wt > 0 ? wt : 1f); // Applying multiplier if wt > 0, though DifficultyRules might return absolute time
-                        // Actually, if wt is the absolute workTime, we should set it:
-                        // But wait! DifficultyRules.GetBuilderWorkTime() might just return 1.0f (no change).
+                    if (!_workerBaseSpeed.ContainsKey(id)) {
+                        _workerBaseSpeed[id]    = w.runSpeed;
+                        _workerBaseWorkTime[id] = w.workTime;
+                    }
+                }
+            }
+
+            if (!boostOn) {
+                // Revert: restore exact cached vanilla values — no multipliers
+                foreach (var w in workers) {
+                    if (w == null) continue;
+                    int id = w.GetInstanceID();
+                    if (_workerBaseSpeed.TryGetValue(id, out float baseSp) &&
+                        _workerBaseWorkTime.TryGetValue(id, out float baseWt)) {
+                        w.runSpeed = baseSp;
+                        w.workTime = baseWt;
                     }
                 }
             } else {
+                // Fetch weapons explicitly once per cycle (cheap & reliable)
+                var ballistas = FindObjectsByType<Ballista>(FindObjectsSortMode.None);
+                var catapults = FindObjectsByType<Catapult>(FindObjectsSortMode.None);
+
+                // Boost: cache first, then apply instant construction values
                 foreach (var w in workers) {
-                    if (w != null) {
-                        w.runSpeed = 8.0f;
+                    if (w == null) continue;
+                    int id = w.GetInstanceID();
+                    // Cache before overwriting (only if not yet cached)
+                    if (!_workerBaseSpeed.ContainsKey(id)) {
+                        _workerBaseSpeed[id]    = w.runSpeed;
+                        _workerBaseWorkTime[id] = w.workTime;
+                    }
+                    w.runSpeed = 8.0f;
+
+                    bool isManningWeapon = false;
+
+                    // 1. Check if they are currently stationary (manning a station)
+                    if (w.IsStationary()) {
+                        isManningWeapon = true;
+                    }
+
+                    // 2. Fast parent name check
+                    if (!isManningWeapon && w.transform.parent != null) {
+                        string pName = w.transform.parent.name;
+                        if (pName.IndexOf("ballista", StringComparison.OrdinalIgnoreCase) >= 0 || 
+                            pName.IndexOf("tower", StringComparison.OrdinalIgnoreCase) >= 0 || 
+                            pName.IndexOf("catapult", StringComparison.OrdinalIgnoreCase) >= 0) {
+                            isManningWeapon = true;
+                        }
+                    }
+
+                    // 3. Robust distance checks directly against all weapon instances
+                    if (!isManningWeapon) {
+                        Vector3 pos = w.transform.position;
+                        if (ballistas != null) {
+                            foreach (var b in ballistas) {
+                                if (b != null && Vector3.Distance(pos, b.transform.position) < 8.0f) {
+                                    isManningWeapon = true; break;
+                                }
+                            }
+                        }
+                        if (!isManningWeapon && catapults != null) {
+                            foreach (var c in catapults) {
+                                if (c != null && Vector3.Distance(pos, c.transform.position) < 8.0f) {
+                                    isManningWeapon = true; break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (isManningWeapon) {
+                        if (_workerBaseWorkTime.TryGetValue(id, out float baseWt)) w.workTime = baseWt;
+                    } else {
                         w.workTime = 0.001f;
                     }
                 }
@@ -392,6 +445,29 @@ namespace KingdomEnhanced.Features
 
             UnityEngine.Object.Instantiate(prefab.gameObject, player.transform.position + new Vector3(2f, 0, 0), Quaternion.identity);
             ModMenu.Speak($"Spawned {hermitName} hermit!", ModMenu.C_ON);
+        }
+
+        public static void SpawnEnemy(EnemyType type, int amount)
+        {
+            var em = Managers.Inst?.enemies;
+            if (em == null) return;
+
+            var prefab = em.GetPrefab(type);
+            if (prefab == null)
+            {
+                ModMenu.Speak($"Enemy prefab not found for type: {type}", ModMenu.C_LOCK);
+                return;
+            }
+
+            var player = Managers.Inst?.kingdom?.GetPlayer(0);
+            if (player == null) return;
+
+            Vector3 pos = player.transform.position + new Vector3(25f, 0, 0); 
+            for (int i = 0; i < amount; i++)
+            {
+                UnityEngine.Object.Instantiate(prefab.gameObject, pos + new Vector3(UnityEngine.Random.Range(-2f, 2f), 0, 0), Quaternion.identity);
+            }
+            ModMenu.Speak($"Spawned {amount} {type}(s)!", ModMenu.C_ON);
         }
         #endregion
     }

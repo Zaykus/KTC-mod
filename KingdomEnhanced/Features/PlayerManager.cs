@@ -18,11 +18,16 @@ namespace KingdomEnhanced.Features
         private Player _player;
         private float _defaultSpeed = -1f;
 
-        void Start() => _player = GetComponent<Player>();
+        void Start() { } // PlayerManager is NOT on the Player's GameObject
 
         void Update()
         {
-            if (_player == null) return;
+            // Find player if not yet cached
+            if (_player == null)
+            {
+                _player = FindFirstObjectByType<Player>();
+                if (_player == null) return;
+            }
 
             if (_player.steed != null && _defaultSpeed == -1f)
                 _defaultSpeed = _player.steed.runSpeed;

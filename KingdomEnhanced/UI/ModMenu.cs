@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -231,9 +231,35 @@ namespace KingdomEnhanced.UI
             if (Input.GetKeyDown(MENU_TOGGLE_KEY))
             {
                 _isVisible = !_isVisible;
-                Cursor.visible = _isVisible;
-                Cursor.lockState = CursorLockMode.None;
-                if (!_isVisible) SaveToSettings();
+                if (!_isVisible)
+                {
+                    if (CursorSystem.Inst != null)
+                    {
+                        CursorSystem.Inst.SetForceVisibleCursor(false);
+                    }
+                    else
+                    {
+                        Cursor.visible = false;
+                        Cursor.lockState = CursorLockMode.Locked;
+                    }
+                    SaveToSettings();
+                }
+                else
+                {
+                    if (CursorSystem.Inst != null)
+                    {
+                        CursorSystem.Inst.SetForceVisibleCursor(true);
+                    }
+                }
+            }
+
+            if (_isVisible)
+            {
+                if (CursorSystem.Inst == null)
+                {
+                    if (!Cursor.visible) Cursor.visible = true;
+                    if (Cursor.lockState != CursorLockMode.None) Cursor.lockState = CursorLockMode.None;
+                }
             }
 
             if (Input.GetKeyDown(KeyCode.F4))
@@ -252,6 +278,8 @@ namespace KingdomEnhanced.UI
             _notifications.RemoveAll(n => n.IsExpired());
         }
 
+        private GUI.WindowFunction _drawWindowFunc;
+
         void OnGUI()
         {
             BuildStyles();
@@ -260,13 +288,11 @@ namespace KingdomEnhanced.UI
 
             if (!_isVisible) return;
 
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
-
             Color originalBg = GUI.backgroundColor;
             GUI.backgroundColor = new Color(C_BG.r, C_BG.g, C_BG.b, MenuOpacity);
 
-            _windowRect = GUI.Window(9900, _windowRect, (GUI.WindowFunction)DrawWindow, GUIContent.none, _styleWindow);
+            if (_drawWindowFunc == null) _drawWindowFunc = (GUI.WindowFunction)DrawWindow;
+            _windowRect = GUI.Window(9900, _windowRect, _drawWindowFunc, GUIContent.none, _styleWindow);
 
             GUI.backgroundColor = originalBg;
         }
@@ -569,8 +595,10 @@ namespace KingdomEnhanced.UI
             string lastSection = null;
             bool inCard = false;
 
-            foreach (var f in _features.Where(f => f.Category == _activeTab))
+            foreach (var f in _features)
             {
+                if (f.Category != _activeTab) continue;
+
                 if (f.Section != lastSection)
                 {
                     if (inCard) GUILayout.EndVertical(); 

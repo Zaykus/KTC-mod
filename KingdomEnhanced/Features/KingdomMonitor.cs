@@ -49,7 +49,19 @@ namespace KingdomEnhanced.Features
         private float _nextCensusTime;
         private int _censusStep = 0;
 
+        private string _strDay = "<b>Day 0 (Unknown)</b>";
+        private string _strThreat = "Threat: <color=#00ff00>SAFE</color>";
+        private string _strGreed = "Greed: 0";
+        private string _strWallet = "Wallet: 0 Coins, 0 Gems";
         
+        private string _strArcher = "Archers: 0";
+        private string _strWorker = "Workers: 0";
+        private string _strPeasant = "Peasants: 0";
+        private string _strFarmer = "Farmers: 0";
+        private string _strPikeman = "Pikemen: 0";
+        private string _strKnight = "Knights: 0";
+        private string _strVagrant = "Vagrants: 0";
+
         private StyleColors[] _stylePalette;
 
         private struct StyleColors
@@ -141,6 +153,9 @@ namespace KingdomEnhanced.Features
             };
         }
 
+        private GUI.WindowFunction _drawWindowFunc;
+        private GUIStyle _cachedWindowStyle;
+
         private void OnGUI()
         {
             if (!_isVisible) return;
@@ -148,18 +163,21 @@ namespace KingdomEnhanced.Features
 
             StyleColors colors = _stylePalette[(int)_currentStyle];
             
-            
             Color prevBg = GUI.backgroundColor;
             GUI.backgroundColor = new Color(1f, 1f, 1f, colors.baseAlpha);
             
-            
-            GUIStyle windowStyle = new GUIStyle(GUI.skin.box)
+            if (_cachedWindowStyle == null)
             {
-                padding = new RectOffset(10 + colors.frameThickness, 10 + colors.frameThickness, 10 + colors.frameThickness, 10 + colors.frameThickness),
-                border = new RectOffset(colors.frameThickness, colors.frameThickness, colors.frameThickness, colors.frameThickness)
-            };
+                _cachedWindowStyle = new GUIStyle(GUI.skin.box)
+                {
+                    padding = new RectOffset(10 + colors.frameThickness, 10 + colors.frameThickness, 10 + colors.frameThickness, 10 + colors.frameThickness),
+                    border = new RectOffset(colors.frameThickness, colors.frameThickness, colors.frameThickness, colors.frameThickness)
+                };
+            }
             
-            _windowRect = GUI.Window(999, _windowRect, (GUI.WindowFunction)DrawWindow, "Kingdom Monitor", windowStyle);
+            if (_drawWindowFunc == null) _drawWindowFunc = (GUI.WindowFunction)DrawWindow;
+            
+            _windowRect = GUI.Window(999, _windowRect, _drawWindowFunc, "Kingdom Monitor", _cachedWindowStyle);
             
             GUI.backgroundColor = prevBg;
         }
@@ -192,79 +210,31 @@ namespace KingdomEnhanced.Features
         {
             StyleColors colors = _stylePalette[(int)_currentStyle];
 
-            GUILayout.BeginVertical();
-            GUILayout.Space(15); 
+            float yPos = 25f;
 
-            
-            string cycle = "Unknown";
-            int day = 0;
-            try {
-                if (Managers.Inst != null && Managers.Inst.director != null)
-                {
-                    day = Managers.Inst.director.CurrentIslandDays;
-                }
-                
-                if (_kingdom == null) _kingdom = FindFirstObjectByType<Kingdom>();
-                if (_kingdom != null)
-                {
-                    cycle = _kingdom.isDaytime ? "Day" : "Night";
-                }
-            } catch { }
-            
-            
             GUI.contentColor = colors.header;
-            GUILayout.Label($"<b>Day {day} ({cycle})</b>");
+            GUI.Label(new Rect(15, yPos, 200, 20), _strDay);
+            yPos += 25f;
+
+            GUI.contentColor = colors.body;
+            GUI.Label(new Rect(15, yPos, 200, 20), _strThreat); yPos += 20f;
+            GUI.Label(new Rect(15, yPos, 200, 20), _strGreed); yPos += 20f;
+            GUI.Label(new Rect(15, yPos, 200, 20), _strWallet); yPos += 25f;
             GUI.contentColor = Color.white;
 
-            
-            try {
-                if (_enemyManager == null) _enemyManager = FindFirstObjectByType<EnemyManager>();
-                if (_enemyManager != null)
-                {
-                    bool danger = _enemyManager.IsDangerous;
-                    string status = danger 
-                        ? $"<color={colors.dangerHex}>DANGER</color>" 
-                        : $"<color={colors.safeHex}>SAFE</color>";
-                    GUI.contentColor = colors.body;
-                    GUILayout.Label($"Threat: {status}");
-                    GUILayout.Label($"Greed: {_enemyCount}");
-                    GUI.contentColor = Color.white;
-                }
-            } catch { }
-            
-            
-            try {
-                if (_kingdom != null && _kingdom.playerOne != null && _kingdom.playerOne.wallet != null)
-                {
-                    int coins = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Coins);
-                    int gems = _kingdom.playerOne.wallet.GetCurrency(CurrencyType.Gems);
-                    GUI.contentColor = colors.body;
-                    GUILayout.Label($"Wallet: {coins} Coins, {gems} Gems");
-                    GUI.contentColor = Color.white;
-                }
-            } catch { }
-
-            GUILayout.Space(5);
-
-            
             GUI.contentColor = colors.header;
-            GUILayout.Label($"<b>Population</b>");
+            GUI.Label(new Rect(15, yPos, 200, 20), "<b>Population</b>"); yPos += 20f;
             GUI.contentColor = colors.body;
             
-            if (_archerCount > 0) GUILayout.Label($"Archers: {_archerCount}");
-            if (_workerCount > 0) GUILayout.Label($"Workers: {_workerCount}");
-            if (_peasantCount > 0) GUILayout.Label($"Peasants: {_peasantCount}");
-            if (_farmerCount > 0) GUILayout.Label($"Farmers: {_farmerCount}");
-            if (_pikemanCount > 0) GUILayout.Label($"Pikemen: {_pikemanCount}");
-            if (_knightCount > 0) GUILayout.Label($"Knights: {_knightCount}");
-            if (_vagrantCount > 0) GUILayout.Label($"Vagrants: {_vagrantCount}");
+            if (_archerCount > 0) { GUI.Label(new Rect(15, yPos, 200, 20), _strArcher); yPos += 18f; }
+            if (_workerCount > 0) { GUI.Label(new Rect(15, yPos, 200, 20), _strWorker); yPos += 18f; }
+            if (_peasantCount > 0) { GUI.Label(new Rect(15, yPos, 200, 20), _strPeasant); yPos += 18f; }
+            if (_farmerCount > 0) { GUI.Label(new Rect(15, yPos, 200, 20), _strFarmer); yPos += 18f; }
+            if (_pikemanCount > 0) { GUI.Label(new Rect(15, yPos, 200, 20), _strPikeman); yPos += 18f; }
+            if (_knightCount > 0) { GUI.Label(new Rect(15, yPos, 200, 20), _strKnight); yPos += 18f; }
+            if (_vagrantCount > 0) { GUI.Label(new Rect(15, yPos, 200, 20), _strVagrant); yPos += 18f; }
             
-            GUI.contentColor = Color.white;
-
-            GUILayout.FlexibleSpace();
-
-            
-            GUILayout.Space(18); 
+            GUI.contentColor = Color.white; 
 
             
             var handleSize = 20f;
@@ -291,7 +261,6 @@ namespace KingdomEnhanced.Features
             }
 
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
-            GUILayout.EndVertical();
         }
 
         
@@ -302,38 +271,60 @@ namespace KingdomEnhanced.Features
         {
             _currentStyle = (MonitorStyle)(((int)_currentStyle + 1) % _stylePalette.Length);
             _stylesBuilt = false;
+            _cachedWindowStyle = null;
         }
 
         private void Update()
         {
             if (!_isVisible) return;
 
+            // Try resolving cached references slowly
+            if (_kingdom == null && Time.frameCount % 120 == 0) _kingdom = FindFirstObjectByType<Kingdom>();
+            if (_enemyManager == null && Time.frameCount % 120 == 60) _enemyManager = FindFirstObjectByType<EnemyManager>();
+
             
             if (Time.time > _nextCensusTime)
             {
-                _nextCensusTime = Time.time + 0.1f;
+                _nextCensusTime = Time.time + 0.3f;
                 
                 try 
                 {
                     switch (_censusStep)
                     {
-                        case 0: _archerCount = FindObjectsByType<Archer>(FindObjectsSortMode.None).Length; break;
-                        case 1: _workerCount = FindObjectsByType<Worker>(FindObjectsSortMode.None).Length; break;
-                        case 2: _peasantCount = FindObjectsByType<Peasant>(FindObjectsSortMode.None).Length; break;
-                        case 3: _knightCount = FindObjectsByType<Knight>(FindObjectsSortMode.None).Length; break;
-                        case 4: _vagrantCount = FindObjectsByType<Beggar>(FindObjectsSortMode.None).Length; break;
-                        case 5: _farmerCount = FindObjectsByType<Farmer>(FindObjectsSortMode.None).Length; break;
-                        case 6: _pikemanCount = FindObjectsByType<Pikeman>(FindObjectsSortMode.None).Length; break;
+                        case 0: _archerCount = FindObjectsByType<Archer>(FindObjectsSortMode.None).Length; _strArcher = $"Archers: {_archerCount}"; break;
+                        case 1: _workerCount = FindObjectsByType<Worker>(FindObjectsSortMode.None).Length; _strWorker = $"Workers: {_workerCount}"; break;
+                        case 2: _peasantCount = FindObjectsByType<Peasant>(FindObjectsSortMode.None).Length; _strPeasant = $"Peasants: {_peasantCount}"; break;
+                        case 3: _knightCount = FindObjectsByType<Knight>(FindObjectsSortMode.None).Length; _strKnight = $"Knights: {_knightCount}"; break;
+                        case 4: _vagrantCount = FindObjectsByType<Beggar>(FindObjectsSortMode.None).Length; _strVagrant = $"Vagrants: {_vagrantCount}"; break;
+                        case 5: _farmerCount = FindObjectsByType<Farmer>(FindObjectsSortMode.None).Length; _strFarmer = $"Farmers: {_farmerCount}"; break;
+                        case 6: _pikemanCount = FindObjectsByType<Pikeman>(FindObjectsSortMode.None).Length; _strPikeman = $"Pikemen: {_pikemanCount}"; break;
                         case 7:
-                            var em = _enemyManager != null ? _enemyManager : FindFirstObjectByType<EnemyManager>();
-                            _enemyCount = (em != null && em.AllEnemies != null) ? em.AllEnemies.Count : 0;
+                            if (_enemyManager != null && _enemyManager.AllEnemies != null) {
+                                _enemyCount = _enemyManager.AllEnemies.Count;
+                            }
+                            _strGreed = $"Greed: {_enemyCount}";
                             break;
                         case 8:
                             var player = Managers.Inst?.kingdom?.GetPlayer(0);
                             if (player != null && player.wallet != null)
                             {
-                                _coinsCount = player.wallet.Coins;
-                                _gemsCount = player.wallet.Gems;
+                                int coins = player.wallet.Coins;
+                                int gems = player.wallet.Gems;
+                                _strWallet = $"Wallet: {coins} Coins, {gems} Gems";
+                            }
+                            break;
+                        case 9:
+                            int day = 0;
+                            if (Managers.Inst != null && Managers.Inst.director != null) day = Managers.Inst.director.CurrentIslandDays;
+                            string cycle = _kingdom != null && _kingdom.isDaytime ? "Day" : "Night";
+                            _strDay = $"<b>Day {day} ({cycle})</b>";
+                            
+                            if (_enemyManager != null) {
+                                bool danger = _enemyManager.IsDangerous;
+                                string safeHex = _stylePalette[(int)_currentStyle].safeHex;
+                                string dangerHex = _stylePalette[(int)_currentStyle].dangerHex;
+                                string status = danger ? $"<color={dangerHex}>DANGER</color>" : $"<color={safeHex}>SAFE</color>";
+                                _strThreat = $"Threat: {status}";
                             }
                             break;
                     }
@@ -341,7 +332,7 @@ namespace KingdomEnhanced.Features
                 catch { }
 
                 _censusStep++;
-                if (_censusStep > 8) _censusStep = 0;
+                if (_censusStep > 9) _censusStep = 0;
             }
         }
     }

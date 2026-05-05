@@ -311,12 +311,12 @@ namespace KingdomEnhanced.Features
             {
                 if (director.IsDaytime && !_wasDay)
                 {
-                    ModMenu.Speak("<color=orange> O The sun rises.</color>");
+                    ModMenu.Speak("<color=orange> The sun rises.</color>");
                     _wasDay = true;
                 }
                 else if (!director.IsDaytime && _wasDay)
                 {
-                    ModMenu.Speak("<color=lightblue> * Stars appear.</color>");
+                    ModMenu.Speak("<color=lightblue> Stars appear.</color>");
                     _wasDay = false;
                 }
             }

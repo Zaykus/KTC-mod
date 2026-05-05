@@ -36,7 +36,8 @@ namespace KingdomEnhanced.Hooks
         [HarmonyPatch(typeof(Steed), "Update")]
         public static class SteedSpeedPatch
         {
-            public static readonly System.Collections.Generic.Dictionary<int, float> _speedCache = new();
+            public static readonly System.Collections.Generic.Dictionary<int, float> _runCache = new();
+            public static readonly System.Collections.Generic.Dictionary<int, float> _walkCache = new();
             
             [HarmonyPostfix]
             public static void Postfix(Steed __instance)
@@ -44,15 +45,17 @@ namespace KingdomEnhanced.Hooks
                 if (__instance == null) return;
 
                 float travelMult = ModMenu.SpeedMultiplier;
-                float steedMult  = ModMenu.SteedSpeedMult;
                 int id = __instance.GetInstanceID();
-                if (!_speedCache.ContainsKey(id))
+                
+                if (!_runCache.ContainsKey(id))
                 {
                     if (__instance.runSpeed <= 0.1f) goto stamina;
-                    _speedCache[id] = __instance.runSpeed;
+                    _runCache[id] = __instance.runSpeed;
+                    _walkCache[id] = __instance.walkSpeed;
                 }
                 
-                __instance.runSpeed = _speedCache[id] * travelMult * steedMult;
+                __instance.runSpeed = _runCache[id] * travelMult;
+                __instance.walkSpeed = _walkCache[id] * travelMult;
 
                 stamina:
                 if (ModMenu.InfiniteStamina && __instance.Rider != null)
@@ -64,10 +67,8 @@ namespace KingdomEnhanced.Hooks
 
             public static void ClearCache(int id)
             {
-                if (_speedCache.ContainsKey(id))
-                {
-                    _speedCache.Remove(id);
-                }
+                _runCache.Remove(id);
+                _walkCache.Remove(id);
             }
         }
 

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <AssemblyName>KingdomEnhanced</AssemblyName>
         <Description>Enhanced Kingdom Two Crowns Mod</Description>
@@ -104,6 +104,10 @@
             <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.PhysicsModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
+        <Reference Include="UnityEngine.Physics2DModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.Physics2DModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
         <Reference Include="UnityEngine.TextRenderingModule">
             <HintPath>..\deps\KTC-ModDevLibs\BIE6_IL2CPP\interop\UnityEngine.TextRenderingModule.dll</HintPath>
             <Private>False</Private>
@@ -167,6 +171,10 @@
         </Reference>
         <Reference Include="UnityEngine.PhysicsModule">
             <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.Physics2DModule">
+            <HintPath>..\deps\KTC-ModDevLibs\BIE6_Mono\Managed\UnityEngine.Physics2DModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TextRenderingModule">

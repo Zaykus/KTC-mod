@@ -10,7 +10,7 @@ New-Item -ItemType Directory -Path $releasesDir | Out-Null
 if (Test-Path $workDir) { Remove-Item -Path $workDir -Recurse -Force }
 New-Item -ItemType Directory -Path $workDir | Out-Null
 
-$version = "v2.1.0-beta2"
+$version = "v2.1.0-beta3"
 
 $targets = @(
     @{ file="BepInEx-Unity.Mono-win-x86-6.0.0-be.755+3fab71a.zip"; name="KTC_Mod_$version`_Mono_Win_x86"; type="Mono"; os="win" },
@@ -38,6 +38,7 @@ foreach ($target in $targets) {
     # Extract
     $extractDir = Join-Path $workDir $target.name
     Expand-Archive -Path $zipPath -DestinationPath $extractDir
+    Start-Sleep -Seconds 4
 
     # Create plugins folder
     $pluginsDir = Join-Path $extractDir "BepInEx\plugins\KingdomEnhanced"
@@ -50,6 +51,7 @@ foreach ($target in $targets) {
         $dllPath = Join-Path $workspace "KingdomEnhanced\bin\BIE6_IL2CPP\KingdomEnhanced.dll"
     }
     Copy-Item -Path $dllPath -Destination $pluginsDir
+    Start-Sleep -Seconds 3
 
     # Handle speech DLL
     if ($target.os -eq "win") {
@@ -64,6 +66,7 @@ foreach ($target in $targets) {
     # Zip release
     $releaseZip = Join-Path $releasesDir "$($target.name).zip"
     Write-Host "  Creating release package $releaseZip..."
+    Start-Sleep -Seconds 6
     Compress-Archive -Path "$extractDir\*" -DestinationPath $releaseZip
 
     # Clean up
