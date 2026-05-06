@@ -230,6 +230,7 @@ namespace KingdomEnhanced.UI
         #region LIFECYCLE
         void Start()
         {
+            OnyxTheme.Initialize();
             _features = ModMenuFeatures.Build();
             LoadFromSettings();
             TTSManager.Initialize();
@@ -293,13 +294,16 @@ namespace KingdomEnhanced.UI
         void OnGUI()
         {
             BuildStyles();
+            
+            // Draw global overlays regardless of menu visibility
             DrawFeedbackOverlay();
             DrawNotificationLog();
 
             if (!_isVisible) return;
 
+            // Apply Onyx transparency
             Color originalBg = GUI.backgroundColor;
-            GUI.backgroundColor = new Color(C_BG.r, C_BG.g, C_BG.b, MenuOpacity);
+            GUI.backgroundColor = Color.white; // We use textures now, don't tint them
 
             if (_drawWindowFunc == null) _drawWindowFunc = (GUI.WindowFunction)DrawWindow;
             _windowRect = GUI.Window(9900, _windowRect, _drawWindowFunc, GUIContent.none, _styleWindow);
@@ -314,75 +318,70 @@ namespace KingdomEnhanced.UI
 
             _styleWindow = new GUIStyle(GUI.skin.window) {
                 padding = new RectOffset(0, 0, 0, 0),
-                normal = { background = GUI.skin.box.normal.background },
-                onNormal = { background = GUI.skin.box.normal.background }
+                normal = { background = OnyxTheme.WindowBg },
+                onNormal = { background = OnyxTheme.WindowBg },
+                border = new RectOffset(12, 12, 12, 12)
             };
 
             _styleTitle = new GUIStyle(GUI.skin.label) {
-                fontSize = 16, fontStyle = FontStyle.Bold,
-                alignment = TextAnchor.MiddleCenter, richText = true,
-                normal = { textColor = C_GOLD }
+                fontSize = 18, fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleLeft, richText = true,
+                normal = { textColor = OnyxTheme.C_Text },
+                padding = new RectOffset(10, 0, 0, 0)
             };
 
             _styleSubtitle = new GUIStyle(GUI.skin.label) {
-                fontSize = 11, alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = C_TEXT_DIM }
+                fontSize = 10, alignment = TextAnchor.MiddleLeft,
+                normal = { textColor = OnyxTheme.C_TextDim },
+                padding = new RectOffset(10, 0, 0, 0)
             };
 
             _styleSectionLabel = new GUIStyle(GUI.skin.label) {
-                fontSize = 12, fontStyle = FontStyle.Bold,
+                fontSize = 11, fontStyle = FontStyle.Bold,
                 alignment = TextAnchor.MiddleLeft,
-                padding = new RectOffset(4, 4, 6, 4),
-                margin = new RectOffset(0, 0, 0, 0),
-                normal = { textColor = C_GOLD }
+                padding = new RectOffset(4, 4, 8, 4),
+                normal = { textColor = OnyxTheme.C_Electric }
             };
 
             _styleBodyText = new GUIStyle(GUI.skin.label) {
                 fontSize = 12, richText = true, wordWrap = true,
-                normal = { textColor = C_TEXT }
+                normal = { textColor = OnyxTheme.C_Text }
             };
 
             _styleDimText = new GUIStyle(GUI.skin.label) {
                 fontSize = 11, fontStyle = FontStyle.Italic,
                 richText = true,
-                normal = { textColor = C_TEXT_DIM }
+                normal = { textColor = OnyxTheme.C_TextDim }
             };
 
             _styleBtn = new GUIStyle(GUI.skin.button) {
                 fontSize = 12, richText = true,
-                padding  = new RectOffset(8, 8, 5, 5),
-                normal = { textColor = C_TEXT },
-                hover = { textColor = C_GOLD },
-                active = { textColor = C_ACCENT_ACTIVE },
-            };
-
-            _styleBtnDim = new GUIStyle(GUI.skin.button) {
-                fontSize = 12, richText = true,
-                padding  = new RectOffset(8, 8, 5, 5),
-                normal = { textColor = C_TEXT_DIM },
-                hover = { textColor = C_GOLD },
-                active = { textColor = C_ACCENT_ACTIVE },
+                padding  = new RectOffset(10, 10, 6, 6),
+                normal = { textColor = OnyxTheme.C_Text, background = OnyxTheme.CardBg },
+                hover = { textColor = Color.white, background = OnyxTheme.SelectionBox },
+                active = { textColor = OnyxTheme.C_Electric, background = OnyxTheme.SelectionBox },
+                border = new RectOffset(6, 6, 6, 6)
             };
 
             _styleTabBtn = new GUIStyle(GUI.skin.button) {
                 fontSize = 13, fontStyle = FontStyle.Bold,
                 alignment = TextAnchor.MiddleLeft,
-                padding = new RectOffset(16, 8, 8, 8),
-                margin = new RectOffset(0, 0, 2, 2),
-                normal = { textColor = C_TEXT_DIM, background = null },
-                hover = { textColor = C_GOLD, background = null },
-                active = { textColor = C_ACCENT_ACTIVE, background = null }
+                padding = new RectOffset(16, 8, 10, 10),
+                margin = new RectOffset(0, 0, 0, 0),
+                normal = { textColor = OnyxTheme.C_TextDim, background = null },
+                hover = { textColor = OnyxTheme.C_Text, background = OnyxTheme.SelectionBox },
+                active = { textColor = OnyxTheme.C_Electric, background = OnyxTheme.SelectionBox },
+                border = new RectOffset(4, 4, 4, 4)
             };
 
-            _stylePill = new GUIStyle(GUI.skin.button);
-            _stylePill.alignment = TextAnchor.MiddleCenter;
-            _stylePill.fontStyle = FontStyle.Bold;
-            _stylePill.fixedHeight = 24;
-            _stylePill.fontSize = 10;
-            _stylePill.normal.textColor = Color.white;
-            _stylePill.padding = new RectOffset(4, 4, 2, 2);
-            _stylePill.margin = new RectOffset(0, 0, 2, 2);
-            _stylePill.border = new RectOffset(2, 2, 2, 2);
+            _stylePill = new GUIStyle(GUI.skin.button) {
+                alignment = TextAnchor.MiddleCenter,
+                fontStyle = FontStyle.Bold,
+                fixedHeight = 24, fontSize = 10,
+                normal = { textColor = Color.white },
+                border = new RectOffset(12, 12, 12, 12)
+            };
+
             _styleNotif = new GUIStyle(GUI.skin.label) {
                 fontSize = 13, fontStyle = FontStyle.Bold,
                 richText = true, alignment = TextAnchor.MiddleLeft,
@@ -390,87 +389,170 @@ namespace KingdomEnhanced.UI
             };
 
             _styleCredit = new GUIStyle(GUI.skin.label) {
-                fontSize = 9, alignment = TextAnchor.LowerRight,
-                normal = { textColor = C_TEXT_DIM }
+                fontSize = 9, alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = OnyxTheme.C_TextDim }
             };
 
             _styleLocked = new GUIStyle(GUI.skin.label) {
                 fontSize = 11, fontStyle = FontStyle.Italic,
                 richText = true,
-                padding = new RectOffset(0, 0, 4, 4),
-                normal = { textColor = C_LOCK }
+                padding = new RectOffset(4, 4, 4, 4),
+                normal = { textColor = OnyxTheme.C_Danger }
             };
 
             _styleCard = new GUIStyle(GUI.skin.box) {
-                padding = new RectOffset(8, 8, 8, 8),
-                margin = new RectOffset(4, 4, 4, 4)
+                padding = new RectOffset(10, 10, 10, 10),
+                margin = new RectOffset(0, 0, 8, 8),
+                normal = { background = OnyxTheme.CardBg },
+                border = new RectOffset(8, 8, 8, 8)
             };
         }
 
         #endregion
 
         #region UI RENDERING
+        private string _searchText = "";
         private void DrawWindow(int id)
         {
-            GUILayout.BeginVertical();
-
-            
-            GUILayout.BeginHorizontal(GUI.skin.box, GUILayout.Height(HEADER_H));
-            GUILayout.BeginVertical();
-            GUILayout.Space(8);
-            GUILayout.Label("Kingdom Enhanced", _styleTitle);
-            GUILayout.Label(MOD_VERSION, _styleSubtitle);
-            GUILayout.EndVertical();
-            GUILayout.EndHorizontal();
-
-            
             GUILayout.BeginHorizontal();
 
+            // --- LEFT SIDEBAR ---
+            GUILayout.BeginVertical(GUILayout.Width(200), GUILayout.ExpandHeight(true));
             
-            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(SIDEBAR_W));
+            // Sidebar Background (manually drawn since GUILayout box uses skin)
+            Rect sidebarRect = new Rect(0, 0, 200, _windowRect.height);
+            GUI.DrawTexture(sidebarRect, OnyxTheme.SidebarBg);
+
+            GUILayout.Space(15);
+            
+            // Header
+            GUILayout.BeginVertical();
+            GUILayout.Label("KINGDOM", _styleTitle);
+            GUILayout.Label("ENHANCED " + MOD_VERSION, _styleSubtitle);
+            GUILayout.EndVertical();
+            
+            GUILayout.Space(20);
+
+            // Search Bar
+            GUILayout.BeginHorizontal(_styleCard, GUILayout.Height(30));
+            _searchText = GUILayout.TextField(_searchText, new GUIStyle(GUI.skin.textField) { 
+                alignment = TextAnchor.MiddleLeft,
+                margin = new RectOffset(5, 5, 0, 0),
+                normal = { textColor = OnyxTheme.C_Text }
+            });
+            if (string.IsNullOrEmpty(_searchText)) GUI.Label(GUILayoutUtility.GetLastRect(), "  🔍 Search...", _styleDimText);
+            GUILayout.EndHorizontal();
+
             GUILayout.Space(10);
+
+            // Tabs
             for (int i = 0; i < TAB_LABELS.Length; i++)
             {
-                bool active = (int)_activeTab == i;
-                Color originalColor = GUI.color;
-                GUI.color = active ? C_GOLD : Color.white;
+                TabCategory cat = (TabCategory)i;
+                string icon = GetCategoryIcon(cat);
+                bool active = _activeTab == cat;
                 
-                if (GUILayout.Button(TAB_LABELS[i], _styleTabBtn, GUILayout.Height(32)))
+                GUI.color = active ? Color.white : new Color(1, 1, 1, 0.6f);
+                if (GUILayout.Button($" {icon}  {TAB_LABELS[i]}", _styleTabBtn, GUILayout.Height(38)))
                 {
-                    if ((int)_activeTab != i) _scrollPos[i] = Vector2.zero;
-                    _activeTab = (TabCategory)i;
+                    _activeTab = cat;
+                    _searchText = ""; // Clear search when switching tabs
                 }
-                    
-                GUI.color = originalColor;
             }
+
             GUILayout.FlexibleSpace();
             GUILayout.Label(CREATOR_CREDIT, _styleCredit);
-            GUILayout.Space(10);
+            GUILayout.Space(12);
             GUILayout.EndVertical();
 
-            
+            // --- MAIN CONTENT ---
             GUILayout.BeginVertical();
+            GUILayout.Space(10);
+            
             _scrollPos[(int)_activeTab] = GUILayout.BeginScrollView(_scrollPos[(int)_activeTab]);
-            DrawCurrentTab();
+            DrawDashboardContent();
             GUILayout.EndScrollView();
-            GUILayout.EndVertical();
 
-            
-            GUILayout.EndHorizontal();
-
-            
+            // Footer / Resize
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            Rect resizeRect = GUILayoutUtility.GetRect(20, 20);
-            GUI.Label(resizeRect, "➘", new GUIStyle(_styleDimText) { alignment = TextAnchor.LowerRight });
-            HandleResize(resizeRect);
+            Rect gripRect = GUILayoutUtility.GetRect(20, 20);
+            GUI.Label(gripRect, "➘", new GUIStyle(_styleDimText) { alignment = TextAnchor.LowerRight });
+            HandleResize(gripRect);
             GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
 
-            GUI.DragWindow(new Rect(0, 0, _windowRect.width, HEADER_H));
-            
+            GUILayout.EndHorizontal();
+
+            GUI.DragWindow(new Rect(0, 0, _windowRect.width, 40));
+            GUI.color = Color.white;
             if (GUI.changed) SaveToSettings();
+        }
+
+        private string GetCategoryIcon(TabCategory cat)
+        {
+            switch (cat)
+            {
+                case TabCategory.Main: return "🏠";
+                case TabCategory.Cheats: return "🔓";
+                case TabCategory.Lab: return "🧪";
+                case TabCategory.Hard: return "💀";
+                case TabCategory.Info: return "ℹ️";
+                case TabCategory.Settings: return "⚙️";
+                case TabCategory.Guide: return "📖";
+                case TabCategory.Report: return "📝";
+                default: return "●";
+            }
+        }
+
+        private void DrawDashboardContent()
+        {
+            if (_activeTab == TabCategory.Cheats && !CheatsUnlocked)
+            {
+                DrawCheatsGate();
+                return;
+            }
+
+            string lastSection = null;
+            bool inCard = false;
+
+            // Search Filter
+            var filtered = _features.Where(f => 
+                string.IsNullOrEmpty(_searchText) ? 
+                (f.Category == _activeTab) : 
+                (f.Label.IndexOf(_searchText, StringComparison.OrdinalIgnoreCase) >= 0 || 
+                 f.SearchTags.Any(t => t.IndexOf(_searchText, StringComparison.OrdinalIgnoreCase) >= 0))
+            );
+
+            foreach (var f in filtered)
+            {
+                if (f.Section != lastSection)
+                {
+                    if (inCard) GUILayout.EndVertical();
+                    GUILayout.BeginVertical(_styleCard);
+                    inCard = true;
+                    GuiHelper.DrawSection(f.Section.ToUpper(), _styleSectionLabel);
+                    lastSection = f.Section;
+                }
+
+                DrawFeatureRow(f);
+            }
+            
+            if (inCard) GUILayout.EndVertical();
+
+            // Special tabs logic
+            if (string.IsNullOrEmpty(_searchText))
+            {
+                switch (_activeTab)
+                {
+                    case TabCategory.Info: DrawInfoTab(); break;
+                    case TabCategory.Settings: DrawSettingsTab(); break;
+                    case TabCategory.Guide: DrawGuideTab(); break;
+                    case TabCategory.Report: DrawReportTab(); break;
+                    case TabCategory.Lab: DrawLabExtras(); break;
+                }
+            }
         }
 
         private void HandleResize(Rect grip)
@@ -676,14 +758,15 @@ namespace KingdomEnhanced.UI
 
         private void DrawFeatureRow(FeatureMeta f)
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(GUILayout.Height(30));
             
+            // Icon + Label
+            string icon = string.IsNullOrEmpty(f.Icon) ? " • " : f.Icon;
+            GUILayout.Label(icon, _styleBodyText, GUILayout.Width(25));
+            GUILayout.Label(f.Label, _styleBodyText, GUILayout.Width(160));
             
-            GUILayout.Label(f.Label, _styleBodyText, GUILayout.Width(180));
-            
-            
+            // Lock Check
             bool isLocked = f.IsLocked != null && f.IsLocked();
-            
             if (isLocked)
             {
                 string reason = f.GetLockReason != null ? f.GetLockReason() : "Locked";
@@ -692,46 +775,44 @@ namespace KingdomEnhanced.UI
                 return;
             }
 
-            
+            // Conflict Warning
             if (f.HasConflict != null && f.HasConflict())
             {
-                GUI.color = Color.yellow;
-                GUILayout.Label("!", _styleBodyText, GUILayout.Width(20));
+                GUI.color = OnyxTheme.C_Danger;
+                GUILayout.Label("!", _styleBodyText, GUILayout.Width(15));
                 GUI.color = Color.white;
             }
             else
             {
-                GUILayout.Space(24);
+                GUILayout.Space(19);
             }
 
-            
+            // Control Element
             if (f.GetFloatValue != null)
             {
-                
                 float val = f.GetFloatValue();
-                GUILayout.Label($"{val:F1}", _styleBodyText, GUILayout.Width(40));
+                GUILayout.Label($"{val:F1}", _styleBodyText, GUILayout.Width(35));
                 float newVal = GUILayout.HorizontalSlider(val, f.MinVal, f.MaxVal, GUILayout.ExpandWidth(true));
                 if (Math.Abs(newVal - val) > 0.01f) f.SetFloatValue(newVal);
             }
             else if (f.OnAction != null)
             {
-                
-                if (GUILayout.Button("Apply", _styleBtn, GUILayout.Width(100))) f.OnAction();
+                if (GUILayout.Button("Apply", _styleBtn, GUILayout.Width(80))) f.OnAction();
             }
             else if (f.GetValue != null)
             {
-                
                 bool val = f.GetValue();
-
-                GUI.backgroundColor = val ? C_ON : C_OFF;
-                if (GUILayout.Button(val ? "ON" : "OFF", _stylePill, GUILayout.Width(60)))
+                GUIStyle toggleStyle = new GUIStyle(_stylePill);
+                toggleStyle.normal.background = val ? OnyxTheme.ToggleOn : OnyxTheme.ToggleOff;
+                
+                if (GUILayout.Button(val ? "ON" : "OFF", toggleStyle, GUILayout.Width(55)))
                 {
                     f.SetValue(!val);
                 }
-                GUI.backgroundColor = Color.white;
             }
 
             GUILayout.EndHorizontal();
+            GUILayout.Space(2);
         }
 
         private void DrawCheatsGate()
