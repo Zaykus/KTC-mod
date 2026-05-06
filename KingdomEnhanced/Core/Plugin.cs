@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
@@ -67,6 +67,7 @@ namespace KingdomEnhanced.Core
 
             var harmony = new Harmony("kingdomenhanced.harmony");
             harmony.PatchAll();
+            UnitCachePatches.ApplyAll(harmony);
             LabPatches.ApplyAll(harmony);
             LogSource.LogInfo("Kingdom Enhanced ready. Waiting for player spawn...");
         }

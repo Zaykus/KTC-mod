@@ -24,6 +24,6 @@ KTC Data
 logOutbut.log
 CHANGELOG.md
 diff.txt
-
+Releases
 # Local developer config (do not commit)
 Directory.Build.props

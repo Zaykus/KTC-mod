@@ -26,6 +26,8 @@ namespace KingdomEnhanced.Features
 
         void Update()
         {
+            UnitCacheManager.CheckColdBoot(); // Phase 2.5: Cold Boot Initialization
+
             _campTimer += Time.deltaTime;
             if (_campTimer >= 5f) { _campTimer = 0f; BoostCamps(); }
             
@@ -45,36 +47,33 @@ namespace KingdomEnhanced.Features
 
         #region Unit Buff Hooks
         private void ApplyUnitBuffs() {
-            var berserkers = FindObjectsByType<Berserker>(FindObjectsSortMode.None);
-            foreach (var b in berserkers) {
+            foreach (var b in UnitCacheManager.Berserkers) {
                 if (b != null && b.gameObject.activeInHierarchy) {
                     KingdomEnhanced.Hooks.LabPatches.BerserkerPostfix(b);
                 }
             }
             
-            var ninjas = FindObjectsByType<Ninja>(FindObjectsSortMode.None);
-            foreach (var n in ninjas) {
+            foreach (var n in UnitCacheManager.Ninjas) {
                 if (n != null && n.gameObject.activeInHierarchy) {
                     KingdomEnhanced.Hooks.LabPatches.NinjaPostfix(n);
                 }
             }
-            var knights = FindObjectsByType<Knight>(FindObjectsSortMode.None);
-            foreach (var k in knights) {
+            foreach (var k in UnitCacheManager.Knights) {
                 if (k != null && k.gameObject.activeInHierarchy) {
                     var d = k.GetComponent<Damageable>();
                     if (d != null && d.initialHitPoints > 0) {
-                        int id = k.GetInstanceID();
-                        if (!_knightBaseHp.ContainsKey(id)) {
-                            _knightBaseHp[id] = d.initialHitPoints;
+                        var md = ModData.GetOrAdd(k.gameObject);
+                        if (md.knightBaseHp == 0) {
+                            md.knightBaseHp = d.initialHitPoints;
                         }
 
                         if (ModMenu.BetterKnight) {
                             d.initialHitPoints = 50;
-                            if (d.hitPoints < 50) d.hitPoints = 50; // Give them the health if buffed
+                            if (d.hitPoints < 50) d.hitPoints = 50; 
                         } else {
-                            if (_knightBaseHp.TryGetValue(id, out int baseHp)) {
-                                d.initialHitPoints = baseHp;
-                                if (d.hitPoints > baseHp) d.hitPoints = baseHp; // Revert health if un-buffed
+                            if (md.knightBaseHp > 0) {
+                                d.initialHitPoints = md.knightBaseHp;
+                                if (d.hitPoints > md.knightBaseHp) d.hitPoints = md.knightBaseHp; 
                             }
                         }
                     }
@@ -82,103 +81,74 @@ namespace KingdomEnhanced.Features
             }
         }
 
-        private static readonly Dictionary<int, int> _knightBaseHp = new();
-
-        private static readonly Dictionary<int, float> _workerBaseSpeed = new();
-        private static readonly Dictionary<int, float> _workerBaseWorkTime = new();
-        private static readonly Collider2D[] _weaponCheckColliders = new Collider2D[16];
-
         private void ApplyBuilderBuffs() {
-            var workers = FindObjectsByType<Worker>(FindObjectsSortMode.None);
-            bool boostOn = DifficultyRules.CanUseInstantConstruction();
+            var workers = UnitCacheManager.Workers;
+            var ballistas = UnitCacheManager.Ballistas;
+            var catapults = UnitCacheManager.Catapults;
 
-            // Cache vanilla values only when the boost is OFF so we capture true base values.
-            // If boost is on, workers may already have boosted values — don't cache those.
-            if (!boostOn) {
-                foreach (var w in workers) {
-                    if (w == null) continue;
-                    int id = w.GetInstanceID();
-                    if (!_workerBaseSpeed.ContainsKey(id)) {
-                        _workerBaseSpeed[id]    = w.runSpeed;
-                        _workerBaseWorkTime[id] = w.workTime;
-                    }
+            foreach (var w in workers) {
+                if (w == null) continue;
+                var md = ModData.GetOrAdd(w.gameObject);
+                
+                if (md.workerBaseSpeed == 0f) {
+                    md.workerBaseSpeed    = w.runSpeed;
+                    md.workerBaseWorkTime = w.workTime;
                 }
-            }
 
-            if (!boostOn) {
-                // Revert: restore exact cached vanilla values — no multipliers
-                foreach (var w in workers) {
-                    if (w == null) continue;
-                    int id = w.GetInstanceID();
-                    if (_workerBaseSpeed.TryGetValue(id, out float baseSp) &&
-                        _workerBaseWorkTime.TryGetValue(id, out float baseWt)) {
-                        w.runSpeed = baseSp;
-                        w.workTime = baseWt;
-                    }
+                // 1. Movement Speed
+                if (ModMenu.HyperBuilders) {
+                    w.runSpeed = md.workerBaseSpeed * ModMenu.BuilderSpeedMult;
+                } else {
+                    w.runSpeed = md.workerBaseSpeed;
                 }
-            } else {
-                // Fetch weapons explicitly once per cycle (cheap & reliable)
-                var ballistas = FindObjectsByType<Ballista>(FindObjectsSortMode.None);
-                var catapults = FindObjectsByType<Catapult>(FindObjectsSortMode.None);
 
-                // Boost: cache first, then apply instant construction values
-                foreach (var w in workers) {
-                    if (w == null) continue;
-                    int id = w.GetInstanceID();
-                    // Cache before overwriting (only if not yet cached)
-                    if (!_workerBaseSpeed.ContainsKey(id)) {
-                        _workerBaseSpeed[id]    = w.runSpeed;
-                        _workerBaseWorkTime[id] = w.workTime;
-                    }
-                    w.runSpeed = 8.0f;
+                // 2. Work Efficiency / Manning Weapons
+                bool isBallista = false;
+                bool isCatapult = false;
+                bool isTower = false;
 
-                    bool isManningWeapon = false;
+                if (w.transform.parent != null) {
+                    string pName = w.transform.parent.name;
+                    if (pName.IndexOf("ballista", StringComparison.OrdinalIgnoreCase) >= 0) isBallista = true;
+                    else if (pName.IndexOf("catapult", StringComparison.OrdinalIgnoreCase) >= 0) isCatapult = true;
+                    else if (pName.IndexOf("tower", StringComparison.OrdinalIgnoreCase) >= 0) isTower = true;
+                }
 
-                    // 1. Check if they are currently stationary (manning a station)
-                    if (w.IsStationary()) {
-                        isManningWeapon = true;
-                    }
-
-                    // 2. Fast parent name check
-                    if (!isManningWeapon && w.transform.parent != null) {
-                        string pName = w.transform.parent.name;
-                        if (pName.IndexOf("ballista", StringComparison.OrdinalIgnoreCase) >= 0 || 
-                            pName.IndexOf("tower", StringComparison.OrdinalIgnoreCase) >= 0 || 
-                            pName.IndexOf("catapult", StringComparison.OrdinalIgnoreCase) >= 0) {
-                            isManningWeapon = true;
-                        }
-                    }
-
-                    // 3. Robust distance checks directly against all weapon instances
-                    if (!isManningWeapon) {
-                        Vector3 pos = w.transform.position;
-                        if (ballistas != null) {
-                            foreach (var b in ballistas) {
-                                if (b != null && Vector3.Distance(pos, b.transform.position) < 8.0f) {
-                                    isManningWeapon = true; break;
-                                }
-                            }
-                        }
-                        if (!isManningWeapon && catapults != null) {
-                            foreach (var c in catapults) {
-                                if (c != null && Vector3.Distance(pos, c.transform.position) < 8.0f) {
-                                    isManningWeapon = true; break;
-                                }
+                if (!isBallista && !isCatapult && !isTower) {
+                    Vector3 pos = w.transform.position;
+                    if (ballistas != null) {
+                        foreach (var b in ballistas) {
+                            if (b != null && Vector3.Distance(pos, b.transform.position) < 8.0f) {
+                                isBallista = true; break;
                             }
                         }
                     }
+                    if (!isBallista && catapults != null) {
+                        foreach (var c in catapults) {
+                            if (c != null && Vector3.Distance(pos, c.transform.position) < 8.0f) {
+                                isCatapult = true; break;
+                            }
+                        }
+                    }
+                }
 
-                    if (isManningWeapon) {
-                        if (_workerBaseWorkTime.TryGetValue(id, out float baseWt)) w.workTime = baseWt;
+                if (isBallista || isCatapult || isTower) {
+                    float timeMult = 1.0f;
+                    if (isBallista && ModMenu.BallistaBoost) timeMult = ModMenu.BallistaReloadMult;
+                    if (isCatapult && ModMenu.CatapultBoost) timeMult = ModMenu.CatapultReloadMult;
+                    w.workTime = md.workerBaseWorkTime * timeMult;
+                } else {
+                    if (ModMenu.HyperBuilders) {
+                        w.workTime = md.workerBaseWorkTime * ModMenu.BuilderEfficiencyMult;
                     } else {
-                        w.workTime = 0.001f;
+                        w.workTime = md.workerBaseWorkTime;
                     }
                 }
             }
         }
 
         private void BoostCamps() {
-            var camps = UnityEngine.Object.FindObjectsByType<BeggarCamp>(FindObjectsSortMode.None);
+            var camps = UnitCacheManager.BeggarCamps;
             bool larger = ModMenu.LargerCamps;
             foreach (var camp in camps) {
                 if (camp != null) { 
@@ -191,8 +161,23 @@ namespace KingdomEnhanced.Features
 
         #region Actions & Cheats
 
+        public static void ClearCoins()
+        {
+            var coins = UnityEngine.Object.FindObjectsByType<DroppableCurrency>(FindObjectsSortMode.None);
+            int count = 0;
+            foreach (var c in coins)
+            {
+                if (c != null && c.gameObject.activeInHierarchy)
+                {
+                    UnityEngine.Object.Destroy(c.gameObject);
+                    count++;
+                }
+            }
+            ModMenu.Speak($"Cleared {count} coins from the ground!", ModMenu.C_ON);
+        }
+
         public static void RecruitBeggars() {
-            var beggars = UnityEngine.Object.FindObjectsByType<Beggar>(FindObjectsSortMode.None);
+            var beggars = UnitCacheManager.Beggars;
             var player = Managers.Inst?.kingdom?.GetPlayer(0);
 
             if (player == null || player.wallet == null) {
@@ -251,7 +236,7 @@ namespace KingdomEnhanced.Features
             var toolPrefab = FindTool(toolName);
             if (toolPrefab == null) return;
 
-            var peasants = FindObjectsByType<Peasant>(FindObjectsSortMode.None);
+            var peasants = UnitCacheManager.Peasants;
             int count = 0;
             foreach (var p in peasants) {
                 if (p != null && p.gameObject.activeInHierarchy) {
@@ -308,9 +293,12 @@ namespace KingdomEnhanced.Features
 
         public static void KillAllEnemies()
         {
-            var enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+            var enemies = UnitCacheManager.Enemies;
             int count = 0;
-            foreach (var e in enemies)
+            
+            // Convert to list before destroying to avoid modifying collection while iterating
+            var toDestroy = new List<Enemy>(enemies);
+            foreach (var e in toDestroy)
             {
                 if (e != null && e.gameObject.activeInHierarchy)
                 {
@@ -324,9 +312,12 @@ namespace KingdomEnhanced.Features
 
         public static void DestroyAllPortals()
         {
-            var portals = FindObjectsByType<Portal>(FindObjectsSortMode.None);
+            var portals = UnitCacheManager.Portals;
             int count = 0;
-            foreach (var p in portals)
+            
+            // Convert to list before destroying
+            var toDestroy = new List<Portal>(portals);
+            foreach (var p in toDestroy)
             {
                 if (p != null && p.gameObject.activeInHierarchy)
                 {
@@ -345,13 +336,16 @@ namespace KingdomEnhanced.Features
             var player = Managers.Inst?.kingdom?.GetPlayer(0);
             if (player == null) return;
             
+            // Phase 3 Bug Fix: Base the spawn logic purely on the max limit 
+            // without capping it negatively against the entire kingdom population.
             int max = ModMenu.RecruitCap > 0 ? ModMenu.RecruitCap : 50;
-            var current = FindObjectsByType<Peasant>(FindObjectsSortMode.None).Length + FindObjectsByType<Archer>(FindObjectsSortMode.None).Length + FindObjectsByType<Worker>(FindObjectsSortMode.None).Length + FindObjectsByType<Knight>(FindObjectsSortMode.None).Length;
-            int toSpawn = max - current;
+            int currentPeasants = UnitCacheManager.Peasants.Count;
+            
+            int toSpawn = max - currentPeasants;
             
             if (toSpawn <= 0)
             {
-                ModMenu.Speak("Army is already at cap.", ModMenu.C_LOCK);
+                ModMenu.Speak($"Army cheat cap reached ({max} peasants).", ModMenu.C_LOCK);
                 return;
             }
 
@@ -462,7 +456,8 @@ namespace KingdomEnhanced.Features
             var player = Managers.Inst?.kingdom?.GetPlayer(0);
             if (player == null) return;
 
-            Vector3 pos = player.transform.position + new Vector3(25f, 0, 0); 
+            float faceDir = (player.transform.localScale.x < 0) ? -1f : 1f;
+            Vector3 pos = player.transform.position + new Vector3(10f * faceDir, 0, 0);
             for (int i = 0; i < amount; i++)
             {
                 UnityEngine.Object.Instantiate(prefab.gameObject, pos + new Vector3(UnityEngine.Random.Range(-2f, 2f), 0, 0), Quaternion.identity);

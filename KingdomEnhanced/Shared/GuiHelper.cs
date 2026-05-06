@@ -54,9 +54,9 @@ namespace KingdomEnhanced.Shared
 
         public static void DrawSection(string title, GUIStyle style)
         {
-            GUILayout.Space(12f);
+            GUILayout.Space(18f);
             GUILayout.Label(title, style);
-            GUILayout.Space(4f);
+            GUILayout.Space(6f);
         }
 
         public static void DrawSlider(string label, ref float value, float min, float max, float defaultValue,
@@ -68,9 +68,7 @@ namespace KingdomEnhanced.Shared
             GUILayout.Label(label, labelStyle);
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("↺ Reset", _sliderRangeStyle, GUILayout.Width(52))) value = defaultValue;
-            GUI.color = KingdomEnhanced.UI.OnyxTheme.C_Electric;
             GUILayout.Label(value.ToString("F1") + "x", dimStyle, GUILayout.Width(42));
-            GUI.color = Color.white;
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
