@@ -1,4 +1,4 @@
-﻿using BepInEx.Configuration;
+using BepInEx.Configuration;
 using UnityEngine;
 
 namespace KingdomEnhanced.Core
@@ -32,6 +32,7 @@ namespace KingdomEnhanced.Core
         public static ConfigEntry<float> ArtemisArrowDamageMult;
         public static ConfigEntry<float> CoinIncomeMult;
         public static ConfigEntry<float> BagDropMult;
+        public static ConfigEntry<float> SpawnUnitCount;
         
         
         public static ConfigEntry<bool> HyperBuilders;
@@ -52,7 +53,15 @@ namespace KingdomEnhanced.Core
         public static ConfigEntry<bool> FarmOutputBoost;
         public static ConfigEntry<bool> TowerFireBoost;
         public static ConfigEntry<bool> BallistaBoost;
+        public static ConfigEntry<float> BallistaReloadMult;
+        public static ConfigEntry<float> BallistaFlightMult;
+        public static ConfigEntry<bool> CatapultBoost;
+        public static ConfigEntry<float> CatapultReloadMult;
+        public static ConfigEntry<float> CatapultFlightMult;
         public static ConfigEntry<bool> InstantCastle;
+
+        public static ConfigEntry<float> BuilderSpeedMult;
+        public static ConfigEntry<float> BuilderWorkMult;
 
         
         public static ConfigEntry<bool> EnableSizeHack;
@@ -101,6 +110,7 @@ namespace KingdomEnhanced.Core
             ArtemisArrowDamageMult = Config.Bind("3. Cheats", "ArtemisArrowDamageMult", 1.0f, "Artemis Bow arrow damage multiplier");
             CoinIncomeMult    = Config.Bind("3. Cheats", "CoinIncomeMult", 1.0f, "Coin income multiplier (0.25-4.0)");
             BagDropMult       = Config.Bind("3. Cheats", "BagDropMult", 1.0f, "Bag drop multiplier (1-10)");
+            SpawnUnitCount    = Config.Bind("3. Cheats", "SpawnUnitCount", 1.0f, "Number of units to spawn");
 
             
             HyperBuilders     = Config.Bind("4. Development", "HyperBuilders", false, "Instant construction");
@@ -122,7 +132,15 @@ namespace KingdomEnhanced.Core
             FarmOutputBoost    = Config.Bind("4. Development", "FarmOutputBoost", false, "Farm output boost x2");
             TowerFireBoost     = Config.Bind("4. Development", "TowerFireBoost", false, "Tower fire rate boost x2");
             BallistaBoost      = Config.Bind("4. Development", "BallistaBoost", false, "Ballista power boost x2");
+            BallistaReloadMult = Config.Bind("4. Development", "BallistaReloadMult", 1.0f, "Ballista reload speed multiplier");
+            BallistaFlightMult = Config.Bind("4. Development", "BallistaFlightMult", 1.0f, "Ballista projectile speed multiplier");
+            CatapultBoost      = Config.Bind("4. Development", "CatapultBoost", false, "Catapult reload speed boost x3");
+            CatapultReloadMult = Config.Bind("4. Development", "CatapultReloadMult", 1.0f, "Catapult reload speed multiplier");
+            CatapultFlightMult = Config.Bind("4. Development", "CatapultFlightMult", 1.0f, "Catapult projectile speed multiplier");
             InstantCastle      = Config.Bind("4. Development", "InstantCastle", false, "Instant castle upgrade completion");
+
+            BuilderSpeedMult   = Config.Bind("4. Development", "BuilderSpeedMult", 1.0f, "Builder movement speed multiplier");
+            BuilderWorkMult    = Config.Bind("4. Development", "BuilderWorkMult", 1.0f, "Builder efficiency multiplier (lower is faster)");
 
             
             EnableSizeHack    = Config.Bind("5. Player Hack", "EnableSizeHack", false, "Enable player scaling");

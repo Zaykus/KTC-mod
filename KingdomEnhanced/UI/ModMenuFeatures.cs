@@ -263,11 +263,21 @@ namespace KingdomEnhanced.UI
                 () => ArmyManager.SpawnEnemy(EnemyType.Archer, (int)ModMenu.SpawnUnitCount),
                 () => !ModMenu.CheatsUnlocked, () => "Locked"));
 
+            list.Add(Button("clear_coins", "Clear Dropped Coins", TabCategory.Cheats, "World",
+                "Removes all dropped coins/gems on the ground to improve performance.",
+                () => ArmyManager.ClearCoins()));
+
             list.Add(Toggle("hyper_builders", "Instant Construction", TabCategory.Cheats, "Builders",
                 "Buildings complete in one frame.",
                 () => ModMenu.HyperBuilders, v => ModMenu.HyperBuilders = v,
                 () => !ModMenu.CheatsUnlocked, null,
                 () => ModMenu.HyperBuilders && ModMenu.LargerCamps));
+            list.Add(Slider("builder_speed", "Builder Speed", TabCategory.Cheats, "Builders",
+                "Multiplies builder movement speed.",
+                () => ModMenu.BuilderSpeedMult, v => ModMenu.BuilderSpeedMult = v, 0.01f, 10.0f));
+            list.Add(Slider("builder_work", "Builder Efficiency", TabCategory.Cheats, "Builders",
+                "Scales builder work time (lower is faster).",
+                () => ModMenu.BuilderEfficiencyMult, v => ModMenu.BuilderEfficiencyMult = v, 0.0001f, 3.0f));
             list.Add(Toggle("larger_camps", "Expand Vagrant Camps", TabCategory.Cheats, "Builders",
                 "Increases the maximum vagrant camp population.",
                 () => ModMenu.LargerCamps, v => ModMenu.LargerCamps = v,
@@ -323,8 +333,24 @@ namespace KingdomEnhanced.UI
                 "Increases tower fire rate.",
                 () => ModMenu.TowerFireBoost, v => ModMenu.TowerFireBoost = v));
             list.Add(Toggle("ballista_boost", "Ballista Boost", TabCategory.Lab, "World",
-                "Increases ballista damage/speed.",
+                "Enables ballista stat overrides.",
                 () => ModMenu.BallistaBoost, v => ModMenu.BallistaBoost = v));
+            list.Add(Slider("ballista_reload", "Ballista Reload", TabCategory.Lab, "World",
+                "Scales ballista reload time.",
+                () => ModMenu.BallistaReloadMult, v => ModMenu.BallistaReloadMult = v, 0.001f, 2.0f));
+            list.Add(Slider("ballista_flight", "Ballista Flight Speed", TabCategory.Lab, "World",
+                "Multiplies ballista bolt speed.",
+                () => ModMenu.BallistaFlightMult, v => ModMenu.BallistaFlightMult = v, 1.0f, 5.0f));
+
+            list.Add(Toggle("catapult_boost", "Catapult Boost", TabCategory.Lab, "World",
+                "Enables catapult stat overrides.",
+                () => ModMenu.CatapultBoost, v => ModMenu.CatapultBoost = v));
+            list.Add(Slider("catapult_reload", "Catapult Reload", TabCategory.Lab, "World",
+                "Scales catapult reload time.",
+                () => ModMenu.CatapultReloadMult, v => ModMenu.CatapultReloadMult = v, 0.001f, 2.0f));
+            list.Add(Slider("catapult_flight", "Catapult Flight Speed", TabCategory.Lab, "World",
+                "Multiplies catapult stone speed.",
+                () => ModMenu.CatapultFlightMult, v => ModMenu.CatapultFlightMult = v, 1.0f, 5.0f));
             list.Add(Toggle("instant_castle", "Instant Castle Upgrade", TabCategory.Lab, "World",
                 "Castle upgrades finish immediately.",
                 () => ModMenu.InstantCastle, v => ModMenu.InstantCastle = v));

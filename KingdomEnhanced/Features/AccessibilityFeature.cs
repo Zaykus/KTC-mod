@@ -44,10 +44,6 @@ namespace KingdomEnhanced.Features
         private float _lastPayableCheckTime = 0f;
         private const float PAYABLE_CHECK_INTERVAL = 0.15f; 
 
-        private Castle[] _cachedCastles;
-        private float _castleCacheTimer = 0f;
-        private const float CASTLE_CACHE_INTERVAL = 2.0f; 
-
         private static readonly Regex _endsWithDigitRegex = new Regex(@"\d$", RegexOptions.Compiled);
         private static readonly Regex _endsWithUpperRegex = new Regex(@"[A-Z]$", RegexOptions.Compiled);
 
@@ -291,21 +287,12 @@ namespace KingdomEnhanced.Features
 
         Castle FindClosestCastle()
         {
-            if (_cachedCastles == null || Time.time > _castleCacheTimer + 5.0f) 
-            {
-                _cachedCastles = FindObjectsByType<Castle>(FindObjectsSortMode.None);
-                _castleCacheTimer = Time.time;
-            }
-
-            if (_cachedCastles == null || _cachedCastles.Length == 0) return null;
-
             Castle closest = null;
             float closestDist = float.MaxValue;
             float playerX = _player.transform.position.x;
 
-            for (int i = 0; i < _cachedCastles.Length; i++)
+            foreach (var c in UnitCacheManager.Castles)
             {
-                var c = _cachedCastles[i];
                 if (c == null) continue;
                 float dist = Mathf.Abs(c.transform.position.x - playerX);
                 if (dist < closestDist)
@@ -348,9 +335,6 @@ namespace KingdomEnhanced.Features
         
         private float _announcerCooldown = 0f;
 
-        private BeggarCamp[] _cachedCamps = null;
-        private Wall[] _cachedWalls = null;
-
         void UpdateZones()
         {
             if (_player == null) return;
@@ -361,14 +345,11 @@ namespace KingdomEnhanced.Features
             float wBox = 0.5f;
 
             float minWallX = float.MaxValue, maxWallX = float.MinValue;
-            if (_cachedWalls == null || UnityEngine.Random.value < 0.2f) 
-                _cachedWalls = FindObjectsByType<Wall>(FindObjectsSortMode.None);
-
-            if (_cachedWalls != null && _cachedWalls.Length > 0)
+            
+            if (UnitCacheManager.Walls.Count > 0)
             {
-                for (int i = 0; i < _cachedWalls.Length; i++)
+                foreach (var w in UnitCacheManager.Walls)
                 {
-                    var w = _cachedWalls[i];
                     if (w == null) continue;
                     float wx = w.transform.position.x;
                     if (wx < minWallX) minWallX = wx;
@@ -394,14 +375,11 @@ namespace KingdomEnhanced.Features
             }
 
             _campIntervals.Clear();
-            if (_cachedCamps == null)
-                _cachedCamps = GameObject.FindObjectsByType<BeggarCamp>(FindObjectsSortMode.None);
 
-            if (_cachedCamps != null)
+            if (UnitCacheManager.BeggarCamps.Count > 0)
             {
-                for (int i = 0; i < _cachedCamps.Length; i++)
+                foreach (var camp in UnitCacheManager.BeggarCamps)
                 {
-                    var camp = _cachedCamps[i];
                     if (camp == null) continue;
                     
                     float cx = camp.transform.position.x;
@@ -497,6 +475,8 @@ namespace KingdomEnhanced.Features
             }
         }
 
+        private GUIStyle _debugLabelStyle;
+
         void OnGUI()
         {
             if (!ModMenu.DebugZones) return;
@@ -506,6 +486,14 @@ namespace KingdomEnhanced.Features
                 cam = UnityEngine.Object.FindFirstObjectByType<Camera>();
 
             if (cam == null) return;
+
+            if (_debugLabelStyle == null)
+            {
+                _debugLabelStyle = new GUIStyle(GUI.skin.label) { 
+                    fontSize = 11, alignment = TextAnchor.MiddleCenter, 
+                    normal = { textColor = Color.white }, fontStyle = FontStyle.Bold 
+                };
+            }
 
             foreach (var zone in _debugZones)
             {
@@ -527,18 +515,12 @@ namespace KingdomEnhanced.Features
                 GUI.Box(screenRect, GUIContent.none, GUI.skin.box);
                 
                 
-                GUIStyle style = new GUIStyle(GUI.skin.label) { 
-                    fontSize = 11, alignment = TextAnchor.MiddleCenter, 
-                    normal = { textColor = Color.white }, fontStyle = FontStyle.Bold 
-                };
-                
-                
                 GUI.color = Color.black;
-                GUI.Label(new Rect(screenRect.x - 49, screenRect.yMax + 1, width + 100, 20), zone.Label, style);
+                GUI.Label(new Rect(screenRect.x - 49, screenRect.yMax + 1, width + 100, 20), zone.Label, _debugLabelStyle);
                 
                 
                 GUI.color = zone.Color;
-                GUI.Label(new Rect(screenRect.x - 50, screenRect.yMax, width + 100, 20), zone.Label, style);
+                GUI.Label(new Rect(screenRect.x - 50, screenRect.yMax, width + 100, 20), zone.Label, _debugLabelStyle);
                 
                 GUI.backgroundColor = prevBg;
                 GUI.color = prevC;
@@ -547,14 +529,11 @@ namespace KingdomEnhanced.Features
 
         private BeggarCamp FindClosestCamp()
         {
-            
-            var camps = GameObject.FindObjectsByType<BeggarCamp>(FindObjectsSortMode.None);
-            if (camps == null || camps.Length == 0) return null;
-            
             BeggarCamp closest = null;
             float minDst = float.MaxValue;
-            foreach (var c in camps)
+            foreach (var c in UnitCacheManager.BeggarCamps)
             {
+                if (c == null) continue;
                 float d = Mathf.Abs(c.transform.position.x - _player.transform.position.x);
                 if (d < minDst) { minDst = d; closest = c; }
             }

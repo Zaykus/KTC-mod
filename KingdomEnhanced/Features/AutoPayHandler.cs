@@ -27,6 +27,9 @@ namespace KingdomEnhanced.Features
 #endif
         }
 
+#if IL2CPP
+        [HideFromIl2Cpp]
+#endif
         private IEnumerator PayRoutine(Payable payable, int amount, Player player)
         {
             yield return null;

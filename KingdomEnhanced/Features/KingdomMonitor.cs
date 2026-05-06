@@ -44,8 +44,6 @@ namespace KingdomEnhanced.Features
         private int _vagrantCount;
         private int _farmerCount;
         private int _pikemanCount;
-        private int _coinsCount;
-        private int _gemsCount;
         private float _nextCensusTime;
         private int _censusStep = 0;
 
@@ -291,17 +289,15 @@ namespace KingdomEnhanced.Features
                 {
                     switch (_censusStep)
                     {
-                        case 0: _archerCount = FindObjectsByType<Archer>(FindObjectsSortMode.None).Length; _strArcher = $"Archers: {_archerCount}"; break;
-                        case 1: _workerCount = FindObjectsByType<Worker>(FindObjectsSortMode.None).Length; _strWorker = $"Workers: {_workerCount}"; break;
-                        case 2: _peasantCount = FindObjectsByType<Peasant>(FindObjectsSortMode.None).Length; _strPeasant = $"Peasants: {_peasantCount}"; break;
-                        case 3: _knightCount = FindObjectsByType<Knight>(FindObjectsSortMode.None).Length; _strKnight = $"Knights: {_knightCount}"; break;
-                        case 4: _vagrantCount = FindObjectsByType<Beggar>(FindObjectsSortMode.None).Length; _strVagrant = $"Vagrants: {_vagrantCount}"; break;
-                        case 5: _farmerCount = FindObjectsByType<Farmer>(FindObjectsSortMode.None).Length; _strFarmer = $"Farmers: {_farmerCount}"; break;
-                        case 6: _pikemanCount = FindObjectsByType<Pikeman>(FindObjectsSortMode.None).Length; _strPikeman = $"Pikemen: {_pikemanCount}"; break;
+                        case 0: _archerCount = UnitCacheManager.Archers.Count; _strArcher = $"Archers: {_archerCount}"; break;
+                        case 1: _workerCount = UnitCacheManager.Workers.Count; _strWorker = $"Workers: {_workerCount}"; break;
+                        case 2: _peasantCount = UnitCacheManager.Peasants.Count; _strPeasant = $"Peasants: {_peasantCount}"; break;
+                        case 3: _knightCount = UnitCacheManager.Knights.Count; _strKnight = $"Knights: {_knightCount}"; break;
+                        case 4: _vagrantCount = UnitCacheManager.Beggars.Count; _strVagrant = $"Vagrants: {_vagrantCount}"; break;
+                        case 5: _farmerCount = UnitCacheManager.Farmers.Count; _strFarmer = $"Farmers: {_farmerCount}"; break;
+                        case 6: _pikemanCount = UnitCacheManager.Pikemen.Count; _strPikeman = $"Pikemen: {_pikemanCount}"; break;
                         case 7:
-                            if (_enemyManager != null && _enemyManager.AllEnemies != null) {
-                                _enemyCount = _enemyManager.AllEnemies.Count;
-                            }
+                            _enemyCount = UnitCacheManager.Enemies.Count;
                             _strGreed = $"Greed: {_enemyCount}";
                             break;
                         case 8:
@@ -329,7 +325,10 @@ namespace KingdomEnhanced.Features
                             break;
                     }
                 } 
-                catch { }
+                catch (Exception ex)
+                {
+                    KingdomEnhanced.Core.Plugin.Instance.LogSource.LogError($"[KingdomMonitor] Census Error: {ex.Message}");
+                }
 
                 _censusStep++;
                 if (_censusStep > 9) _censusStep = 0;

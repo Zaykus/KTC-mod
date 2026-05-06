@@ -94,7 +94,15 @@ namespace KingdomEnhanced.UI
         public static bool  FarmOutputBoost  = false;
         public static bool  TowerFireBoost   = false;
         public static bool  BallistaBoost    = false;
+        public static float BallistaReloadMult = 1.0f;
+        public static float BallistaFlightMult = 1.0f;
+        public static bool  CatapultBoost    = false;
+        public static float CatapultReloadMult = 1.0f;
+        public static float CatapultFlightMult = 1.0f;
         public static bool  InstantCastle    = false;
+
+        public static float BuilderSpeedMult = 1.0f;
+        public static float BuilderEfficiencyMult = 1.0f;
 
         public static float SteedSpeedMult   = 1.0f;
         public static bool  ChargeDmgBoost   = false;
@@ -498,6 +506,7 @@ namespace KingdomEnhanced.UI
             ArtemisArrowDamageMult = Settings.ArtemisArrowDamageMult.Value;
             CoinIncomeMult        = Settings.CoinIncomeMult.Value;
             BagDropMult           = Settings.BagDropMult.Value;
+            SpawnUnitCount        = Settings.SpawnUnitCount.Value;
             HyperBuilders         = Settings.HyperBuilders.Value;
             LargerCamps           = Settings.LargerCamps.Value;
             BetterKnight          = Settings.BetterKnight.Value;
@@ -516,7 +525,14 @@ namespace KingdomEnhanced.UI
             FarmOutputBoost       = Settings.FarmOutputBoost.Value;
             TowerFireBoost        = Settings.TowerFireBoost.Value;
             BallistaBoost         = Settings.BallistaBoost.Value;
+            BallistaReloadMult    = Settings.BallistaReloadMult.Value;
+            BallistaFlightMult    = Settings.BallistaFlightMult.Value;
+            CatapultBoost         = Settings.CatapultBoost.Value;
+            CatapultReloadMult    = Settings.CatapultReloadMult.Value;
+            CatapultFlightMult    = Settings.CatapultFlightMult.Value;
             InstantCastle         = Settings.InstantCastle.Value;
+            BuilderSpeedMult      = Settings.BuilderSpeedMult.Value;
+            BuilderEfficiencyMult = Settings.BuilderWorkMult.Value;
             EnableSizeHack        = Settings.EnableSizeHack.Value;
             TargetSize            = Settings.TargetSize.Value;
             SteedSpeedMult        = Settings.SteedSpeedMult.Value;
@@ -551,6 +567,7 @@ namespace KingdomEnhanced.UI
             Settings.ArtemisArrowDamageMult.Value = ArtemisArrowDamageMult;
             Settings.CoinIncomeMult.Value        = CoinIncomeMult;
             Settings.BagDropMult.Value           = BagDropMult;
+            Settings.SpawnUnitCount.Value        = SpawnUnitCount;
             Settings.HyperBuilders.Value         = HyperBuilders;
             Settings.LargerCamps.Value           = LargerCamps;
             Settings.BetterKnight.Value          = BetterKnight;
@@ -569,7 +586,14 @@ namespace KingdomEnhanced.UI
             Settings.FarmOutputBoost.Value       = FarmOutputBoost;
             Settings.TowerFireBoost.Value        = TowerFireBoost;
             Settings.BallistaBoost.Value         = BallistaBoost;
+            Settings.BallistaReloadMult.Value    = BallistaReloadMult;
+            Settings.BallistaFlightMult.Value    = BallistaFlightMult;
+            Settings.CatapultBoost.Value         = CatapultBoost;
+            Settings.CatapultReloadMult.Value    = CatapultReloadMult;
+            Settings.CatapultFlightMult.Value    = CatapultFlightMult;
             Settings.InstantCastle.Value         = InstantCastle;
+            Settings.BuilderSpeedMult.Value      = BuilderSpeedMult;
+            Settings.BuilderWorkMult.Value       = BuilderEfficiencyMult;
             Settings.EnableSizeHack.Value        = EnableSizeHack;
             Settings.TargetSize.Value            = TargetSize;
             Settings.SteedSpeedMult.Value        = SteedSpeedMult;
@@ -681,11 +705,12 @@ namespace KingdomEnhanced.UI
             
             if (f.GetFloatValue != null)
             {
-                
                 float val = f.GetFloatValue();
-                GUILayout.Label($"{val:F1}", _styleBodyText, GUILayout.Width(40));
+                // Adaptive precision: show enough decimals to see small values
+                string valStr = val < 0.01f ? $"{val:F4}" : val < 0.1f ? $"{val:F3}" : val < 1f ? $"{val:F2}" : $"{val:F1}";
+                GUILayout.Label(valStr, _styleBodyText, GUILayout.Width(46));
                 float newVal = GUILayout.HorizontalSlider(val, f.MinVal, f.MaxVal, GUILayout.ExpandWidth(true));
-                if (Math.Abs(newVal - val) > 0.01f) f.SetFloatValue(newVal);
+                if (Math.Abs(newVal - val) > 0.00001f) f.SetFloatValue(newVal);
             }
             else if (f.OnAction != null)
             {
@@ -750,7 +775,8 @@ namespace KingdomEnhanced.UI
                 }
                 else if (f.GetFloatValue != null)
                 {
-                    stateStr = $"{f.GetFloatValue():F1}x";
+                    float gv = f.GetFloatValue();
+                    stateStr = gv < 0.01f ? $"{gv:F4}x" : gv < 0.1f ? $"{gv:F3}x" : gv < 1f ? $"{gv:F2}x" : $"{gv:F1}x";
                 }
                 else if (f.OnAction != null)
                 {

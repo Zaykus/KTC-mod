@@ -2,7 +2,7 @@ using HarmonyLib;
 using KingdomEnhanced.UI;
 using UnityEngine;
 using System;
-using System.Collections.Generic;
+using System.Reflection;
 using KingdomEnhanced.Features;
 using Rulers;
 
@@ -36,10 +36,19 @@ namespace KingdomEnhanced.Hooks
                 postfix: new HarmonyMethod(typeof(LabPatches), nameof(FarmOutputPostfix)));
 
             TryPatch(harmony, "Ballista Boost", typeof(Bolt),       "Launch",
-                postfix: new HarmonyMethod(typeof(LabPatches), nameof(BallistaLaunchPostfix)));
+                prefix: new HarmonyMethod(typeof(LabPatches), nameof(BallistaLaunchPrefix)));
 
-            TryPatch(harmony, "Enemy Speed Cache", typeof(Mover), "OnEnable",
-                postfix: new HarmonyMethod(typeof(LabPatches), nameof(MoverEnablePostfix)));
+            TryPatch(harmony, "Ballista Reload", typeof(Ballista),   "Update",
+                postfix: new HarmonyMethod(typeof(LabPatches), nameof(BallistaUpdatePostfix)));
+
+            TryPatch(harmony, "Catapult Reload", typeof(Catapult),   "Update",
+                postfix: new HarmonyMethod(typeof(LabPatches), nameof(CatapultUpdatePostfix)));
+
+            // Targeted declared method on base class to avoid Harmony warning, 
+            // but we filter for Catapult-launched projectiles in the prefix.
+            TryPatch(harmony, "Launchable Boost", typeof(Launchable), "Launch",
+                prefix: new HarmonyMethod(typeof(LabPatches), nameof(LaunchableLaunchPrefix)));
+
             TryPatch(harmony, "Enemy Speed Apply", typeof(Mover), "Update",
                 postfix: new HarmonyMethod(typeof(LabPatches), nameof(MoverUpdatePostfix)));
 
@@ -92,26 +101,9 @@ namespace KingdomEnhanced.Hooks
             }
             catch (Exception ex)
             {
-                Core.Plugin.Instance.LogSource.LogWarning($"[Lab] '{name}' patch failed: {ex.Message}");
+                Core.Plugin.Instance.LogSource.LogWarning($"[Lab] '{name}' patch failed: {ex}");
             }
         }
-
-        #endregion
-
-        #region Base Value Caches
-
-        private static readonly Dictionary<int, float> _archerBaseFireRate  = new();
-        private static readonly Dictionary<int, float> _berserkerBaseSpeed  = new();
-        private static readonly Dictionary<int, float> _ninjaBaseSpeed      = new();
-        private static readonly Dictionary<int, float> _farmBaseCoinYield   = new();
-        private static readonly Dictionary<int, int>   _boltBaseDamage      = new();
-        private static readonly Dictionary<int, float> _boltBaseForce       = new();
-        private static readonly Dictionary<int, float> _enemyBaseSpeed      = new();
-        private static readonly Dictionary<int, float> _portalBaseInterval  = new();
-        private static readonly HashSet<int>           _enemyMoverIds       = new();
-        private static readonly Dictionary<int, int>   _artemisBaseArrows   = new();
-        private static readonly Dictionary<int, float> _artemisBaseRange    = new();
-        private static readonly Dictionary<int, int>   _artemisBaseDamage   = new();
 
         #endregion
 
@@ -157,16 +149,17 @@ namespace KingdomEnhanced.Hooks
         public static void ArtemisBowTriggerPrefix(ArtemisBow __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_artemisBaseArrows.ContainsKey(id))
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (!md.isInitialized)
             {
-                _artemisBaseArrows[id] = __instance._arrowsToFire;
-                _artemisBaseRange[id]  = __instance._abilityRange;
-                _artemisBaseDamage[id] = __instance._damagePerArrow;
+                md.artemisBaseArrows = __instance._arrowsToFire;
+                md.artemisBaseRange  = __instance._abilityRange;
+                md.artemisBaseDamage = __instance._damagePerArrow;
+                md.isInitialized = true;
             }
             __instance._arrowsToFire   = Mathf.RoundToInt(ModMenu.ArtemisArrowCount);
-            __instance._abilityRange   = _artemisBaseRange[id]  * ModMenu.ArtemisRangeMult;
-            __instance._damagePerArrow = Mathf.RoundToInt(_artemisBaseDamage[id] * ModMenu.ArtemisArrowDamageMult);
+            __instance._abilityRange   = md.artemisBaseRange  * ModMenu.ArtemisRangeMult;
+            __instance._damagePerArrow = Mathf.RoundToInt(md.artemisBaseDamage * ModMenu.ArtemisArrowDamageMult);
         }
 
         #endregion
@@ -176,58 +169,55 @@ namespace KingdomEnhanced.Hooks
         public static void ArcherAwakePostfix(Archer __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_archerBaseFireRate.ContainsKey(id))
-                _archerBaseFireRate[id] = __instance.shootCooldownTime;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (md.baseFireRate == 0f) md.baseFireRate = __instance.shootCooldownTime;
         }
 
         public static void ArcherUpdatePostfix(Archer __instance)
         {
             if (__instance == null || (!ModMenu.ArcherFireBoost && !ModMenu.TowerFireBoost)) return;
-            int id = __instance.GetInstanceID();
-            if (!_archerBaseFireRate.TryGetValue(id, out float baseRate)) return;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (md.baseFireRate == 0f) return;
             float mult = 1.0f;
             if (ModMenu.ArcherFireBoost)  mult *= 2.0f;
             if (ModMenu.TowerFireBoost && __instance.GetComponentInParent<Tower>() != null) mult *= 2.0f;
-            __instance.shootCooldownTime = baseRate / mult;
+            __instance.shootCooldownTime = md.baseFireRate / mult;
         }
 
         public static void BerserkerAwakePostfix(Berserker __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_berserkerBaseSpeed.ContainsKey(id))
-                _berserkerBaseSpeed[id] = __instance.runSpeed;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (md.baseSpeed == 0f) md.baseSpeed = __instance.runSpeed;
         }
 
         public static void BerserkerPostfix(Berserker __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_berserkerBaseSpeed.TryGetValue(id, out float baseSpeed)) return;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (md.baseSpeed == 0f) return;
             
             if (ModMenu.BerserkerRage) {
-                __instance.runSpeed  = baseSpeed * 2.5f;
+                __instance.runSpeed  = md.baseSpeed * 2.5f;
                 __instance.rageTimer = float.MaxValue;
             } else {
-                __instance.runSpeed  = baseSpeed;
+                __instance.runSpeed  = md.baseSpeed;
             }
         }
 
         public static void NinjaAwakePostfix(Ninja __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_ninjaBaseSpeed.ContainsKey(id))
-                _ninjaBaseSpeed[id] = __instance.runSpeed;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (md.baseSpeed == 0f) md.baseSpeed = __instance.runSpeed;
         }
 
         public static void NinjaPostfix(Ninja __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_ninjaBaseSpeed.TryGetValue(id, out float baseSpeed)) return;
-            __instance.runSpeed = ModMenu.NinjaSpeedBoost ? baseSpeed * 2.0f : baseSpeed;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (md.baseSpeed == 0f) return;
+            __instance.runSpeed = ModMenu.NinjaSpeedBoost ? md.baseSpeed * 2.0f : md.baseSpeed;
         }
 
         #endregion
@@ -237,41 +227,94 @@ namespace KingdomEnhanced.Hooks
         public static void FarmAwakePostfix(Farmland __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_farmBaseCoinYield.ContainsKey(id))
-                _farmBaseCoinYield[id] = __instance.coinYield;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (md.baseCoinYield == 0f) md.baseCoinYield = __instance.coinYield;
         }
 
         public static void FarmOutputPostfix(Farmland __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_farmBaseCoinYield.TryGetValue(id, out float baseYield)) return;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (md.baseCoinYield == 0f) return;
             __instance.coinYield = ModMenu.FarmOutputBoost
-                ? Mathf.RoundToInt(baseYield * 2f)
-                : (int)baseYield;
+                ? Mathf.RoundToInt(md.baseCoinYield * 2f)
+                : (int)md.baseCoinYield;
         }
 
-        public static void BallistaLaunchPostfix(Bolt __instance)
+        public static void BallistaLaunchPrefix(Bolt __instance)
         {
             if (__instance == null || __instance._boltData == null) return;
-            int id = __instance.GetInstanceID();
+            var md = ModData.GetOrAdd(__instance.gameObject);
             
-            if (!_boltBaseDamage.ContainsKey(id))
+            if (!md.isInitialized)
             {
-                _boltBaseDamage[id] = __instance._boltData._damage;
-                _boltBaseForce[id]  = __instance._boltData._shootForce;
+                md.baseDamage = __instance._boltData._damage;
+                md.baseForce  = __instance._boltData._shootForce;
+                md.isInitialized = true;
             }
             
             if (!ModMenu.BallistaBoost)
             {
-                __instance._boltData._damage = _boltBaseDamage[id];
-                __instance._boltData._shootForce = _boltBaseForce[id];
+                __instance._boltData._damage = md.baseDamage;
+                __instance._boltData._shootForce = md.baseForce;
                 return;
             }
 
-            __instance._boltData._damage     = _boltBaseDamage[id] * 2;
-            __instance._boltData._shootForce = _boltBaseForce[id]  * 2f;
+            __instance._boltData._damage     = md.baseDamage * 2;
+            __instance._boltData._shootForce = md.baseForce  * ModMenu.BallistaFlightMult;
+        }
+
+        public static void BallistaUpdatePostfix(Ballista __instance)
+        {
+            if (!ModMenu.BallistaBoost || ModMenu.BallistaReloadMult <= 1.0f) return;
+            // State 0 is Reloading in Ballista
+            if (__instance._state == Ballista.State.Reloading && __instance._currentWork < __instance.reloadWork)
+            {
+                var md = ModData.GetOrAdd(__instance.gameObject);
+                float extraWork = Time.deltaTime * (ModMenu.BallistaReloadMult - 1.0f) * 5f; // Scale up for feel
+                md.ballistaFractionalWork += extraWork;
+
+                if (md.ballistaFractionalWork >= 1.0f)
+                {
+                    int add = (int)md.ballistaFractionalWork;
+                    __instance._currentWork += add;
+                    md.ballistaFractionalWork -= add;
+                }
+            }
+        }
+
+        public static void CatapultUpdatePostfix(Catapult __instance)
+        {
+            if (!ModMenu.CatapultBoost || ModMenu.CatapultReloadMult <= 1.0f) return;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            
+            // IL2CPP dummy assemblies often hide these as private fields or properties
+            var crankField = typeof(Catapult).GetField("crankRate", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var crankFormationField = typeof(Catapult).GetField("crankRateFormation", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (crankField == null) return;
+
+            if (md.baseCrankRate == 0f)
+            {
+                md.baseCrankRate = (float)crankField.GetValue(__instance);
+                if (crankFormationField != null)
+                    md.baseCrankRateFormation = (float)crankFormationField.GetValue(__instance);
+            }
+
+            crankField.SetValue(__instance, md.baseCrankRate * ModMenu.CatapultReloadMult);
+            if (crankFormationField != null)
+                crankFormationField.SetValue(__instance, md.baseCrankRateFormation * ModMenu.CatapultReloadMult);
+        }
+
+        public static void LaunchableLaunchPrefix(Launchable __instance, ref Vector2 __0, GameObject __1)
+        {
+            if (!ModMenu.CatapultBoost || __1 == null) return;
+            
+            // Check if the launcher is a Catapult
+            if (__1.GetComponent<Catapult>() != null)
+            {
+                __0 *= ModMenu.CatapultFlightMult;
+            }
         }
 
         #endregion
@@ -292,26 +335,20 @@ namespace KingdomEnhanced.Hooks
             return _moverSpeedField;
         }
 
-        public static void MoverEnablePostfix(Mover __instance)
-        {
-            if (__instance == null || __instance.GetComponent<Enemy>() == null) return;
-            var f = GetMoverSpeedField();
-            if (f == null) return;
-            int id = __instance.GetInstanceID();
-            _enemyMoverIds.Add(id);
-            if (!_enemyBaseSpeed.ContainsKey(id))
-                _enemyBaseSpeed[id] = (float)f.GetValue(__instance);
-        }
-
         public static void MoverUpdatePostfix(Mover __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_enemyMoverIds.Contains(id)) return;
+            var md = ModData.GetOrAdd(__instance.gameObject);
             var f = GetMoverSpeedField();
             if (f == null) return;
-            if (!_enemyBaseSpeed.TryGetValue(id, out float baseSpeed)) return;
-            f.SetValue(__instance, baseSpeed * ModMenu.EnemySpeedMult);
+
+            if (!md.isInitialized)
+            {
+                md.moverBaseSpeed = (float)f.GetValue(__instance);
+                md.isInitialized = true;
+            }
+            
+            f.SetValue(__instance, md.moverBaseSpeed * ModMenu.EnemySpeedMult);
         }
 
         private static bool _inWaveSpawnExtra = false;
@@ -332,17 +369,16 @@ namespace KingdomEnhanced.Hooks
         public static void PortalAwakePostfix(Portal __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_portalBaseInterval.ContainsKey(id))
-                _portalBaseInterval[id] = __instance._spawnInterval;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (md.baseSpawnInterval == 0f) md.baseSpawnInterval = __instance._spawnInterval;
         }
 
         public static void PortalApplyRate(Portal __instance)
         {
             if (__instance == null) return;
-            int id = __instance.GetInstanceID();
-            if (!_portalBaseInterval.TryGetValue(id, out float baseInterval)) return;
-            __instance._spawnInterval = baseInterval / ModMenu.PortalSpawnRate;
+            var md = ModData.GetOrAdd(__instance.gameObject);
+            if (md.baseSpawnInterval == 0f) return;
+            __instance._spawnInterval = md.baseSpawnInterval / ModMenu.PortalSpawnRate;
         }
 
         public static bool NoCrownStealPrefix()

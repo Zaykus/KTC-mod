@@ -55,7 +55,7 @@ namespace KingdomEnhanced.Hooks
                 }
                 
                 __instance.runSpeed = _runCache[id] * travelMult;
-                __instance.walkSpeed = _walkCache[id] * travelMult;
+                __instance.walkSpeed = _walkCache[id]; // Don't scale walk speed to prevent animation issues
 
                 stamina:
                 if (ModMenu.InfiniteStamina && __instance.Rider != null)
