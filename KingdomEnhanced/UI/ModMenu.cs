@@ -705,11 +705,12 @@ namespace KingdomEnhanced.UI
             
             if (f.GetFloatValue != null)
             {
-                
                 float val = f.GetFloatValue();
-                GUILayout.Label($"{val:F1}", _styleBodyText, GUILayout.Width(40));
+                // Adaptive precision: show enough decimals to see small values
+                string valStr = val < 0.01f ? $"{val:F4}" : val < 0.1f ? $"{val:F3}" : val < 1f ? $"{val:F2}" : $"{val:F1}";
+                GUILayout.Label(valStr, _styleBodyText, GUILayout.Width(46));
                 float newVal = GUILayout.HorizontalSlider(val, f.MinVal, f.MaxVal, GUILayout.ExpandWidth(true));
-                if (Math.Abs(newVal - val) > 0.01f) f.SetFloatValue(newVal);
+                if (Math.Abs(newVal - val) > 0.00001f) f.SetFloatValue(newVal);
             }
             else if (f.OnAction != null)
             {
@@ -774,7 +775,8 @@ namespace KingdomEnhanced.UI
                 }
                 else if (f.GetFloatValue != null)
                 {
-                    stateStr = $"{f.GetFloatValue():F1}x";
+                    float gv = f.GetFloatValue();
+                    stateStr = gv < 0.01f ? $"{gv:F4}x" : gv < 0.1f ? $"{gv:F3}x" : gv < 1f ? $"{gv:F2}x" : $"{gv:F1}x";
                 }
                 else if (f.OnAction != null)
                 {
