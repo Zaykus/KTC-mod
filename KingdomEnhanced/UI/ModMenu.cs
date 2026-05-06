@@ -127,29 +127,6 @@ namespace KingdomEnhanced.UI
 
         #endregion
 
-        #region COLORS
-        private static readonly Color C_BG              = new Color(0.06f, 0.05f, 0.03f);
-        public static readonly Color C_PANEL            = new Color(0.10f, 0.08f, 0.05f);
-        public static readonly Color C_CARD             = new Color(0.13f, 0.10f, 0.06f);
-        public static readonly Color C_BORDER           = new Color(0.55f, 0.42f, 0.18f);
-        public static readonly Color C_GOLD             = new Color(0.90f, 0.72f, 0.30f);
-        private static readonly Color C_GOLD_DIM        = new Color(0.70f, 0.55f, 0.20f);
-        public static readonly Color C_TEXT             = new Color(0.95f, 0.90f, 0.75f);
-        public static readonly Color C_TEXT_DIM         = new Color(0.60f, 0.55f, 0.45f);
-        public static readonly Color C_ACCENT_ACTIVE    = new Color(1.00f, 0.80f, 0.35f);
-        private static readonly Color C_DANGER          = new Color(0.75f, 0.25f, 0.20f);
-
-        public static readonly Color C_ON               = new Color(0.22f, 0.72f, 0.32f, 1f);
-        public static readonly Color C_OFF              = new Color(0.45f, 0.18f, 0.18f, 1f);
-        public static readonly Color C_BTN              = C_CARD;
-        public static readonly Color C_BTN_HOT          = new Color(0.18f, 0.14f, 0.08f, 1f);
-        public static readonly Color C_DANGER_BG        = C_DANGER;
-        public static readonly Color C_LOCK             = new Color(0.96f, 0.35f, 0.35f, 1f);
-        public static readonly Color C_LOCK_BG          = new Color(0.35f, 0.10f, 0.10f, 1f);
-        public static readonly Color C_SOON_BG          = new Color(0.22f, 0.22f, 0.22f, 1f);
-
-        #endregion
-
         #region CONSTANTS
         private static readonly string[] TAB_LABELS = { "MAIN", "CHEATS", "LAB", "HARD", "INFO", "GUIDE", "SETTINGS", "REPORT" };
         private const float SIDEBAR_W = 140f;
@@ -234,7 +211,7 @@ namespace KingdomEnhanced.UI
             _features = ModMenuFeatures.Build();
             LoadFromSettings();
             TTSManager.Initialize();
-            Speak("Kingdom Enhanced initialized", C_ON);
+            Speak("Kingdom Enhanced initialized", OnyxTheme.C_Electric);
         }
 
         void Update()
@@ -826,7 +803,7 @@ namespace KingdomEnhanced.UI
             {
                 CheatsUnlocked = true;
                 Settings.CheatsUnlocked.Value = true;
-                Speak("Cheats unlocked", C_ON);
+                Speak("Cheats unlocked", OnyxTheme.C_Electric);
             }
             GUILayout.EndVertical();
         }
@@ -853,7 +830,7 @@ namespace KingdomEnhanced.UI
                 if (f.IsLocked != null && f.IsLocked())
                 {
                     stateStr = f.GetLockReason != null ? f.GetLockReason() : "Locked";
-                    stateColor = C_LOCK;
+                    stateColor = OnyxTheme.C_Danger;
                 }
                 else if (f.GetFloatValue != null)
                 {
@@ -866,7 +843,7 @@ namespace KingdomEnhanced.UI
                 else if (f.GetValue != null)
                 {
                     stateStr = f.GetValue() ? "ON" : "OFF";
-                    stateColor = f.GetValue() ? C_ON : Color.white;
+                    stateColor = f.GetValue() ? OnyxTheme.C_Electric : Color.white;
                 }
 
                 GUILayout.Label(stateStr, new GUIStyle(_styleTitle) { normal = { textColor = stateColor } }, GUILayout.Height(20));
@@ -906,10 +883,10 @@ namespace KingdomEnhanced.UI
 
                 Color prev = GUI.color;
                 
-                GUI.color = status == 1 ? C_ON : Color.white;
+                GUI.color = status == 1 ? OnyxTheme.C_Electric : Color.white;
                 if (GUILayout.Button("Works", _styleBtn, GUILayout.Width(60))) _featureStatus[f.Id] = status == 1 ? 0 : 1;
                 
-                GUI.color = status == 2 ? C_LOCK : Color.white;
+                GUI.color = status == 2 ? OnyxTheme.C_Danger : Color.white;
                 if (GUILayout.Button("Broken", _styleBtn, GUILayout.Width(60))) _featureStatus[f.Id] = status == 2 ? 0 : 2;
                 
                 GUI.color = prev;
@@ -1066,12 +1043,12 @@ namespace KingdomEnhanced.UI
             if (isGem)
             {
                 player.wallet.Gems = Mathf.Min(100, player.wallet.Gems + amount);
-                Speak($"+{amount} Gems", C_GOLD);
+                Speak($"+{amount} Gems", OnyxTheme.C_Electric);
             }
             else
             {
                 player.wallet.Coins = Mathf.Min(100, player.wallet.Coins + amount);
-                Speak($"+{amount} Coins", C_GOLD);
+                Speak($"+{amount} Coins", OnyxTheme.C_Electric);
             }
         }
 
@@ -1081,7 +1058,7 @@ namespace KingdomEnhanced.UI
             if (player == null || player.wallet == null) return;
 
             player.wallet.Coins = 100;
-            Speak("Wallet Filled to Max!", C_GOLD);
+            Speak("Wallet Filled to Max!", OnyxTheme.C_Electric);
         }
 
         public static void CycleStaminaBarStyle()
