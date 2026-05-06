@@ -11,34 +11,37 @@ namespace KingdomEnhanced.UI
     public static class ModMenuFeatures
     {
         public static FeatureMeta Toggle(string id, string label, TabCategory cat, string section, string desc,
-            Func<bool> get, Action<bool> set, Func<bool> isLocked = null,
+            Func<bool> get, Action<bool> set, string icon = "", string[] tags = null, Func<bool> isLocked = null,
             Func<string> lockReason = null, Func<bool> hasConflict = null)
         {
             return new FeatureMeta
             {
                 Id = id, Label = label, Section = section, Category = cat, Description = desc,
+                Icon = icon, SearchTags = tags ?? new string[0],
                 GetValue = get, SetValue = set, OnAction = null,
                 IsLocked = isLocked, GetLockReason = lockReason, HasConflict = hasConflict
             };
         }
 
         public static FeatureMeta Button(string id, string label, TabCategory cat, string section, string desc,
-            Action act, Func<bool> isLocked = null, Func<string> lockReason = null)
+            Action act, string icon = "", string[] tags = null, Func<bool> isLocked = null, Func<string> lockReason = null)
         {
             return new FeatureMeta
             {
                 Id = id, Label = label, Section = section, Category = cat, Description = desc,
+                Icon = icon, SearchTags = tags ?? new string[0],
                 GetValue = null, SetValue = null, OnAction = act,
                 IsLocked = isLocked, GetLockReason = lockReason, HasConflict = null
             };
         }
 
         public static FeatureMeta Slider(string id, string label, TabCategory cat, string section, string desc,
-            Func<float> get, Action<float> set, float min, float max)
+            Func<float> get, Action<float> set, float min, float max, string icon = "", string[] tags = null)
         {
             return new FeatureMeta
             {
                 Id = id, Label = label, Section = section, Category = cat, Description = desc,
+                Icon = icon, SearchTags = tags ?? new string[0],
                 GetFloatValue = get, SetFloatValue = set, MinVal = min, MaxVal = max,
                 IsLocked = null, GetLockReason = null, HasConflict = null
             };
@@ -51,64 +54,80 @@ namespace KingdomEnhanced.UI
             // ==================== MAIN ====================
             list.Add(Toggle("show_stamina", "Energy Bar", TabCategory.Main, "HUD",
                 "Shows or hides the stamina bar on the HUD.",
-                () => ModMenu.ShowStaminaBar, v => ModMenu.ShowStaminaBar = v));
-            list.Add(Button("stamina_style", "Cycle Energy Bar Style", TabCategory.Main, "HUD",
+                () => ModMenu.ShowStaminaBar, v => ModMenu.ShowStaminaBar = v, "📊", new[] { "hud", "ui", "stamina" }));
+            list.Add(Button("stamina_style", "Energy Bar Style", TabCategory.Main, "HUD",
                 "Changes the visual style of the Energy Bar.",
-                () => ModMenu.CycleStaminaBarStyle(),
+                () => ModMenu.CycleStaminaBarStyle(), "🎨", new[] { "ui", "stamina", "style" },
                 () => !ModMenu.ShowStaminaBar, () => "Requires Energy Bar"));
-            list.Add(Button("stamina_pos", "Cycle Energy Bar Position", TabCategory.Main, "HUD",
+            list.Add(Button("stamina_pos", "Energy Bar Position", TabCategory.Main, "HUD",
                 "Changes the position of the Energy Bar on screen.",
-                () => ModMenu.CycleStaminaBarPosition(),
+                () => ModMenu.CycleStaminaBarPosition(), "📍", new[] { "ui", "stamina", "position" },
                 () => !ModMenu.ShowStaminaBar, () => "Requires Energy Bar"));
             list.Add(Toggle("display_times", "HUD Display", TabCategory.Main, "HUD",
                 "Toggles the entire in-game HUD overlay.",
-                () => ModMenu.DisplayTimes, v => ModMenu.DisplayTimes = v));
-            list.Add(Button("monitor_style", "Cycle Monitor Style", TabCategory.Main, "HUD",
+                () => ModMenu.DisplayTimes, v => ModMenu.DisplayTimes = v, "👁️", new[] { "hud", "ui" }));
+            list.Add(Button("monitor_style", "Monitor Style", TabCategory.Main, "HUD",
                 "Changes the visual style of the Kingdom Monitor panel.",
-                () => KingdomMonitor.Instance?.NextStyle(),
+                () => KingdomMonitor.Instance?.NextStyle(), "📈", new[] { "ui", "monitor", "style" },
                 () => KingdomMonitor.Instance == null || !KingdomMonitor.Instance.IsVisible,
                 () => "Requires Monitor"));
 
             list.Add(Toggle("enable_accessibility", "Accessibility & Radar", TabCategory.Main, "Accessibility",
                 "Enables world tracking, radar pings, and proximity alerts.",
-                () => ModMenu.EnableAccessibility, v => ModMenu.EnableAccessibility = v));
+                () => ModMenu.EnableAccessibility, v => ModMenu.EnableAccessibility = v, "📡", new[] { "radar", "track" }));
             list.Add(Toggle("enable_tts", "Narrator (TTS)", TabCategory.Main, "Accessibility",
                 "Reads menu interactions aloud using the system TTS engine.",
-                () => ModMenu.EnableTTS, v => ModMenu.EnableTTS = v));
+                () => ModMenu.EnableTTS, v => ModMenu.EnableTTS = v, "🎙️", new[] { "tts", "voice" }));
             list.Add(Toggle("simplify_names", "Simplify Names", TabCategory.Main, "Accessibility",
                 "Replaces payable object names with shorter labels.",
-                () => ModMenu.SimplifyNames, v => ModMenu.SimplifyNames = v));
+                () => ModMenu.SimplifyNames, v => ModMenu.SimplifyNames = v, "🏷️", new[] { "names", "text" }));
             list.Add(Toggle("castle_announcer", "Castle Announcer", TabCategory.Main, "Accessibility",
                 "Announces castle events via TTS.",
-                () => ModMenu.EnableCastleAnnouncer, v => ModMenu.EnableCastleAnnouncer = v));
+                () => ModMenu.EnableCastleAnnouncer, v => ModMenu.EnableCastleAnnouncer = v, "🏰", new[] { "tts", "castle" }));
 
             list.Add(Slider("speed_mult", "Travel Speed", TabCategory.Main, "Movement",
                 "Multiplies the monarch's movement speed while mounted.",
-                () => ModMenu.SpeedMultiplier, v => ModMenu.SpeedMultiplier = v, 0.5f, 10.0f));
+                () => ModMenu.SpeedMultiplier, v => ModMenu.SpeedMultiplier = v, 0.5f, 10.0f, "🐎", new[] { "move", "speed" }));
 
             list.Add(Toggle("size_hack", "Player Size Hack", TabCategory.Main, "Player",
                 "Scales the monarch sprite larger or smaller.",
-                () => ModMenu.EnableSizeHack, v => ModMenu.EnableSizeHack = v));
+                () => ModMenu.EnableSizeHack, v => ModMenu.EnableSizeHack = v, "👑", new[] { "size", "scale" }));
             list.Add(Slider("target_size", "Player Size", TabCategory.Main, "Player",
                 "Multiplies the monarch's visual size (requires Player Size Hack to be ON).",
-                () => ModMenu.TargetSize, v => ModMenu.TargetSize = v, 0.2f, 3.0f));
+                () => ModMenu.TargetSize, v => ModMenu.TargetSize = v, 0.2f, 3.0f, "📏", new[] { "size", "scale" }));
 
             // ==================== CHEATS ====================
             list.Add(Toggle("infinite_stamina", "Infinite Mount Stamina", TabCategory.Cheats, "Invincibility",
                 "Prevents mount stamina from depleting.",
-                () => ModMenu.InfiniteStamina, v => ModMenu.InfiniteStamina = v,
+                () => ModMenu.InfiniteStamina, v => ModMenu.InfiniteStamina = v, "⚡", new[] { "stamina", "infinite" },
+                () => !ModMenu.CheatsUnlocked));
+            list.Add(Toggle("invincible_walls", "Invincible Walls", TabCategory.Cheats, "Invincibility",
+                "Prevents walls from taking damage.",
+                () => ModMenu.InvincibleWalls, v => ModMenu.InvincibleWalls = v, "🧱", new[] { "walls", "hp" },
+                () => !ModMenu.CheatsUnlocked));
+            list.Add(Toggle("no_tool_cooldowns", "No Tool Cooldowns", TabCategory.Cheats, "Invincibility",
+                "Removes wait time for items like the scythe or hammer.",
+                () => ModMenu.NoToolCooldowns, v => ModMenu.NoToolCooldowns = v, "⏳", new[] { "tools", "cooldown" },
                 () => !ModMenu.CheatsUnlocked));
 
-            list.Add(Toggle("no_tool_cooldowns", "No Tool Cooldowns", TabCategory.Cheats, "Infinite Stone",
-                "Removes the cooldown/timeout of all Hermit tools (Horn of Healing, Athena's Shield, Hermes' Staff, etc).",
-                () => ModMenu.NoToolCooldowns, v => ModMenu.NoToolCooldowns = v,
+            list.Add(Toggle("archer_fire_boost", "Rapid Fire Archers", TabCategory.Cheats, "Combat",
+                "Archers fire significantly faster.",
+                () => ModMenu.ArcherFireBoost, v => ModMenu.ArcherFireBoost = v, "🏹", new[] { "archers", "combat", "speed" },
                 () => !ModMenu.CheatsUnlocked));
+            list.Add(Toggle("berserker_rage", "Eternal Berserker Rage", TabCategory.Cheats, "Combat",
+                "Berserkers stay in their raged state permanently.",
+                () => ModMenu.BerserkerRage, v => ModMenu.BerserkerRage = v, "🪓", new[] { "berserker", "combat" },
+                () => !ModMenu.CheatsUnlocked));
+
+            list.Add(Slider("coin_income", "Coin Income Mult", TabCategory.Cheats, "Economy",
+                "Multiplies all gold coins earned from any source.",
+                () => ModMenu.CoinIncomeMult, v => ModMenu.CoinIncomeMult = v, 1f, 50f, "💰", new[] { "coins", "gold", "income" }));
+
             list.Add(Slider("artemis_arrows", "Artemis Arrow Count", TabCategory.Cheats, "Infinite Stone",
                 "How many arrows fall per cast of the Artemis Bow.",
-                () => ModMenu.ArtemisArrowCount, v => ModMenu.ArtemisArrowCount = v, 1f, 50f));
+                () => ModMenu.ArtemisArrowCount, v => ModMenu.ArtemisArrowCount = v, 1f, 50f, "🏹", new[] { "artemis", "arrows" }));
             list.Add(Slider("artemis_range", "Artemis Range", TabCategory.Cheats, "Infinite Stone",
                 "Multiplies the range across which arrows are spread.",
-                () => ModMenu.ArtemisRangeMult, v => ModMenu.ArtemisRangeMult = v, 0.5f, 5.0f));
             list.Add(Slider("artemis_damage", "Artemis Arrow Damage", TabCategory.Cheats, "Infinite Stone",
                 "Multiplies damage dealt per arrow.",
                 () => ModMenu.ArtemisArrowDamageMult, v => ModMenu.ArtemisArrowDamageMult = v, 0.5f, 5.0f));
@@ -263,11 +282,21 @@ namespace KingdomEnhanced.UI
                 () => ArmyManager.SpawnEnemy(EnemyType.Archer, (int)ModMenu.SpawnUnitCount),
                 () => !ModMenu.CheatsUnlocked, () => "Locked"));
 
+            list.Add(Button("clear_coins", "Clear Dropped Coins", TabCategory.Cheats, "World",
+                "Removes all dropped coins/gems on the ground to improve performance.",
+                () => ArmyManager.ClearCoins()));
+
             list.Add(Toggle("hyper_builders", "Instant Construction", TabCategory.Cheats, "Builders",
                 "Buildings complete in one frame.",
                 () => ModMenu.HyperBuilders, v => ModMenu.HyperBuilders = v,
                 () => !ModMenu.CheatsUnlocked, null,
                 () => ModMenu.HyperBuilders && ModMenu.LargerCamps));
+            list.Add(Slider("builder_speed", "Builder Speed", TabCategory.Cheats, "Builders",
+                "Multiplies builder movement speed.",
+                () => ModMenu.BuilderSpeedMult, v => ModMenu.BuilderSpeedMult = v, 0.01f, 10.0f));
+            list.Add(Slider("builder_work", "Builder Efficiency", TabCategory.Cheats, "Builders",
+                "Scales builder work time (lower is faster).",
+                () => ModMenu.BuilderEfficiencyMult, v => ModMenu.BuilderEfficiencyMult = v, 0.0001f, 3.0f));
             list.Add(Toggle("larger_camps", "Expand Vagrant Camps", TabCategory.Cheats, "Builders",
                 "Increases the maximum vagrant camp population.",
                 () => ModMenu.LargerCamps, v => ModMenu.LargerCamps = v,
@@ -323,8 +352,24 @@ namespace KingdomEnhanced.UI
                 "Increases tower fire rate.",
                 () => ModMenu.TowerFireBoost, v => ModMenu.TowerFireBoost = v));
             list.Add(Toggle("ballista_boost", "Ballista Boost", TabCategory.Lab, "World",
-                "Increases ballista damage/speed.",
+                "Enables ballista stat overrides.",
                 () => ModMenu.BallistaBoost, v => ModMenu.BallistaBoost = v));
+            list.Add(Slider("ballista_reload", "Ballista Reload", TabCategory.Lab, "World",
+                "Scales ballista reload time.",
+                () => ModMenu.BallistaReloadMult, v => ModMenu.BallistaReloadMult = v, 0.001f, 2.0f));
+            list.Add(Slider("ballista_flight", "Ballista Flight Speed", TabCategory.Lab, "World",
+                "Multiplies ballista bolt speed.",
+                () => ModMenu.BallistaFlightMult, v => ModMenu.BallistaFlightMult = v, 1.0f, 5.0f));
+
+            list.Add(Toggle("catapult_boost", "Catapult Boost", TabCategory.Lab, "World",
+                "Enables catapult stat overrides.",
+                () => ModMenu.CatapultBoost, v => ModMenu.CatapultBoost = v));
+            list.Add(Slider("catapult_reload", "Catapult Reload", TabCategory.Lab, "World",
+                "Scales catapult reload time.",
+                () => ModMenu.CatapultReloadMult, v => ModMenu.CatapultReloadMult = v, 0.001f, 2.0f));
+            list.Add(Slider("catapult_flight", "Catapult Flight Speed", TabCategory.Lab, "World",
+                "Multiplies catapult stone speed.",
+                () => ModMenu.CatapultFlightMult, v => ModMenu.CatapultFlightMult = v, 1.0f, 5.0f));
             list.Add(Toggle("instant_castle", "Instant Castle Upgrade", TabCategory.Lab, "World",
                 "Castle upgrades finish immediately.",
                 () => ModMenu.InstantCastle, v => ModMenu.InstantCastle = v));
